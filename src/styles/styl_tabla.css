@@ -642,7 +642,7 @@
 
   padding: 0 var(--gap8);
 
-  background: color-mix(in srgb, var(--red-dark) 20%, transparent);
+  background: color-mix(in srgb, var(--black-dark) 50%, transparent);
 
   border-color: var(--highlight-red);
 

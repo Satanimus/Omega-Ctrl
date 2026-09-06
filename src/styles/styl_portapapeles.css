@@ -200,7 +200,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--overlay-superficie) var(--portapapeles-boton-fijar-opacidad), transparent);
+  background: color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
   border: 1px solid color-mix(in srgb, var(--overlay-contraste) 25%, transparent);
   border-radius: 6px;
   color: var(--text);
@@ -210,7 +210,9 @@ body {
 }
 
 .portapapeles-boton-fijar:hover {
-  background: color-mix(in srgb, var(--overlay-contraste) 12%, transparent);
+  background:
+    linear-gradient(color-mix(in srgb, var(--overlay-contraste) 12%, transparent), color-mix(in srgb, var(--overlay-contraste) 12%, transparent)),
+    color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
 }
 
 .portapapeles-boton-fijar.fijado {
@@ -255,7 +257,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
   border: 1px solid color-mix(in srgb, var(--overlay-contraste) 25%, transparent);
   border-radius: 6px;
   color: var(--text-disabled);
@@ -266,7 +268,9 @@ body {
 }
 
 .portapapeles-boton-opciones:hover {
-  background: color-mix(in srgb, var(--overlay-contraste) 12%, transparent);
+  background:
+    linear-gradient(color-mix(in srgb, var(--overlay-contraste) 12%, transparent), color-mix(in srgb, var(--overlay-contraste) 12%, transparent)),
+    color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
   color: var(--text);
 }
 

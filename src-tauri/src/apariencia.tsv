@@ -89,6 +89,8 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	green-dark	Color	#2E7D32	color
 2	red-dark	Rojo (estado activo)		
 0	red-dark	Color	#8F2525	color
+2	red-light	Rojo claro (indicadores/bordes)		
+0	red-light	Color	#FF0000	color
 2	black-dark	Negro (acento UI)		
 0	black-dark	Color	#000000	color
 2	gray-dark-1	Gris oscuro 1 (fondo tabla impar)		
@@ -154,25 +156,13 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	tabla-color-hover	Color hover	#00aeff	color
 0	tabla-fondo-opacidad	Opacidad	50%	porcentaje
 0	tabla-fondo-opacidad-hover	Opacidad hover	24%	porcentaje
-2	botones-ghost	Botones		
+2	botones-ghost	Botones generales hover highlight		
 0	botones-ghost-opacidad-hover	Opacidad hover	8%	porcentaje
 2	separador	Separador		
 0	separador-opacidad-header	Opacidad	18%	porcentaje
 0	separador-opacidad-fila	Opacidad en filas	5%	porcentaje
 2	boton-off	Botón Off (fila y separador)		
 0	boton-off-opacidad	Opacidad	55%	porcentaje
-2	perfil-activo	Botón Perfil Activo		
-0	perfil-activo-opacidad	Opacidad	100%	porcentaje
-2	perfil-inactivo	Botón Perfil Inactivo		
-0	perfil-inactivo-opacidad	Opacidad	10%	porcentaje
-2	panel-lateral-item-actual	Panel lateral — ítem actual		
-0	panel-lateral-item-actual-opacidad	Opacidad	50%	porcentaje
-2	panel-lateral-eliminar	Panel lateral — botón Eliminar		
-0	panel-lateral-eliminar-opacidad	Opacidad	100%	porcentaje
-2	boton-guardar	Botón Guardar		
-0	guardar-opacidad	Opacidad	100%	porcentaje
-2	portapapeles-boton-fijar	Botón Fijar (Portapapeles)		
-0	portapapeles-boton-fijar-opacidad	Opacidad	70%	porcentaje
 1	opacidad-indicadores	Opacidad		
 2	indicador-macro	Indicador Macro		
 0	indicador-macro-fondo-opacidad	Fondo	55%	porcentaje

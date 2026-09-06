@@ -35,9 +35,9 @@
 
   --highlight: #00aeff;
   /* Antes color propio (#C62828) editable en el catálogo de
-      Apariencia; ahora derivado de --red-dark + un aumento de brillo
+      Apariencia; ahora derivado de --red-light + un aumento de brillo
       (mezcla con blanco), así queda un solo rojo configurable. */
-  --highlight-red: color-mix(in srgb, var(--red-dark) 80%, white 20%);
+  --highlight-red: color-mix(in srgb, var(--red-light) 80%, white 20%);
   --highlight-dark: #007db8;
   --black-dark: #000000;
   --gray-dark-1: #202020;
@@ -49,6 +49,8 @@
 
   --green-dark: #2e7d32;
   --red-dark: #8f2525;
+
+  --red-light: #ff0000;
 
   /* ==========================
        Fondos
@@ -126,14 +128,6 @@
   --botones-ghost-opacidad-hover: 8%;
 
   --boton-off-opacidad: 55%;
-
-  --perfil-activo-opacidad: 100%;
-
-  --perfil-inactivo-opacidad: 10%;
-
-  --panel-lateral-item-actual-opacidad: 50%;
-
-  --panel-lateral-eliminar-opacidad: 100%;
 
   /* ==========================
        Bordes
@@ -356,10 +350,7 @@
       concreto, no de un color — dos objetos que usan el mismo color
       base (ej. --overlay-superficie) pueden tener cada uno su propia
       opacidad, sin compartir variable entre sí (ver
-      reglas_opacidad_apariencia.txt, reglas 2-4). Piloto: botón
-      "Fijar" de Portapapeles (.portapapeles-boton-fijar en
-      styl_portapapeles.css). */
-  --portapapeles-boton-fijar-opacidad: 70%;
+      reglas_opacidad_apariencia.txt, reglas 2-4). */
 
   /* Ventana overlay Indicador_Macro (styl_indicador_macro.css) —
       Fondo del cartel y color del texto, ambas comparten valor entre

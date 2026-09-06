@@ -35,12 +35,12 @@ body {
   align-items: center;
   gap: 6px;
   padding: 0 10px;
-  /* Fondo cyan semi-transparente — llama la atención sobre el
+  /* Fondo semi-transparente — llama la atención sobre el
      escritorio sin tapar del todo lo que hay detrás. La ventana en
      sí ya es del tamaño exacto del cartel (200x40, ver comandos.rs),
      así que esto cubre toda la ventana. Opacidad configurable
      (pestaña Apariencia de Configuración, catálogo apariencia.tsv). */
-  background: color-mix(in srgb, var(--tag-cyan) var(--indicador-macro-fondo-opacidad), transparent);
+  background: color-mix(in srgb, var(--highlight-dark) var(--indicador-macro-fondo-opacidad), transparent);
 }
 
 .indicador-macro-punto {
