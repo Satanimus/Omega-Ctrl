@@ -133,23 +133,24 @@ nivel	id	nombre_ui	valor_defecto	tipo
 2	barra-inferior	Barra inferior		
 0	barra-inferior-color	Color	#14141e	color
 0	barra-inferior-opacidad	Opacidad	60%	porcentaje
-2	cabecera-tabla	Cabecera de tabla		
+2	tabla	Tabla		
+3	cabecera-tabla	Cabecera de tabla		
 0	cabecera-tabla-color	Color	#000000	color
 0	cabecera-tabla-opacidad	Opacidad	40%	porcentaje
-2	fondo-tabla	Fondo de tabla		
+3	fondo-tabla	Fondo de tabla		
 0	tabla-color-impar	Color impar	#000000	color
 0	tabla-color-par	Color par	#ffffff	color
 0	tabla-color-hover	Color hover	#00aeff	color
 0	tabla-fondo-opacidad-impar	Opacidad impar	5%	porcentaje
 0	tabla-fondo-opacidad-par	Opacidad par	5%	porcentaje
 0	tabla-fondo-opacidad-hover	Opacidad hover	24%	porcentaje
-2	botones-ghost	Botones generales hover highlight		
-0	botones-ghost-opacidad-hover	Opacidad hover	8%	porcentaje
-2	separador	Separador		
+3	separador	Separador		
 0	separador-opacidad-header	Opacidad	18%	porcentaje
 0	separador-opacidad-fila	Opacidad en filas	5%	porcentaje
-2	boton-off	Botón Off (fila y separador)		
+3	boton-off	Botón Off (fila y separador)		
 0	boton-off-opacidad	Opacidad	55%	porcentaje
+2	botones-ghost	Botones generales hover highlight		
+0	botones-ghost-opacidad-hover	Opacidad hover	8%	porcentaje
 1	opacidad-indicadores	Opacidad		
 2	indicador-macro	Indicador Macro		
 0	indicador-macro-fondo-opacidad	Fondo	55%	porcentaje

@@ -555,6 +555,16 @@ function crearFilaArbol(
   botonPersonalizado.type = "button";
   botonPersonalizado.className = "configuracion-arbol-personalizado";
 
+  // Fila sin valores propios (ej. "Tabla": subtítulo contenedor, sus
+  // valores viven en los niveles 3 anidados debajo, no acá) — sin
+  // Valor por Defecto tampoco tiene sentido el botón "✎".
+  const sinValorPropio = nodo.hijos.length === 0;
+
+  if (sinValorPropio) {
+    botonPersonalizado.classList.add("configuracion-arbol-personalizado--sin-valor");
+    botonPersonalizado.disabled = true;
+  }
+
   // Botón "X" (Limpiar): reemplaza el antiguo doble click sobre
   // Valor por Defecto (Regla: ya no se borra a ciegas con un doble
   // click, hace falta un botón visible). Vive siempre en el DOM,

@@ -486,6 +486,16 @@
   color: var(--highlight);
 }
 
+/* Filas nivel 2/3 sin valores propios (nodo.hijos vacío — ej. un
+   subtítulo puramente contenedor como "Tabla", cuyo Valor por
+   Defecto tampoco muestra nada): oculta el botón "✎", no hay nada
+   que editar. visibility en vez de display para no correr el ancho
+   de columna respecto a las filas que sí tienen botón. */
+.configuracion-arbol-personalizado--sin-valor {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* Botón "X" (Limpiar), agregado al lado del botón fusionado de
    arriba en las 4 pestañas de Configuración: reserva su espacio
    siempre con visibility en vez de display, para que la celda no
