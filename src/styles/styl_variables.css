@@ -38,7 +38,7 @@
       Apariencia; ahora derivado de --red-dark + un aumento de brillo
       (mezcla con blanco), así queda un solo rojo configurable. */
   --highlight-red: color-mix(in srgb, var(--red-dark) 80%, white 20%);
-  --cyan-dark: #007db8;
+  --highlight-dark: #007db8;
   --black-dark: #000000;
   --gray-dark-1: #202020;
   --gray-dark-2: #141414;

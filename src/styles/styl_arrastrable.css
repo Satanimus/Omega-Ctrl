@@ -121,7 +121,7 @@
    ========================== */
 
 .arr-placeholder {
-    background: var(--cyan-dark);
+    background: var(--highlight-dark);
     opacity: 0.5;
     border-radius: var(--r4);
     margin: 2px 0;

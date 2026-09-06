@@ -66,8 +66,8 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	fondo-general-color2	Color 2	#000924	color
 2	highlight	Resaltado (UI)		
 0	highlight	Color	#00aeff	color
-2	cyan-dark	Resaltado oscuro (UI)		
-0	cyan-dark	Color	#007db8	color
+2	highlight-dark	Resaltado oscuro (UI)		
+0	highlight-dark	Color	#007db8	color
 2	bg	Fondo base		
 0	bg	Color	#181818	color
 2	panel	Fondo de panel		

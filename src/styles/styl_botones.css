@@ -485,9 +485,9 @@
 
 .popup-capa .popup-extra-capturar {
 
-    background: var(--cyan-dark);
+    background: var(--highlight-dark);
 
-    border-color: var(--cyan-dark);
+    border-color: var(--highlight-dark);
 
     color: var(--text);
 
