@@ -1406,7 +1406,7 @@
   border-radius: var(--r4);
   background: color-mix(
     in srgb,
-    var(--tabla-color-impar) var(--tabla-fondo-opacidad),
+    var(--tabla-color-impar) var(--tabla-fondo-opacidad-impar),
     transparent
   );
   transition: background var(--speed);
@@ -1415,7 +1415,7 @@
 .popup-macro-editor-paso:nth-child(even) {
   background: color-mix(
     in srgb,
-    var(--tabla-color-par) var(--tabla-fondo-opacidad),
+    var(--tabla-color-par) var(--tabla-fondo-opacidad-par),
     transparent
   );
 }

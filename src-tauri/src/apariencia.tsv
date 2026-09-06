@@ -87,10 +87,6 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	red-light	Color	#FF0000	color
 2	black-dark	Negro (acento UI)		
 0	black-dark	Color	#000000	color
-2	gray-dark-1	Gris oscuro 1 (fondo tabla impar)		
-0	gray-dark-1	Color	#202020	color
-2	gray-dark-2	Gris oscuro 2 (fondo tabla par)		
-0	gray-dark-2	Color	#141414	color
 1	color-texto	Color de Texto		
 2	text	Color de texto principal		
 0	text	Color	#F2F2F2	color
@@ -145,10 +141,11 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	cabecera-tabla-color	Color	#000000	color
 0	cabecera-tabla-opacidad	Opacidad	40%	porcentaje
 2	fondo-tabla	Fondo de tabla		
-0	tabla-color-impar	Color impar	#202020	color
-0	tabla-color-par	Color par	#141414	color
+0	tabla-color-impar	Color impar	#000000	color
+0	tabla-color-par	Color par	#ffffff	color
 0	tabla-color-hover	Color hover	#00aeff	color
-0	tabla-fondo-opacidad	Opacidad	50%	porcentaje
+0	tabla-fondo-opacidad-impar	Opacidad impar	5%	porcentaje
+0	tabla-fondo-opacidad-par	Opacidad par	5%	porcentaje
 0	tabla-fondo-opacidad-hover	Opacidad hover	24%	porcentaje
 2	botones-ghost	Botones generales hover highlight		
 0	botones-ghost-opacidad-hover	Opacidad hover	8%	porcentaje

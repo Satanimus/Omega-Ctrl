@@ -246,7 +246,7 @@
 .coordenadas-tabla tbody tr {
   background: color-mix(
     in srgb,
-    var(--tabla-color-impar) var(--tabla-fondo-opacidad),
+    var(--tabla-color-impar) var(--tabla-fondo-opacidad-impar),
     transparent
   );
   transition: background var(--speed);
@@ -255,7 +255,7 @@
 .coordenadas-tabla tbody tr:nth-child(even) {
   background: color-mix(
     in srgb,
-    var(--tabla-color-par) var(--tabla-fondo-opacidad),
+    var(--tabla-color-par) var(--tabla-fondo-opacidad-par),
     transparent
   );
 }

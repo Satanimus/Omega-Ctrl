@@ -40,8 +40,6 @@
   --highlight-red: color-mix(in srgb, var(--red-light) 80%, white 20%);
   --highlight-dark: #007db8;
   --black-dark: #000000;
-  --gray-dark-1: #202020;
-  --gray-dark-2: #141414;
 
   /* ==========================
          Estados de perfil
@@ -94,13 +92,15 @@
        Fondo de tabla
        ========================== */
 
-  --tabla-color-impar: var(--gray-dark-1);
+  --tabla-color-impar: var(--black-dark);
 
-  --tabla-color-par: var(--gray-dark-2);
+  --tabla-color-par: var(--overlay-contraste);
 
   --tabla-color-hover: var(--highlight);
 
-  --tabla-fondo-opacidad: 50%;
+  --tabla-fondo-opacidad-impar: 5%;
+
+  --tabla-fondo-opacidad-par: 5%;
 
   --tabla-fondo-opacidad-hover: 24%;
 
