@@ -876,7 +876,7 @@
   z-index: 20;
   max-width: 260px;
   padding: 8px 10px;
-  background: color-mix(in srgb, var(--overlay-tooltip) 97%, transparent);
+  background: color-mix(in srgb, var(--bg) 97%, transparent);
   border: 1px solid var(--border-light);
   border-radius: 6px;
   color: var(--text);

@@ -21,8 +21,8 @@
 //   mismo — ver categorizarTecla()).
 // • Apariencia  → Texto + Dimensiones, con selector de Escala general.
 // • Tema        → Color de tema + Color de Texto + Color y opacidad
-//   de elementos, con el selector Cargar/Guardar/Renombrar/Eliminar
-//   tema.
+//   de elementos + Opacidad (indicadores Macro/Coordenada), con el
+//   selector Cargar/Guardar/Renombrar/Eliminar tema.
 // ======================================================
 
 import { invoke } from "@tauri-apps/api/core";
@@ -1322,14 +1322,15 @@ async function refrescarTrasCambioApariencia(): Promise<void> {
 //
 // Apariencia = Texto + Dimensiones (con selector de Escala general).
 // Tema = Color de tema + Color de Texto + Color y opacidad de
-// elementos (con el selector Cargar/Guardar/Renombrar/Eliminar
-// tema). Ambas comparten el mismo catálogo/sesión de apariencia en
-// el backend — ver apariencia.tsv y refrescarDesdeOtraPestana.
+// elementos + Opacidad (indicadores Macro/Coordenada), al final
+// (con el selector Cargar/Guardar/Renombrar/Eliminar tema). Ambas
+// comparten el mismo catálogo/sesión de apariencia en el backend —
+// ver apariencia.tsv y refrescarDesdeOtraPestana.
 const pestanaApariencia = crearPestanaApariencia(
   panelApariencia,
   refrescarTrasCambioApariencia,
   {
-    grupos: ["texto", "dimensiones", "opacidad-indicadores"],
+    grupos: ["texto", "dimensiones"],
     incluirSelectorTema: false,
     incluirEscala: true,
     textoConfirmacionRestablecer:
@@ -1342,7 +1343,12 @@ const pestanaTema = crearPestanaApariencia(
   panelTema,
   refrescarTrasCambioApariencia,
   {
-    grupos: ["color-tema", "color-texto", "color-opacidad-elementos"],
+    grupos: [
+      "color-tema",
+      "color-texto",
+      "color-opacidad-elementos",
+      "opacidad-indicadores",
+    ],
     incluirSelectorTema: true,
     incluirEscala: false,
     textoConfirmacionRestablecer:

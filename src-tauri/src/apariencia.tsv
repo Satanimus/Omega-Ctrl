@@ -69,7 +69,7 @@ nivel	id	nombre_ui	valor_defecto	tipo
 2	highlight-dark	Resaltado oscuro (UI)		
 0	highlight-dark	Color	#007db8	color
 2	bg	Fondo base		
-0	bg	Color	#181818	color
+0	bg	Color	#0f0f14	color
 2	panel	Fondo de panel		
 0	panel	Color	#222222	color
 2	panel2	Fondo de panel secundario		
@@ -81,8 +81,6 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	overlay-superficie	Color	#14141e	color
 2	overlay-popup	Fondo de popup en ventanas flotantes		
 0	overlay-popup	Color	#191920	color
-2	overlay-tooltip	Fondo de tooltip en ventanas flotantes		
-0	overlay-tooltip	Color	#0f0f14	color
 2	overlay-contraste	Contraste (bordes/hover) en ventanas flotantes		
 0	overlay-contraste	Color	#ffffff	color
 2	green-dark	Verde (estado activo)		
@@ -167,5 +165,6 @@ nivel	id	nombre_ui	valor_defecto	tipo
 2	indicador-macro	Indicador Macro		
 0	indicador-macro-fondo-opacidad	Fondo	55%	porcentaje
 0	indicador-macro-texto-opacidad	Texto	100%	porcentaje
-2	indicador-coordenada	Indicador Coordenada		
+2	indicador-coordenada	Indicador coordenada ⊙		
+0	indicador-coordenada-color	Color	#00aeff	color
 0	indicador-coordenada-texto-opacidad	Texto	40%	porcentaje

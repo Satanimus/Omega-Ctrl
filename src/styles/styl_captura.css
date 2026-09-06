@@ -123,28 +123,28 @@ body {
 
 .captura-marcador-preview circle {
   fill: none;
-  stroke: var(--text-highlight);
+  stroke: var(--indicador-coordenada-color);
   stroke-width: 3;
 }
 
 .captura-marcador-preview .captura-marcador-punto {
-  fill: var(--text-highlight);
+  fill: var(--indicador-coordenada-color);
   stroke: none;
 }
 
 /* Flash de confirmación al guardar con F1 (guardarYcerrar) — mismo
-   marcador ⊙, pero en verde en vez de cyan para distinguirlo de una
-   Previsualización en curso. */
+   marcador ⊙ y mismo color que la Previsualización (unificado, ya
+   no distingue con verde). */
 .captura-marcador-confirmacion circle {
-  stroke: var(--green-dark);
+  stroke: var(--indicador-coordenada-color);
 }
 
 .captura-marcador-confirmacion .captura-marcador-punto {
-  fill: var(--green-dark);
+  fill: var(--indicador-coordenada-color);
 }
 
 .captura-marcador-confirmacion svg {
-  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--green-dark) 70%, transparent));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--indicador-coordenada-color) 70%, transparent));
 }
 
 /* Zona de arrastre — único punto de la ventana que agarra el mouse

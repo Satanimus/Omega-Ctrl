@@ -56,7 +56,7 @@
        Fondos
        ========================== */
 
-  --bg: #181818;
+  --bg: #0f0f14;
 
   --fondo-general-color1: #00292e;
 
@@ -338,8 +338,6 @@
 
   --overlay-popup: #191920;
 
-  --overlay-tooltip: #0f0f14;
-
   --overlay-contraste: #ffffff;
 
   /* ==========================
@@ -360,8 +358,12 @@
   --indicador-macro-texto-opacidad: 100%;
 
   /* Marcador de preview de la ventana de captura de coordenada
-      (.captura-marcador-preview en styl_captura.css) — "Texto" es la
-      opacidad del propio ícono SVG (este marcador no tiene texto).
-      Ya no tiene "Fondo": el marcador quedó sin relleno de fondo. */
+      (.captura-marcador-preview/.captura-marcador-confirmacion en
+      styl_captura.css) — "Texto" es la opacidad del propio ícono SVG
+      (este marcador no tiene texto). Ya no tiene "Fondo": el
+      marcador quedó sin relleno de fondo. "Color" es el color del
+      marcador ⊙ mismo (antes fijo en var(--highlight)). */
   --indicador-coordenada-texto-opacidad: 40%;
+
+  --indicador-coordenada-color: #00aeff;
 }

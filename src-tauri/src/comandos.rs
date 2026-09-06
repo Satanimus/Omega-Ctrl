@@ -1590,6 +1590,8 @@ pub async fn abrir_ventana_coordenadas(
     captura_coordenada::fijar_destino_activo(destino);
 
     if let Some(existente) = app.get_webview_window(VENTANA_COORDENADAS) {
+        let _ = existente.unminimize();
+        let _ = existente.show();
         let _ = existente.set_focus();
         return Ok(());
     }
@@ -1972,6 +1974,8 @@ pub async fn abrir_ventana_configuracion(app: tauri::AppHandle) -> Result<(), St
     // ser async o WebviewWindowBuilder::build() hace deadlock en
     // Windows si se llama desde un comando síncrono.
     if let Some(existente) = app.get_webview_window(VENTANA_CONFIGURACION) {
+        let _ = existente.unminimize();
+        let _ = existente.show();
         let _ = existente.set_focus();
         return Ok(());
     }
