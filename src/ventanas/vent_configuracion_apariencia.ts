@@ -27,6 +27,8 @@ import {
 
 import { abrirFormularioNombre } from "../componentes/comp_popup_formulario_nombre";
 
+import { crearBoton } from "../componentes/comp_boton";
+
 import {
   crearFilaPopup,
   crearGrupoOpciones,
@@ -543,25 +545,46 @@ function crearFilaArbol(
   const tdDefecto = document.createElement("td");
   tdDefecto.className = "configuracion-celda configuracion-arbol-defecto";
 
-  // Columna Editar/Valor Personalizado fusionada (Etapa H11): un
-  // solo botón por fila, sin padding propio en la celda (el botón
-  // ocupa todo el ancho, ver .configuracion-arbol-personalizado-celda).
+  // Columna Editar/Valor Personalizado fusionada (Etapa H11): el
+  // botón "✎"/valor ocupa el espacio disponible; el botón "X"
+  // (Limpiar) se agrega al lado, ver más abajo.
   const tdPersonalizado = document.createElement("td");
   tdPersonalizado.className = "configuracion-arbol-personalizado-celda";
 
   const botonPersonalizado = document.createElement("button");
   botonPersonalizado.type = "button";
   botonPersonalizado.className = "configuracion-arbol-personalizado";
-  tdPersonalizado.append(botonPersonalizado);
+
+  // Botón "X" (Limpiar): reemplaza el antiguo doble click sobre
+  // Valor por Defecto (Regla: ya no se borra a ciegas con un doble
+  // click, hace falta un botón visible). Vive siempre en el DOM,
+  // oculto por CSS salvo hover + fila con Valor Personalizado (ver
+  // .configuracion-arbol-personalizado-celda--editado en
+  // styl_configuracion.css) para que ocupe siempre la misma posición
+  // a la derecha de la columna.
+  const botonLimpiar = crearBoton({
+    texto: "X",
+    clase: "configuracion-valor-limpiar",
+    titulo: "Limpiar",
+  });
+  botonLimpiar.classList.add("boton-peligro");
+
+  tdPersonalizado.append(botonPersonalizado, botonLimpiar);
 
   // G5/H11: refresca Valor por Defecto y el botón fusionado tras un
-  // cambio en el popup Editar o un borrado por doble click — el
-  // botón muestra "✎" vacío cuando no hay Valor Personalizado, o el
-  // valor ya guardado (swatch+nombre para color) en su lugar.
+  // cambio en el popup Editar o un borrado por "X" — el botón
+  // muestra "✎" vacío cuando no hay Valor Personalizado, o el valor
+  // ya guardado (swatch+nombre para color) en su lugar. También
+  // marca/saca la clase que habilita mostrar "X" en hover.
   const actualizarColumnas = (): void => {
     tdDefecto.replaceChildren(renderizarValorDefecto(nodo.hijos, coloresTema));
 
     const hayValorPersonalizado = nodo.hijos.some(esPersonalizadoReal);
+
+    tdPersonalizado.classList.toggle(
+      "configuracion-arbol-personalizado-celda--editado",
+      hayValorPersonalizado,
+    );
 
     if (hayValorPersonalizado) {
       botonPersonalizado.replaceChildren(
@@ -572,14 +595,14 @@ function crearFilaArbol(
     }
   };
 
-  // F5/H1: doble click sobre Valor por Defecto borra el Valor
-  // Personalizado de toda la fila (Regla 34). Si alguno de los hijos
-  // tenía un valor original (ya guardado en el backend), la fila
-  // sigue marcada en filasConCambio para que "Guardar cambios" mande
-  // el borrado — ver SENTINEL_BORRAR en validarYRecolectar. Si
-  // ninguno tenía valor original (todo era edición sin guardar
-  // todavía), no hay nada que persistir: se saca del set.
-  tdDefecto.addEventListener("dblclick", () => {
+  // F5/H1: click en "X" borra el Valor Personalizado de toda la fila
+  // (Regla 34). Si alguno de los hijos tenía un valor original (ya
+  // guardado en el backend), la fila sigue marcada en filasConCambio
+  // para que "Guardar cambios" mande el borrado — ver SENTINEL_BORRAR
+  // en validarYRecolectar. Si ninguno tenía valor original (todo era
+  // edición sin guardar todavía), no hay nada que persistir: se saca
+  // del set.
+  botonLimpiar.addEventListener("click", () => {
     nodo.hijos.forEach((hijo) => {
       hijo.valor_personalizado = null;
     });
@@ -1216,6 +1239,22 @@ export function crearPestanaApariencia(
 
   // H9
   async function limpiarEstadoTrasGuardado(): Promise<void> {
+    // Fix bug doble click tras Aplicar cambios: valoresOriginales solo
+    // se refrescaba en recargarTablaApariencia() (cargar/restablecer),
+    // nunca tras un Aplicar cambios normal — quedaba con el valor de
+    // ANTES de la edición recién guardada. Eso hacía que un doble click
+    // posterior en Valor por Defecto (habiaValorGuardado comparando
+    // contra ese original stale) creyera que nunca hubo nada que
+    // borrar: no marcaba la fila como editada (bug 1) y por lo tanto
+    // "Aplicar cambios" nunca mandaba el SENTINEL_BORRAR (bug 2). Se
+    // sincroniza acá con el valor recién persistido de cada hijo de
+    // las filas que se acaban de guardar.
+    for (const nodo of filasConCambio) {
+      for (const hijo of nodo.hijos) {
+        valoresOriginales.set(hijo.id, hijo.valor_personalizado);
+      }
+    }
+
     filasConCambio.clear();
     huboCargaDeTema = false;
 

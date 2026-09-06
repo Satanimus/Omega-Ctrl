@@ -42,6 +42,7 @@ import { triggerAHTML, triggerATexto } from "../core/core_trigger";
 
 import { aplicarOverridesApariencia } from "../core/core_apariencia";
 import { crearPestanaApariencia } from "./vent_configuracion_apariencia";
+import { crearBoton } from "../componentes/comp_boton";
 
 import "../styles/styl_variables.css";
 import "../styles/styl_general.css";
@@ -502,6 +503,22 @@ function actualizarBotonPersonalizado(
   }
 }
 
+// Reemplaza el antiguo doble click en "Valor por defecto" (borraba
+// directo, sin poder verse antes de soltar el botón): solo agrega/
+// saca la clase que habilita mostrar el botón "X" (Limpiar) en hover
+// de la columna Editar/Valor Personalizado — el botón mismo vive
+// siempre en el DOM (ver montarFila) para que su posición no salte
+// al aparecer.
+function actualizarValorLimpiar(
+  tdPersonalizado: HTMLElement,
+  montada: Pick<FilaMontada, "fila" | "valorActual">,
+): void {
+  tdPersonalizado.classList.toggle(
+    "configuracion-arbol-personalizado-celda--editado",
+    montada.valorActual !== montada.fila.valorDefecto,
+  );
+}
+
 // Campo de edición según tipo, montado dentro del popup que abre el
 // botón fusionado (mismo criterio que crearCampoValor en
 // vent_configuracion_apariencia.ts, pero una sola fila/valor por
@@ -811,20 +828,36 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     }
 
     // Columna Editar/Valor Personalizado fusionada (mismo patrón que
-    // vent_configuracion_apariencia.ts, H11): un solo botón por fila,
-    // sin padding propio en la celda (el botón ocupa todo el ancho).
+    // vent_configuracion_apariencia.ts, H11): el botón "✎"/valor
+    // ocupa el espacio disponible; el botón "X" (Limpiar) se agrega
+    // al lado, ver más abajo.
     const tdPersonalizado = document.createElement("td");
     tdPersonalizado.className = "configuracion-arbol-personalizado-celda";
 
     const botonPersonalizado = document.createElement("button");
     botonPersonalizado.type = "button";
     botonPersonalizado.className = "configuracion-arbol-personalizado";
-    tdPersonalizado.append(botonPersonalizado);
+
+    // Botón "X" (Limpiar): reemplaza el antiguo doble click sobre
+    // "Valor por defecto" (Regla: ya no se elimina el Valor
+    // Personalizado a ciegas con un doble click, hace falta un botón
+    // visible). Vive siempre en el DOM, oculto por CSS salvo hover +
+    // fila editada (ver .configuracion-arbol-personalizado-celda--editado
+    // en styl_configuracion.css) para que ocupe siempre la misma
+    // posición a la derecha de la columna.
+    const botonLimpiar = crearBoton({
+      texto: "X",
+      clase: "configuracion-valor-limpiar",
+      titulo: "Limpiar",
+    });
+    botonLimpiar.classList.add("boton-peligro");
+
+    tdPersonalizado.append(botonPersonalizado, botonLimpiar);
 
     const valorActual = fila.valorPersonalizado ?? fila.valorDefecto;
 
     // Fila montada real, referenciada por el click del botón fusionado
-    // y por el dblclick de tdDefecto — se completa antes de armar el
+    // y por el click del botón "X" — se completa antes de armar el
     // contenido del botón porque ambos la necesitan por referencia
     // (no una copia).
     const montada: FilaMontada = {
@@ -835,6 +868,7 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     };
 
     actualizarBotonPersonalizado(botonPersonalizado, montada);
+    actualizarValorLimpiar(tdPersonalizado, montada);
 
     // El botón fusionado (vacío=lápiz o con el Valor Personalizado ya
     // guardado) abre el mini popup sobre la fila; cualquier cambio
@@ -845,6 +879,7 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
         montada.valorActual = valor;
 
         actualizarBotonPersonalizado(botonPersonalizado, montada);
+        actualizarValorLimpiar(tdPersonalizado, montada);
         marcarEditando(fila.clave, tr);
       });
 
@@ -855,15 +890,14 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
       mostrarPopup(popup, evento.clientX, evento.clientY);
     });
 
-    // Doble click en "Valor por defecto" → lo copia a "Valor
-    // personalizado" (spec: acceso rápido para restablecer una
-    // sola fila sin pasar por "Restablecer esta pestaña", que
-    // afecta a todas).
-    tdDefecto.title = "Doble click para usar este valor";
-    tdDefecto.addEventListener("dblclick", () => {
+    // Botón "X" (reemplaza el antiguo doble click sobre "Valor por
+    // defecto"): borra el Valor Personalizado de la fila,
+    // restableciendo valorActual al valor por defecto.
+    botonLimpiar.addEventListener("click", () => {
       montada.valorActual = fila.valorDefecto;
 
       actualizarBotonPersonalizado(botonPersonalizado, montada);
+      actualizarValorLimpiar(tdPersonalizado, montada);
       marcarEditando(fila.clave, tr);
     });
 

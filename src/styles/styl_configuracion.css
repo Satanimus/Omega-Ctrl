@@ -243,22 +243,12 @@
   color: var(--text-disabled);
 }
 
+/* Ya no funciona como botón (era el doble click); solo muestra el
+   valor por defecto. */
 .configuracion-valor-defecto {
   color: var(--text);
-  cursor: pointer;
 }
 
-.configuracion-valor-defecto:hover {
-  color: var(--text-highlight);
-}
-
-/* El swatch de color (Apariencia) necesita ir en línea junto al
-   texto — pero el contenedor NO debe ser display:flex en el <td>:
-   un <td> con vertical-align:middle centra su contenido de forma
-   fiable solo cuando el contenido es inline (o inline-block); un
-   hijo directo en flex/block rompe ese centrado y el texto queda
-   pegado arriba. inline-flex conserva el centrado de la celda y
-   alinea swatch+texto entre sí. */
 .configuracion-valor-defecto .configuracion-swatch-wrap {
   display: inline-flex;
   align-items: center;
@@ -403,15 +393,9 @@
   margin-right: 4px;
 }
 
-/* F7: indica que la celda funciona como botón (doble click borra
-   el Valor Personalizado de la fila, Regla 34). */
-.configuracion-arbol-defecto {
-  cursor: pointer;
-}
-
-.configuracion-arbol-defecto:hover {
-  background: color-mix(in srgb, var(--overlay-contraste) 8%, transparent);
-}
+/* Ya no funciona como botón (era el doble click); solo muestra el
+   valor por defecto — el resto del estilo de celda ya lo da
+   .configuracion-celda, no hace falta nada propio acá. */
 
 /* E7: sangría/color por nivel (Regla 28: única diferencia visual
    entre nivel 2 y 3 es la sangría, que ya pone padding-left inline
@@ -458,25 +442,30 @@
 
 /* H11: columna Editar/Valor Personalizado fusionada — la celda
    pierde el padding genérico de .configuracion-celda (el botón de
-   adentro pone el suyo, así ocupa toda la celda y es clickeable de
-   punta a punta), pero conserva el alto de fila estándar. */
+   adentro pone el suyo), pero conserva el alto de fila estándar.
+   Pasa a flex para poder sumar el botón "X" (Limpiar) al lado del
+   botón "✎"/valor, sin que ninguno de los dos pierda su alto de
+   celda completo. */
 .configuracion-arbol-personalizado-celda {
   height: var(--row-height);
   padding: 0;
   vertical-align: middle;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
 
 /* Botón único: "✎" cuando no hay Valor Personalizado, o el valor ya
    guardado (swatch+nombre para color, texto para el resto) en su
    lugar — mismo criterio ghost que .configuracion-arbol-expandir,
-   pero ocupando todo el ancho/alto de la celda y alineado a la
-   izquierda. */
+   ocupando el ancho disponible (ya no el 100% de la celda: ahora
+   comparte espacio con el botón "X") y alineado a la izquierda. */
 .configuracion-arbol-personalizado {
   display: flex;
   align-items: center;
   gap: var(--gap4);
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
   height: 100%;
   background: transparent;
   border: 1px solid transparent;
@@ -495,6 +484,26 @@
 .configuracion-arbol-personalizado:hover {
   border-color: var(--highlight);
   color: var(--highlight);
+}
+
+/* Botón "X" (Limpiar), agregado al lado del botón fusionado de
+   arriba en las 4 pestañas de Configuración: reserva su espacio
+   siempre con visibility en vez de display, para que la celda no
+   cambie de ancho ni el botón salte de posición al aparecer — solo
+   se vuelve visible en hover de la celda, y solo cuando la fila tiene
+   un Valor Personalizado editado (clase --editado agregada/sacada
+   desde TS). El estilo ghost + acento rojo en hover ya lo da la
+   familia .boton-peligro (styl_botones.css), no hace falta redefinir
+   colores acá. */
+.configuracion-valor-limpiar {
+  visibility: hidden;
+  flex-shrink: 0;
+  margin-right: var(--gap8);
+}
+
+.configuracion-arbol-personalizado-celda--editado:hover
+  .configuracion-valor-limpiar {
+  visibility: visible;
 }
 
 /* G7: mini popup de edición (una fila por valor, ver
