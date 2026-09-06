@@ -115,15 +115,6 @@ nivel	id	nombre_ui	valor_defecto	tipo
 2	gap16	Espaciado grande		
 0	gap16	Tamaño	16px	pixeles
 1	color-opacidad-elementos	Color y opacidad de elementos		
-2	fondo-configuracion	Fondo Configuración		
-0	fondo-configuracion-color	Color	#0f0f14	color
-0	fondo-configuracion-opacidad	Opacidad	50%	porcentaje
-2	fondo-coordenadas	Fondo Coordenadas		
-0	fondo-coordenadas-color	Color	#0f0f14	color
-0	fondo-coordenadas-opacidad	Opacidad	50%	porcentaje
-2	fila-titulos	Fila Títulos		
-0	fila-titulos-color	Color	#191920	color
-0	fila-titulos-opacidad	Opacidad	80%	porcentaje
 2	barra-superior	Barra superior		
 0	barra-superior-color	Color	#14141e	color
 0	barra-superior-opacidad	Opacidad	60%	porcentaje
@@ -133,6 +124,21 @@ nivel	id	nombre_ui	valor_defecto	tipo
 2	barra-inferior	Barra inferior		
 0	barra-inferior-color	Color	#14141e	color
 0	barra-inferior-opacidad	Opacidad	60%	porcentaje
+2	botones-ghost	Botones generales hover highlight		
+0	botones-ghost-opacidad-hover	Opacidad hover	8%	porcentaje
+2	ventana	Ventanas/Indicadores		
+3	fondo-configuracion	Fondo Configuración		
+0	fondo-configuracion-color	Color	#0f0f14	color
+0	fondo-configuracion-opacidad	Opacidad	50%	porcentaje
+3	fondo-coordenadas	Fondo Coordenadas		
+0	fondo-coordenadas-color	Color	#0f0f14	color
+0	fondo-coordenadas-opacidad	Opacidad	50%	porcentaje
+3	indicador-macro	Indicador Macro		
+0	indicador-macro-fondo-opacidad	Fondo	55%	porcentaje
+0	indicador-macro-texto-opacidad	Texto	100%	porcentaje
+3	indicador-coordenada	Indicador coordenada ⊙		
+0	indicador-coordenada-color	Color	#00aeff	color
+0	indicador-coordenada-texto-opacidad	Texto	40%	porcentaje
 2	tabla	Tabla		
 3	cabecera-tabla	Cabecera de tabla		
 0	cabecera-tabla-color	Color	#000000	color
@@ -149,12 +155,6 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	separador-opacidad-fila	Opacidad en filas	5%	porcentaje
 3	boton-off	Botón Off (fila y separador)		
 0	boton-off-opacidad	Opacidad	55%	porcentaje
-2	botones-ghost	Botones generales hover highlight		
-0	botones-ghost-opacidad-hover	Opacidad hover	8%	porcentaje
-1	opacidad-indicadores	Opacidad		
-2	indicador-macro	Indicador Macro		
-0	indicador-macro-fondo-opacidad	Fondo	55%	porcentaje
-0	indicador-macro-texto-opacidad	Texto	100%	porcentaje
-2	indicador-coordenada	Indicador coordenada ⊙		
-0	indicador-coordenada-color	Color	#00aeff	color
-0	indicador-coordenada-texto-opacidad	Texto	40%	porcentaje
+3	fila-titulos	Títulos (Configuración)		
+0	fila-titulos-color	Color	#191920	color
+0	fila-titulos-opacidad	Opacidad	80%	porcentaje
