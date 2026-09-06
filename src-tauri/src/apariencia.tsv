@@ -65,25 +65,21 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	fondo-general-color1	Color 1	#00292e	color
 0	fondo-general-color2	Color 2	#000924	color
 2	highlight	Resaltado (UI)		
-0	highlight	Color	#00aeff	color
-2	highlight-dark	Resaltado oscuro (UI)		
-0	highlight-dark	Color	#007db8	color
-2	bg	Fondo base		
-0	bg	Color	#0f0f14	color
-2	panel	Fondo de panel		
-0	panel	Color	#14141e	color
-2	panel2	Fondo de panel secundario		
-0	panel2	Color	#191920	color
+0	highlight	Claro	#00aeff	color
+0	highlight-dark	Oscuro	#007db8	color
+2	bg	Fondo base paneles		
+0	bg	Base	#0f0f14	color
+0	panel	Panel 1	#14141e	color
+0	panel2	Panel 2	#191920	color
 2	border	Color de borde		
 0	border	Color	#404040	color
 0	border-light	Color claro	#555555	color
-2	overlay-contraste	Contraste (bordes/hover) en ventanas flotantes		
+2	overlay-contraste	Contraste (bordes/hover)		
 0	overlay-contraste	Color	#ffffff	color
-2	green-dark	Verde (estado activo)		
-0	green-dark	Color	#2E7D32	color
-2	red-dark	Rojo (estado activo)		
-0	red-dark	Color	#8F2525	color
-2	red-light	Rojo claro (indicadores/bordes)		
+2	green-dark	Botón de estado		
+0	green-dark	Activo	#2E7D32	color
+0	red-dark	Inactivo	#8F2525	color
+2	red-light	Indicadores/bordes rojo		
 0	red-light	Color	#FF0000	color
 2	black-dark	Negro (acento UI)		
 0	black-dark	Color	#000000	color
