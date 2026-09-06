@@ -135,8 +135,6 @@
 
   --panel-lateral-eliminar-opacidad: 100%;
 
-  --guardar-opacidad: 100%;
-
   /* ==========================
        Bordes
        ========================== */
@@ -160,7 +158,7 @@
   /* Texto oscuro sobre fondo --highlight (ej. btn-guardar-cambios,
       badge de arrastre múltiple, marcador de macro activo) — no
       comparte token con --text, que es claro sobre fondo oscuro. */
-  --text-highdark: #05202a;
+  --text-highdark: #000000;
 
   /* ==========================
        Colores principales

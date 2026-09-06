@@ -214,7 +214,7 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
                 </button>
 
                 <button
-                    class="btn-guardar-cambios"
+                    class="btn-guardar-cambios familia-highdark"
                     type="button"
                     data-ayuda-id="btn-guardar-cambios"
                 >

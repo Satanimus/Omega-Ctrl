@@ -875,13 +875,17 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     // dentro del popup marca la fila como pendiente de guardar. Se
     // reabre igual estando vacío o con valor.
     botonPersonalizado.addEventListener("click", (evento) => {
-      const campo = crearCampoValorGeneral(fila, montada.valorActual, (valor) => {
-        montada.valorActual = valor;
+      const campo = crearCampoValorGeneral(
+        fila,
+        montada.valorActual,
+        (valor) => {
+          montada.valorActual = valor;
 
-        actualizarBotonPersonalizado(botonPersonalizado, montada);
-        actualizarValorLimpiar(tdPersonalizado, montada);
-        marcarEditando(fila.clave, tr);
-      });
+          actualizarBotonPersonalizado(botonPersonalizado, montada);
+          actualizarValorLimpiar(tdPersonalizado, montada);
+          marcarEditando(fila.clave, tr);
+        },
+      );
 
       const popup = document.createElement("div");
       popup.className = "popup-editar-apariencia";
@@ -1452,8 +1456,7 @@ botonRestablecerGlobal.textContent = "Restablecer esta pestaña";
 
 const botonGuardarGlobal = document.createElement("button");
 botonGuardarGlobal.type = "button";
-botonGuardarGlobal.className =
-  "configuracion-boton configuracion-boton-primario";
+botonGuardarGlobal.className = "configuracion-boton familia-highdark";
 botonGuardarGlobal.textContent = "Aplicar cambios";
 
 barraGlobal.append(botonRestablecerGlobal, botonGuardarGlobal);

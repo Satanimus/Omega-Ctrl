@@ -105,7 +105,7 @@ nivel	id	nombre_ui	valor_defecto	tipo
 2	text-red	Color de texto (alerta)		
 0	text-red	Color	#C62828	color
 2	text-highdark	Color de texto oscuro sobre resaltado		
-0	text-highdark	Color	#05202a	color
+0	text-highdark	Color	#000000	color
 1	texto	Texto		
 2	font	Fuente de texto		
 0	font	Texto	"Segoe UI", sans-serif	texto

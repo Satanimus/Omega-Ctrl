@@ -3688,7 +3688,7 @@ function crearDetalleCoordenada(
   filaSeleccionar.className = "popup-extra-fila-acciones";
 
   const botonSeleccionar = document.createElement("button");
-  botonSeleccionar.className = "ui-btn popup-extra-capturar";
+  botonSeleccionar.className = "ui-btn familia-highdark";
   botonSeleccionar.textContent = tieneCoordenada
     ? "📌 Cambiar"
     : "📌 Seleccionar";

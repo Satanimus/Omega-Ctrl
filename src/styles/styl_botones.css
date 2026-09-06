@@ -476,26 +476,38 @@
 }
 
 /* ======================================================
-    📌 BOTÓN PRINCIPAL — Capturar Coordenada
-    ------------------------------------------------------
-    Único botón "cyan oscuro" del popup Extra: es la acción
-    principal, tiene que destacar sobre el resto (que son
-    transparentes por la regla de arriba).
-    ====================================================== */
+   🟦 FAMILIA "HIGHDARK" — botón principal cyan oscuro
+   ------------------------------------------------------
+   Estilo compartido por los botones de acción principal que
+   antes usaban --highlight a secas (fondo/borde) + texto
+   oscuro: Guardar (barra superior), Seleccionar/Cambiar
+   coordenada (popup Extra de Tecla/Mouse y editor de Macro) y
+   "+ Fila coordenada" (gestor de Coordenadas). Reposo en
+   --highlight-dark, hover en --highlight (más claro), texto
+   siempre --text-highdark. Para sumar un botón a la familia
+   alcanza con agregarle la clase .familia-highdark — no hace
+   falta reescribir colores en el archivo/contexto donde vive.
+   ====================================================== */
 
-.popup-capa .popup-extra-capturar {
+/* Selector reforzado (button + clase repetida) para pisar de forma
+   confiable el fondo/color propio de cada botón base (.ui-btn,
+   .coordenadas-boton, la regla ghost .popup-capa .ui-btn, etc.)
+   sin importar el orden de import entre archivos CSS ni el peso de
+   esas reglas base. */
+button.familia-highdark.familia-highdark {
 
     background: var(--highlight-dark);
 
     border-color: var(--highlight-dark);
 
-    color: var(--text);
+    color: var(--text-highdark);
 
+    font-weight: 600;
 }
 
-.popup-capa .popup-extra-capturar:hover {
+button.familia-highdark.familia-highdark:hover {
 
-    background: var(--highlight);
+    background: var(--highlight) !important;
 
     border-color: var(--highlight);
 }
@@ -838,18 +850,7 @@
 
 .btn-guardar-cambios {
 
-    color: var(--text-highdark);
-
-    background: color-mix(in srgb, var(--highlight) var(--guardar-opacidad), transparent);
-
     font-weight: 600;
-}
-
-.btn-guardar-cambios:hover {
-
-    background: var(--highlight-strong, var(--highlight));
-
-    filter: brightness(1.1);
 }
 
 /* I10: ghost puro (Regla 20/21) — sin color propio en el catálogo,

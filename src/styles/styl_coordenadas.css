@@ -80,17 +80,6 @@
   transform: translateY(1px);
 }
 
-.coordenadas-boton-primario {
-  background: var(--highlight);
-  border-color: var(--highlight);
-  color: var(--text-highdark);
-  font-weight: 600;
-}
-
-.coordenadas-boton-primario:hover {
-  filter: brightness(1.1);
-}
-
 /* ======================================================
    📌 BOTÓN FIJAR VENTANA
    ------------------------------------------------------

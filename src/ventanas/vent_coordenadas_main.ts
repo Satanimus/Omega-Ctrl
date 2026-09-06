@@ -66,7 +66,7 @@ barraSuperior.className = "coordenadas-barra-superior";
 
 const botonAgregarFila = document.createElement("button");
 botonAgregarFila.type = "button";
-botonAgregarFila.className = "coordenadas-boton coordenadas-boton-primario";
+botonAgregarFila.className = "coordenadas-boton familia-highdark";
 botonAgregarFila.textContent = "+ Fila coordenada";
 botonAgregarFila.addEventListener("click", () => {
   void agregarFila();
@@ -602,7 +602,7 @@ function crearCeldaXY(coordenada: CoordenadaBanco): HTMLTableCellElement {
   if (idsSinMarcador.has(coordenada.id)) {
     const botonGenerar = document.createElement("button");
     botonGenerar.type = "button";
-    botonGenerar.className = "coordenadas-boton coordenadas-boton-primario";
+    botonGenerar.className = "coordenadas-boton familia-highdark";
     botonGenerar.textContent = "Generar marcador ⊙";
     botonGenerar.addEventListener("click", () => {
       iniciarCapturaMarcador(coordenada);
