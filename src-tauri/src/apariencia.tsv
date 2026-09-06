@@ -64,8 +64,10 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	fondo-general-modo	Modo	degradado	modo
 0	fondo-general-color1	Color 1	#00292e	color
 0	fondo-general-color2	Color 2	#000924	color
-2	highlight	Color de resaltado (UI)		
-0	highlight	Color	#03A9F4	color
+2	highlight	Resaltado (UI)		
+0	highlight	Color	#00aeff	color
+2	cyan-dark	Resaltado oscuro (UI)		
+0	cyan-dark	Color	#007db8	color
 2	bg	Fondo base		
 0	bg	Color	#181818	color
 2	panel	Fondo de panel		
@@ -87,8 +89,6 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	green-dark	Color	#2E7D32	color
 2	red-dark	Rojo (estado activo)		
 0	red-dark	Color	#8F2525	color
-2	cyan-dark	Cian oscurecido (acento UI)		
-0	cyan-dark	Color	#0B7285	color
 2	black-dark	Negro (acento UI)		
 0	black-dark	Color	#000000	color
 2	gray-dark-1	Gris oscuro 1 (fondo tabla impar)		
@@ -101,7 +101,7 @@ nivel	id	nombre_ui	valor_defecto	tipo
 2	text-disabled	Color de texto deshabilitado		
 0	text-disabled	Color	#9e9e9e	color
 2	text-highlight	Color de texto resaltado		
-0	text-highlight	Color	#03A9F4	color
+0	text-highlight	Color	#00aeff	color
 2	text-red	Color de texto (alerta)		
 0	text-red	Color	#C62828	color
 2	text-highdark	Color de texto oscuro sobre resaltado		
@@ -151,7 +151,7 @@ nivel	id	nombre_ui	valor_defecto	tipo
 2	fondo-tabla	Fondo de tabla		
 0	tabla-color-impar	Color impar	#202020	color
 0	tabla-color-par	Color par	#141414	color
-0	tabla-color-hover	Color hover	#03A9F4	color
+0	tabla-color-hover	Color hover	#00aeff	color
 0	tabla-fondo-opacidad	Opacidad	50%	porcentaje
 0	tabla-fondo-opacidad-hover	Opacidad hover	24%	porcentaje
 2	botones-ghost	Botones		
