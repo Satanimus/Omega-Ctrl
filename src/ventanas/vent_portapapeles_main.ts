@@ -164,7 +164,7 @@ function aplicarColorFondo(color: string): void {
 
   card.style.setProperty(
     "--portapapeles-color",
-    `color-mix(in srgb, ${variable} 45%, color-mix(in srgb, var(--overlay-superficie) 60%, transparent))`,
+    `color-mix(in srgb, ${variable} 45%, color-mix(in srgb, var(--panel) 60%, transparent))`,
   );
 
   card.style.setProperty(

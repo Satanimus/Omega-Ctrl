@@ -49,7 +49,7 @@ body {
   flex-direction: column;
   background: var(
     --portapapeles-gradient,
-    var(--portapapeles-color, color-mix(in srgb, var(--overlay-superficie) 60%, transparent))
+    var(--portapapeles-color, color-mix(in srgb, var(--panel) 60%, transparent))
   );
   border: 1px solid var(--border-light);
   border-radius: 8px;
@@ -200,7 +200,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
   border: 1px solid color-mix(in srgb, var(--overlay-contraste) 25%, transparent);
   border-radius: 6px;
   color: var(--text);
@@ -212,7 +212,7 @@ body {
 .portapapeles-boton-fijar:hover {
   background:
     linear-gradient(color-mix(in srgb, var(--overlay-contraste) 12%, transparent), color-mix(in srgb, var(--overlay-contraste) 12%, transparent)),
-    color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
+    color-mix(in srgb, var(--panel) 90%, transparent);
 }
 
 .portapapeles-boton-fijar.fijado {
@@ -226,7 +226,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0 10px;
-  background: color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
   border: 1px solid color-mix(in srgb, var(--overlay-contraste) 35%, transparent);
   border-radius: 6px;
   color: var(--text);
@@ -241,14 +241,14 @@ body {
 .portapapeles-boton-nombre:hover {
   background:
     linear-gradient(color-mix(in srgb, var(--overlay-contraste) 12%, transparent), color-mix(in srgb, var(--overlay-contraste) 12%, transparent)),
-    color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
+    color-mix(in srgb, var(--panel) 90%, transparent);
 }
 
 .portapapeles-boton-nombre:active,
 .portapapeles-boton-nombre.presionado {
   background:
     linear-gradient(color-mix(in srgb, var(--overlay-contraste) 20%, transparent), color-mix(in srgb, var(--overlay-contraste) 20%, transparent)),
-    color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
+    color-mix(in srgb, var(--panel) 90%, transparent);
 }
 
 .portapapeles-boton-opciones {
@@ -257,7 +257,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
   border: 1px solid color-mix(in srgb, var(--overlay-contraste) 25%, transparent);
   border-radius: 6px;
   color: var(--text-disabled);
@@ -270,7 +270,7 @@ body {
 .portapapeles-boton-opciones:hover {
   background:
     linear-gradient(color-mix(in srgb, var(--overlay-contraste) 12%, transparent), color-mix(in srgb, var(--overlay-contraste) 12%, transparent)),
-    color-mix(in srgb, var(--overlay-superficie) 90%, transparent);
+    color-mix(in srgb, var(--panel) 90%, transparent);
   color: var(--text);
 }
 
@@ -321,7 +321,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 6px 8px;
-  background: color-mix(in srgb, var(--overlay-superficie) 85%, transparent);
+  background: color-mix(in srgb, var(--panel) 85%, transparent);
   border: 1px solid color-mix(in srgb, var(--overlay-contraste) 25%, transparent);
   border-radius: 6px;
   color: var(--text);
@@ -412,7 +412,7 @@ body {
   background: color-mix(
     in srgb,
     var(--highlight-red) 18%,
-    color-mix(in srgb, var(--overlay-superficie) 85%, transparent)
+    color-mix(in srgb, var(--panel) 85%, transparent)
   );
 }
 
@@ -439,7 +439,7 @@ body {
   flex-direction: column;
   gap: 8px;
   padding: 10px;
-  background: color-mix(in srgb, var(--overlay-popup) 98%, transparent);
+  background: color-mix(in srgb, var(--panel2) 98%, transparent);
   border: 1px solid var(--border-light);
   border-radius: 8px;
   box-shadow: 0 6px 18px color-mix(in srgb, #000000 50%, transparent);
@@ -550,6 +550,6 @@ body {
 }
 
 .portapapeles-popup-boton.primario {
-  background: color-mix(in srgb, var(--highlight) 35%, color-mix(in srgb, var(--overlay-superficie) 85%, transparent));
+  background: color-mix(in srgb, var(--highlight) 35%, color-mix(in srgb, var(--panel) 85%, transparent));
   border-color: var(--highlight);
 }

@@ -71,9 +71,9 @@
       caliente por el gradient con blobs (color1/color2 reales). */
   --fondo-general: var(--fondo-general-color1);
 
-  --panel: #222222;
+  --panel: #14141e;
 
-  --panel2: #2b2b2b;
+  --panel2: #191920;
 
   /* Capa de color propia de cada ventana secundaria, pintada encima
       de --fondo-general (color-mix con su propia opacidad — mismo
@@ -318,26 +318,12 @@
        Overlays flotantes
        ========================== */
 
-  /* Paleta propia de las ventanas overlay/flotantes (Captura,
-      Portapapeles, Menú Express) — fondos oscuros translúcidos +
-      contraste blanco para bordes/hover, independientes de
-      --panel/--panel2/--border-light porque estas ventanas no
-      tienen fondo sólido de la app detrás (son transparent:true en
-      Tauri, ver comandos.rs) y necesitan su propio nivel de opacidad
-      para funcionar sobre cualquier fondo de escritorio. Los tonos
-      distintos (superficie/popup/tooltip) dan jerarquía visual: cada
-      capa que se abre encima de otra es un poco más oscura/opaca.
-      La MAYORÍA de las variantes con transparencia (bordes, hover,
-      intensidades de fondo) todavía se arman con color-mix() y un
-      porcentaje fijo en el CSS de cada ventana — no todas tienen
-      variable propia. Las que sí la tienen están en el bloque
-      "Opacidad de objetos" más abajo (ver
-      reglas_opacidad_apariencia.txt: la opacidad es del
-      objeto/contenedor, no del color). */
-  --overlay-superficie: #14141e;
-
-  --overlay-popup: #191920;
-
+  /* Contraste (bordes/hover) para las ventanas overlay/flotantes
+      (Captura, Portapapeles, Menú Express) — su fondo ahora reusa
+      --panel/--panel2 directo (ver reemplazo de --overlay-superficie/
+      --overlay-popup/--overlay-tooltip), pero el contraste blanco
+      sigue siendo propio de estas ventanas sin fondo sólido detrás
+      (transparent:true en Tauri, ver comandos.rs). */
   --overlay-contraste: #ffffff;
 
   /* ==========================
@@ -346,7 +332,7 @@
 
   /* Cada variable de acá es la opacidad de UN objeto/contenedor
       concreto, no de un color — dos objetos que usan el mismo color
-      base (ej. --overlay-superficie) pueden tener cada uno su propia
+      base (ej. --panel) pueden tener cada uno su propia
       opacidad, sin compartir variable entre sí (ver
       reglas_opacidad_apariencia.txt, reglas 2-4). */
 
