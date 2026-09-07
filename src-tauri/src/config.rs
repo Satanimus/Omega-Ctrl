@@ -343,7 +343,7 @@ pub fn establecer_tiempo_espera_normal(valor: u64) {
 // la que actuó o si el problema es otro.
 // ======================================================
 
-static TIEMPO_MAXIMO_RETENIDO: AtomicU64 = AtomicU64::new(5000);
+static TIEMPO_MAXIMO_RETENIDO: AtomicU64 = AtomicU64::new(10000);
 
 pub fn tiempo_maximo_retenido() -> u64 {
     TIEMPO_MAXIMO_RETENIDO.load(Ordering::Relaxed)
@@ -497,7 +497,7 @@ pub fn tecla_grabar_macro() -> AtajoSimple {
         .clone()
         .unwrap_or_else(|| AtajoSimple {
             modificadores: Vec::new(),
-            gatillo: InputId::new("keyboard", "F9"),
+            gatillo: InputId::new("keyboard", "F2"),
         })
 }
 

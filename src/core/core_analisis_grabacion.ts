@@ -418,7 +418,7 @@ function cerrarGrupo(
   const pasos: PasoMacro[] = [];
 
   // momentoCierreAnterior null == primer grupo de la sesión: se
-  // omite el tiempo entre F9 (arranque real de la grabación,
+  // omite el tiempo entre F2 (arranque real de la grabación,
   // momento_ms = 0 en grabacion_macro.rs) y la primera tecla —
   // ese tiempo de "reacción" del usuario no es parte de la macro.
   if (momentoCierreAnterior !== null) {

@@ -310,6 +310,21 @@
   );
 }
 
+/* Toda la fila de Título/Subtítulo es clickeable (no solo la
+   flecha) — ver tr.addEventListener("click", ...) en
+   vent_configuracion_main.ts / vent_configuracion_apariencia.ts. */
+.configuracion-fila-titulo-clickeable {
+  cursor: pointer;
+}
+
+.configuracion-fila-titulo-clickeable:hover td {
+  background: color-mix(
+    in srgb,
+    var(--tabla-color-hover) var(--tabla-fondo-opacidad-hover),
+    transparent
+  );
+}
+
 /* Separación entre el botón desplegable y el texto (ejemplo:
    pestaña General) — el botón en sí no trae margen propio, así
    que esta clase es la única fuente de esa separación en las

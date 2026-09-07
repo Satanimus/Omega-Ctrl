@@ -1477,7 +1477,7 @@ fn procesar_pulse_runtime(input: InputId) {
         // cual). Como RETENIDO es un buffer único global, todo
         // evento físico posterior (cualquier tecla, cualquier rueda)
         // quedaba atrapado ahí también, hasta que la red de
-        // seguridad de config::tiempo_maximo_retenido() (5s) lo
+        // seguridad de config::tiempo_maximo_retenido() (10s) lo
         // soltara de golpe — de ahí "ninguna rueda funciona en
         // Windows" en cuanto había algún trigger compilado (con
         // cache vacía esto ni se alcanzaba a ejecutar, ver

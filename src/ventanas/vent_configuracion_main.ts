@@ -746,7 +746,14 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     }
   }
 
+  // Estado de contraído del último subtítulo montado — arranca en
+  // `true` (colapsado por defecto) y se usa para que montarFila()
+  // oculte de entrada las filas que le siguen (ver cargar()).
+  let ultimoSubtituloContraido = true;
+
   function montarFilaSubtitulo(texto: string): void {
+    ultimoSubtituloContraido = true;
+
     const tr = document.createElement("tr");
     tr.className = "configuracion-subtitulo configuracion-fila-titulo";
 
@@ -756,11 +763,7 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     const botonExpandir = document.createElement("button");
     botonExpandir.type = "button";
     botonExpandir.className = "configuracion-arbol-expandir";
-    botonExpandir.textContent = "▾";
-
-    botonExpandir.addEventListener("click", () => {
-      alternarExpandirSubtitulo(botonExpandir, tr);
-    });
+    botonExpandir.textContent = "▸";
 
     const textoSpan = document.createElement("span");
     textoSpan.className = "configuracion-fila-titulo-texto";
@@ -769,6 +772,17 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     td.append(botonExpandir, textoSpan);
 
     tr.append(td);
+
+    // Toda la fila actúa como botón (no solo la flecha) — un único
+    // listener en la fila cubre clicks en el botón, el texto o
+    // cualquier otra parte (el click en el botón hace bubble hasta
+    // acá, así que un segundo listener en botonExpandir dispararía
+    // el toggle dos veces).
+    tr.classList.add("configuracion-fila-titulo-clickeable");
+    tr.addEventListener("click", () => {
+      alternarExpandirSubtitulo(botonExpandir, tr);
+    });
+
     tbody.append(tr);
   }
 
@@ -892,6 +906,11 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     }
 
     tr.append(tdDefecto, tdPersonalizado);
+
+    if (ultimoSubtituloContraido) {
+      tr.classList.add("oculta");
+    }
+
     tbody.append(tr);
 
     filasMontadas.set(fila.clave, montada);
@@ -906,6 +925,7 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     filasMontadas.clear();
     filasEditadas.clear();
     ocultarError();
+    ultimoSubtituloContraido = false;
 
     let filas: FilaConfiguracion[];
 

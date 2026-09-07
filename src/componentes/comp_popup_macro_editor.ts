@@ -845,7 +845,7 @@ function montarEditor(
   // eventos — null solo cuando no hay ninguna sesión en curso.
   let estadoInicioGrabacion: ConfigInicioGrabacion | null = null;
 
-  // Texto de la tecla toggle configurada (ej. "F9"), obtenido una
+  // Texto de la tecla toggle configurada (ej. "F2"), obtenido una
   // vez en armarGrabacion() vía obtener_tecla_grabar_macro — se usa
   // para que el botón "Grabar Macro" refleje el mismo texto que la
   // ventana overlay (vent_indicador_macro_main.ts). null hasta que
@@ -933,11 +933,7 @@ function montarEditor(
 
       const tiempoDoble = await invoke<number>("obtener_tiempo_doble");
 
-      const nuevosPasos = analizarGrabacion(
-        eventos,
-        config,
-        tiempoDoble,
-      );
+      const nuevosPasos = analizarGrabacion(eventos, config, tiempoDoble);
 
       const errorRetencion = validarRetencionMacro(nuevosPasos);
 
@@ -2893,7 +2889,9 @@ function duplicarPasosSeleccionados(
       // por cada copia para no repetir letra entre bucles
       // duplicados dentro del mismo lote.
       if (nuevoPaso.tipo === "bucle") {
-        nuevoPaso.bucleMarcadorDestino = letraBucleDisponible(macroArchivo.pasos);
+        nuevoPaso.bucleMarcadorDestino = letraBucleDisponible(
+          macroArchivo.pasos,
+        );
       }
 
       return nuevoPaso;

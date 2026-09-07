@@ -27,7 +27,7 @@
 //     dejando el teclado y el mouse completamente mudos.
 //     Por eso, cada vez que se abre un RETENIDO nuevo, se
 //     arranca un vigía en otro hilo
-//     (config::tiempo_maximo_retenido(), 5s por defecto):
+//     (config::tiempo_maximo_retenido(), 10s por defecto):
 //     si para entonces sigue sin resolverse, se fuerza a
 //     soltar todo el buffer tal cual — y se avisa por
 //     consola, para poder distinguir "se activó la red de

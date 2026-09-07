@@ -94,26 +94,6 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	text-red	Color	#C62828	color
 2	text-highdark	Color de texto oscuro sobre resaltado		
 0	text-highdark	Color	#000000	color
-1	texto	Texto		
-2	font	Fuente de texto		
-0	font	Texto	"Segoe UI", sans-serif	texto
-2	fs11	Tamaño de texto pequeño		
-0	fs11	Tamaño	11px	pixeles
-2	fs13	Tamaño de texto normal		
-0	fs13	Tamaño	13px	pixeles
-2	fs16	Tamaño de texto grande		
-0	fs16	Tamaño	16px	pixeles
-1	dimensiones	Dimensiones		
-2	toolbar-height	Alto de la barra de herramientas		
-0	toolbar-height	Tamaño	48px	pixeles
-2	row-height	Alto de fila		
-0	row-height	Tamaño	40px	pixeles
-2	r6	Radio de bordes		
-0	r6	Tamaño	6px	pixeles
-2	gap8	Espaciado estándar		
-0	gap8	Tamaño	8px	pixeles
-2	gap16	Espaciado grande		
-0	gap16	Tamaño	16px	pixeles
 1	color-opacidad-elementos	Color y opacidad de elementos		
 2	barra-superior	Barra superior		
 0	barra-superior-color	Color	#14141e	color
@@ -158,3 +138,23 @@ nivel	id	nombre_ui	valor_defecto	tipo
 3	fila-titulos	Títulos (Configuración)		
 0	fila-titulos-color	Color	#191920	color
 0	fila-titulos-opacidad	Opacidad	80%	porcentaje
+1	texto	Texto		
+2	font	Fuente de texto		
+0	font	Texto	"Segoe UI", sans-serif	texto
+2	fs11	Tamaño de texto pequeño		
+0	fs11	Tamaño	11px	pixeles
+2	fs13	Tamaño de texto normal		
+0	fs13	Tamaño	13px	pixeles
+2	fs16	Tamaño de texto grande		
+0	fs16	Tamaño	16px	pixeles
+1	dimensiones	Dimensiones		
+2	toolbar-height	Alto de la barra de herramientas		
+0	toolbar-height	Tamaño	48px	pixeles
+2	row-height	Alto de fila		
+0	row-height	Tamaño	40px	pixeles
+2	r6	Radio de bordes		
+0	r6	Tamaño	6px	pixeles
+2	gap8	Espaciado estándar		
+0	gap8	Tamaño	8px	pixeles
+2	gap16	Espaciado grande		
+0	gap16	Tamaño	16px	pixeles

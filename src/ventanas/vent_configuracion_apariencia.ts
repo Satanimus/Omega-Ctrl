@@ -517,11 +517,7 @@ function crearFilaArbol(
     const botonExpandir = document.createElement("button");
     botonExpandir.type = "button";
     botonExpandir.className = "configuracion-arbol-expandir";
-    botonExpandir.textContent = "▾";
-
-    botonExpandir.addEventListener("click", () => {
-      alternarExpandir(botonExpandir, tr, filasMontadas);
-    });
+    botonExpandir.textContent = "▸";
 
     const textoSpan = document.createElement("span");
     textoSpan.className = "configuracion-fila-titulo-texto";
@@ -530,6 +526,16 @@ function crearFilaArbol(
     tdTitulo.append(botonExpandir, textoSpan);
 
     tr.append(tdTitulo);
+
+    // Toda la fila actúa como botón (no solo la flecha) — un único
+    // listener en la fila cubre clicks en el botón, el texto o
+    // cualquier otra parte (evita el doble toggle de tener también
+    // un listener en botonExpandir, ver mismo criterio en
+    // vent_configuracion_main.ts).
+    tr.classList.add("configuracion-fila-titulo-clickeable");
+    tr.addEventListener("click", () => {
+      alternarExpandir(botonExpandir, tr, filasMontadas);
+    });
 
     return { tr, actualizarColumnas: () => {} };
   }
@@ -1100,8 +1106,17 @@ export function crearPestanaApariencia(
 
     const filasMontadas: FilaMontada[] = [];
 
+    // Títulos (nivel 1) arrancan contraídos por defecto: cada uno
+    // oculta sus hijos (nivel 2/3) hasta el próximo nivel 1, mismo
+    // criterio que ultimoSubtituloContraido en vent_configuracion_main.ts.
+    let tituloContraido = false;
+
     for (let i = 0; i < arbol.length; i++) {
       const nodo = arbol[i];
+
+      if (nodo.entrada.nivel === 1) {
+        tituloContraido = true;
+      }
 
       const { tr, actualizarColumnas } = crearFilaArbol(
         nodo,
@@ -1116,6 +1131,10 @@ export function crearPestanaApariencia(
       // filas"), para reforzar la jerarquía de árbol.
       if (nodo.entrada.nivel === 2 && arbol[i + 1]?.entrada.nivel === 3) {
         tr.classList.add("configuracion-arbol-con-hijo");
+      }
+
+      if (nodo.entrada.nivel !== 1 && tituloContraido) {
+        tr.classList.add("oculta");
       }
 
       filasMontadas.push({ nodo, tr, actualizarColumnas });
