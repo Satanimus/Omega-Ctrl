@@ -12,9 +12,10 @@
    Estructura tipo card (mismo criterio visual que
    styl_captura.css/"Modo Captura"): header con ícono de
    arrastre + título + botón Cancelar, y debajo el cuerpo con
-   el punto de estado y el texto. Mismo esquema de color que
-   Captura: borde de la card en --highlight, header en
-   --highlight-dark, cuerpo en --panel.
+   el punto de estado y el texto. Color/Opacidad de Encabezado
+   y Fondo son configurables (pestaña Apariencia → "Indicador
+   (ventana)", catálogo apariencia.tsv) — el texto queda fijo
+   al 100%, ya no es configurable.
    ====================================================== */
 
 * {
@@ -54,8 +55,13 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 26px;
   padding: 6px 8px;
-  background: var(--highlight-dark);
+  background: color-mix(
+    in srgb,
+    var(--indicador-macro-encabezado-color) var(--indicador-macro-encabezado-opacidad),
+    transparent
+  );
   cursor: move;
 }
 
@@ -91,9 +97,14 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 10px;
+  min-height: 34px;
+  padding: 8px 10px;
   white-space: nowrap;
-  background: color-mix(in srgb, var(--panel) 85%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--indicador-macro-fondo-color) var(--indicador-macro-fondo-opacidad),
+    transparent
+  );
 }
 
 .indicador-macro-punto {
@@ -121,6 +132,6 @@ body {
 .indicador-macro-texto {
   font-weight: 600;
   white-space: nowrap;
-  color: color-mix(in srgb, var(--text) var(--indicador-macro-texto-opacidad), transparent);
+  color: var(--text);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }

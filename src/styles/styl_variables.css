@@ -315,11 +315,17 @@
       reglas_opacidad_apariencia.txt, reglas 2-4). */
 
   /* Ventana overlay Indicador_Macro (styl_indicador_macro.css) —
-      Fondo del cartel y color del texto, ambas comparten valor entre
-      sus dos modos (Grabación/Play, misma ventana). */
-  --indicador-macro-fondo-opacidad: 55%;
+      Color/Opacidad de Encabezado y Fondo, compartidas entre sus
+      3 modos (Grabación/Play/Ubicar, misma ventana). El texto ya
+      no es configurable — queda fijo al 100% (ver
+      .indicador-macro-texto en styl_indicador_macro.css). */
+  --indicador-macro-encabezado-color: #007db8;
 
-  --indicador-macro-texto-opacidad: 100%;
+  --indicador-macro-encabezado-opacidad: 100%;
+
+  --indicador-macro-fondo-color: #14141e;
+
+  --indicador-macro-fondo-opacidad: 85%;
 
   /* Marcador de preview de la ventana de captura de coordenada
       (.captura-marcador-preview/.captura-marcador-confirmacion en

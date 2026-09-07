@@ -213,9 +213,23 @@ function ajustarTamañoAlContenido(card: HTMLElement): void {
   card.style.width = "max-content";
   card.style.height = "auto";
 
+  // Fuerza un reflow síncrono antes de medir (leer una propiedad de
+  // layout como offsetHeight obliga al motor a recalcular ANTES de
+  // seguir) — sin esto, en el primer render la medición podía
+  // tomarse contra un layout todavía no asentado (fuente sin
+  // cargar/aplicar), midiendo el alto un poco corto y recortando el
+  // borde inferior de la card.
+  void card.offsetHeight;
+
   const rect = card.getBoundingClientRect();
-  const ancho = Math.ceil(rect.width);
-  const alto = Math.ceil(rect.height);
+
+  // +2px de margen (no solo Math.ceil): en pantallas con escalado
+  // != 100%, la conversión lógico↔físico de Tauri puede perder el
+  // último medio píxel del borde de 1px de la card, cortándolo. El
+  // margen es imperceptible y evita ese recorte en vez de depender
+  // de un redondeo exacto.
+  const ancho = Math.ceil(rect.width) + 2;
+  const alto = Math.ceil(rect.height) + 2;
 
   card.style.width = "";
   card.style.height = "";

@@ -113,9 +113,11 @@ nivel	id	nombre_ui	valor_defecto	tipo
 3	fondo-coordenadas	Fondo Coordenadas		
 0	fondo-coordenadas-color	Color	#0f0f14	color
 0	fondo-coordenadas-opacidad	Opacidad	50%	porcentaje
-3	indicador-macro	Indicador Macro		
-0	indicador-macro-fondo-opacidad	Fondo	55%	porcentaje
-0	indicador-macro-texto-opacidad	Texto	100%	porcentaje
+3	indicador-macro	Indicador (ventana)		
+0	indicador-macro-encabezado-color	Color Encabezado	#007db8	color
+0	indicador-macro-encabezado-opacidad	Opacidad Encabezado	100%	porcentaje
+0	indicador-macro-fondo-color	Color Fondo	#14141e	color
+0	indicador-macro-fondo-opacidad	Opacidad Fondo	85%	porcentaje
 3	indicador-coordenada	Indicador coordenada ⊙		
 0	indicador-coordenada-color	Color	#00aeff	color
 0	indicador-coordenada-texto-opacidad	Texto	40%	porcentaje
