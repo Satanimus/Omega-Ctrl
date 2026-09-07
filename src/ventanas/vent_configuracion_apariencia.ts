@@ -726,7 +726,7 @@ export function crearPestanaApariencia(
   panel: HTMLDivElement,
   despuesDeAplicar: () => Promise<void>,
   opciones: OpcionesPestanaApariencia,
-): Pestana & { refrescarDesdeOtraPestana: () => Promise<void> } {
+): Pestana {
   const gruposPermitidos = new Set(opciones.grupos);
 
   const tbody = crearTablaApariencia(panel);
@@ -1297,27 +1297,30 @@ export function crearPestanaApariencia(
     }
   }
 
-  // Refresco liviano al entrar a esta pestaña (ver activarTab en
-  // vent_configuracion_main.ts): las pestañas "Apariencia" y "Tema"
-  // comparten la misma sesión de apariencia en el backend, así que
-  // cargar/guardar un tema en una debe reflejarse en la otra. No
-  // reinicia la sesión (a diferencia de cargar()) para no perder un
-  // preview de tema sin guardar. Se salta si hay ediciones propias
-  // pendientes, para no pisarlas.
-  async function refrescarDesdeOtraPestana(): Promise<void> {
-    if (hayEdicionesPendientes()) {
-      return;
+  // Fila combinada "Seleccionar tema" + "Escala general" arriba de la
+  // tabla, seguida del subtítulo "Personalizar estilo:" — pestaña
+  // única (ex Apariencia+Tema fusionadas), ambos controles comparten
+  // la misma sesión de apariencia en el backend (ver apariencia.tsv).
+  if (opciones.incluirSelectorTema && opciones.incluirEscala) {
+    const filaCombinada = document.createElement("div");
+    filaCombinada.className = "configuracion-fila-combinada";
+    filaCombinada.append(crearFilaTema(), crearFilaEscala());
+    panel.prepend(filaCombinada);
+
+    const subtitulo = document.createElement("h3");
+    subtitulo.className = "configuracion-apariencia-subtitulo";
+    subtitulo.textContent = "Personalizar estilo:";
+
+    const scrollTabla = panel.querySelector(".configuracion-tabla-scroll");
+    panel.insertBefore(subtitulo, scrollTabla);
+  } else {
+    if (opciones.incluirEscala) {
+      panel.prepend(crearFilaEscala());
     }
 
-    await recargarTablaApariencia();
-  }
-
-  if (opciones.incluirEscala) {
-    panel.prepend(crearFilaEscala());
-  }
-
-  if (opciones.incluirSelectorTema) {
-    panel.prepend(crearFilaTema());
+    if (opciones.incluirSelectorTema) {
+      panel.prepend(crearFilaTema());
+    }
   }
 
   return {
@@ -1328,7 +1331,6 @@ export function crearPestanaApariencia(
     marcarErroresGuardado,
     limpiarEstadoTrasGuardado,
     restablecerPestana,
-    refrescarDesdeOtraPestana,
 
     textoConfirmacionRestablecer: opciones.textoConfirmacionRestablecer,
   };

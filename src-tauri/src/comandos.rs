@@ -2020,6 +2020,9 @@ pub struct ConfiguracionFilaUI {
 
     // None = sin override, se muestra el valor de fábrica.
     pub valor_personalizado: Option<String>,
+
+    // Título de grupo (nivel 1 de configuracion.tsv), ej. "Varios".
+    pub grupo: String,
 }
 
 #[derive(Deserialize)]
@@ -2067,6 +2070,8 @@ pub async fn configuracion_listar_general() -> Result<Vec<ConfiguracionFilaUI>, 
             valor_defecto: entrada.valor_defecto.clone(),
 
             valor_personalizado: overrides.get(&entrada.clave).cloned(),
+
+            grupo: entrada.grupo.clone(),
         })
         .collect();
 

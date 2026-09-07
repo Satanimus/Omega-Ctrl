@@ -192,6 +192,10 @@ pub struct EntradaCatalogo {
     pub valor_defecto: String,
 
     pub tipo: TipoValor,
+
+    // Título de grupo (nivel 1 inmediatamente anterior en
+    // configuracion.tsv) — ej. "Varios", "Tiempo (ms)".
+    pub grupo: String,
 }
 
 // ======================================================
@@ -210,34 +214,66 @@ pub fn cargar_catalogo() -> &'static Vec<EntradaCatalogo> {
 
         let mut catalogo: Vec<EntradaCatalogo> = Vec::new();
 
-        for (numero_linea, linea) in texto.lines().enumerate() {
-            let linea = linea.trim();
+        let mut grupo_actual: Option<String> = None;
 
-            if linea.is_empty() || linea.starts_with('#') {
+        for (numero_linea, linea) in texto.lines().enumerate() {
+            // No usar trim() sobre la línea completa: elimina también los
+            // tabs finales de las filas de nivel 1 (terminan en "\t\t"
+            // porque clave/valor_defecto/tipo van vacíos), dejando menos
+            // de 5 columnas tras el split. Cada columna se trimea
+            // individualmente más abajo en su lugar (mismo criterio que
+            // cargar_catalogo_css() con apariencia.tsv).
+            let linea = linea.strip_suffix('\r').unwrap_or(linea);
+
+            if linea.trim().is_empty() || linea.trim_start().starts_with('#') {
                 continue;
             }
 
             let columnas: Vec<&str> = linea.split('\t').collect();
 
-            if columnas.len() != 4 {
+            if columnas.len() != 5 {
                 panic!(
                     "❌ Error interno en configuracion.tsv. Línea {}",
                     numero_linea + 1
                 );
             }
 
-            // Fila de encabezado ("clave  nombre_ui  valor_defecto  tipo").
-            if columnas[0].trim() == "clave" {
+            // Fila de encabezado ("nivel  clave  nombre_ui  valor_defecto  tipo").
+            if columnas[0].trim() == "nivel" {
                 continue;
             }
 
-            let clave = columnas[0].trim();
+            let nivel = columnas[0].trim();
 
-            let nombre_ui = columnas[1].trim();
+            // Nivel 1: título de grupo — solo trae nombre_ui, no abre
+            // fila propia, las "0" siguientes quedan bajo este grupo.
+            if nivel == "1" {
+                grupo_actual = Some(columnas[2].trim().to_string());
+                continue;
+            }
 
-            let valor_defecto = columnas[2].trim();
+            if nivel != "0" {
+                panic!(
+                    "❌ Nivel desconocido \"{}\" en configuracion.tsv. Línea {}",
+                    nivel,
+                    numero_linea + 1
+                );
+            }
 
-            let tipo_texto = columnas[3].trim();
+            let Some(grupo) = grupo_actual.clone() else {
+                panic!(
+                    "❌ Fila de nivel 0 sin grupo (nivel 1) previo en configuracion.tsv. Línea {}",
+                    numero_linea + 1
+                );
+            };
+
+            let clave = columnas[1].trim();
+
+            let nombre_ui = columnas[2].trim();
+
+            let valor_defecto = columnas[3].trim();
+
+            let tipo_texto = columnas[4].trim();
 
             if clave.is_empty() {
                 panic!(
@@ -277,6 +313,8 @@ pub fn cargar_catalogo() -> &'static Vec<EntradaCatalogo> {
                 valor_defecto: valor_defecto.to_string(),
 
                 tipo,
+
+                grupo,
             });
         }
 

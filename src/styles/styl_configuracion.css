@@ -128,6 +128,23 @@
   flex-shrink: 0;
 }
 
+/* Fila que junta "Tema" + "Escala general" (pestaña Apariencia
+   fusionada) en los extremos de una misma fila. */
+.configuracion-fila-combinada {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--gap16);
+  flex-shrink: 0;
+}
+
+.configuracion-apariencia-subtitulo {
+  font-size: var(--fs13);
+  color: var(--text);
+  margin: 0;
+}
+
 .configuracion-escala-etiqueta {
   font-size: var(--fs13);
   color: var(--text);

@@ -129,7 +129,6 @@ tabs.className = "configuracion-tabs";
 
 const tabGeneral = crearBotonTab("General", true);
 const tabApariencia = crearBotonTab("Apariencia", false);
-const tabTema = crearBotonTab("Tema", false);
 const tabTeclas = crearBotonTab("Teclas", false);
 const tabAvanzado = crearBotonTab("Avanzado", false);
 
@@ -150,7 +149,6 @@ botonCarpetaUsuario.addEventListener("click", async () => {
 tabs.append(
   tabGeneral,
   tabApariencia,
-  tabTema,
   tabTeclas,
   tabAvanzado,
   botonCarpetaUsuario,
@@ -165,9 +163,6 @@ panelGeneral.className = "configuracion-panel";
 const panelApariencia = document.createElement("div");
 panelApariencia.className = "configuracion-panel oculto";
 
-const panelTema = document.createElement("div");
-panelTema.className = "configuracion-panel oculto";
-
 const panelTeclas = document.createElement("div");
 panelTeclas.className = "configuracion-panel oculto";
 
@@ -177,7 +172,6 @@ panelAvanzado.className = "configuracion-panel oculto";
 cuerpo.append(
   panelGeneral,
   panelApariencia,
-  panelTema,
   panelTeclas,
   panelAvanzado,
 );
@@ -213,7 +207,6 @@ function crearBotonTab(texto: string, activa: boolean): HTMLButtonElement {
 const paresTab: ReadonlyArray<readonly [HTMLButtonElement, HTMLDivElement]> = [
   [tabGeneral, panelGeneral],
   [tabApariencia, panelApariencia],
-  [tabTema, panelTema],
   [tabTeclas, panelTeclas],
   [tabAvanzado, panelAvanzado],
 ];
@@ -226,21 +219,10 @@ function activarTab(botonElegido: HTMLButtonElement): void {
 
     panel.classList.toggle("oculto", !activa);
   }
-
-  // Apariencia y Tema comparten la misma sesión de apariencia en el
-  // backend (ver refrescarDesdeOtraPestana en
-  // vent_configuracion_apariencia.ts): al entrar a una, se refleja
-  // lo que se haya cargado/tocado en la otra.
-  if (botonElegido === tabApariencia) {
-    void pestanaApariencia.refrescarDesdeOtraPestana();
-  } else if (botonElegido === tabTema) {
-    void pestanaTema.refrescarDesdeOtraPestana();
-  }
 }
 
 tabGeneral.addEventListener("click", () => activarTab(tabGeneral));
 tabApariencia.addEventListener("click", () => activarTab(tabApariencia));
-tabTema.addEventListener("click", () => activarTab(tabTema));
 tabTeclas.addEventListener("click", () => activarTab(tabTeclas));
 tabAvanzado.addEventListener("click", () => activarTab(tabAvanzado));
 
@@ -1063,6 +1045,7 @@ interface FilaGeneralCruda {
   tipo: string;
   valor_defecto: string;
   valor_personalizado: string | null;
+  grupo: string;
 }
 
 // Claves de configuracion.tsv que se muestran en la pestaña
@@ -1084,20 +1067,10 @@ const CLAVES_TAMANOS_EN_APARIENCIA: readonly string[] = [
   "portapapeles_boton_grande",
 ];
 
-// Agrupa el resto de General en dos categorías: "Varios" arriba
-// (tecla de atajo, sensibilidad, paso de volumen — todo lo que no es
-// un tiempo) y "Tiempo (ms)" abajo (todas las claves de temporización
-// del catálogo). Cualquier clave nueva que no sea de tiempo cae en
-// "Varios" por defecto (catch-all), así que sigue viéndose aunque no
-// esté prevista acá.
-function grupoGeneral(clave: string, nombreUi: string): string {
-  if (clave.startsWith("tiempo_") || clave.startsWith("delay_")) {
-    return "Tiempo (ms)";
-  }
-
-  return nombreUi.includes("(ms)") ? "Tiempo (ms)" : "Varios";
-}
-
+// El grupo ("Varios"/"Tiempo (ms)") ya viene armado desde el nivel 1
+// de configuracion.tsv (ver cargar_catalogo() en
+// configuracion_usuario.rs) — el orden de salida del backend define
+// el orden de las secciones, no hay sort propio acá.
 const pestanaGeneral = crearPestanaEditable({
   panel: panelGeneral,
 
@@ -1112,23 +1085,14 @@ const pestanaGeneral = crearPestanaEditable({
       (cruda) => !CLAVES_TAMANOS_EN_APARIENCIA.includes(cruda.clave),
     );
 
-    // "Varios" antes que "Tiempo (ms)" (ver montarFilaSubtitulo /
-    // ultimoGrupo en crearPestanaEditable: el orden de salida define
-    // el orden de las secciones, no hay sort propio acá).
-    const orden = ["Varios", "Tiempo (ms)"];
-
-    const filas = propiasDeGeneral.map((cruda) => ({
+    return propiasDeGeneral.map((cruda) => ({
       clave: cruda.clave,
       nombreMostrado: cruda.nombre_ui,
-      grupo: grupoGeneral(cruda.clave, cruda.nombre_ui),
+      grupo: cruda.grupo,
       tipo: cruda.tipo as TipoValorConfiguracion,
       valorDefecto: cruda.valor_defecto,
       valorPersonalizado: cruda.valor_personalizado,
     }));
-
-    filas.sort((a, b) => orden.indexOf(a.grupo) - orden.indexOf(b.grupo));
-
-    return filas;
   },
 
   guardarLote: (cambios) =>
@@ -1320,27 +1284,13 @@ async function refrescarTrasCambioApariencia(): Promise<void> {
 // al guardar/restablecer, que vivía acá, se reintroduce cuando
 // crearPestanaApariencia tenga persistencia real.)
 //
-// Apariencia = Texto + Dimensiones (con selector de Escala general).
-// Tema = Color de tema + Color de Texto + Color y opacidad de
-// elementos + Opacidad (indicadores Macro/Coordenada), al final
-// (con el selector Cargar/Guardar/Renombrar/Eliminar tema). Ambas
-// comparten el mismo catálogo/sesión de apariencia en el backend —
-// ver apariencia.tsv y refrescarDesdeOtraPestana.
+// Apariencia (pestaña única, ex Apariencia+Tema fusionadas) = Color
+// de tema + Color de Texto + Color y opacidad de elementos + Opacidad
+// (indicadores Macro/Coordenada) + Texto + Dimensiones, con el
+// selector Cargar/Guardar/Renombrar/Eliminar tema y el selector de
+// Escala general juntos arriba de la tabla — ver apariencia.tsv.
 const pestanaApariencia = crearPestanaApariencia(
   panelApariencia,
-  refrescarTrasCambioApariencia,
-  {
-    grupos: ["texto", "dimensiones"],
-    incluirSelectorTema: false,
-    incluirEscala: true,
-    textoConfirmacionRestablecer:
-      "¿Restablecer Texto y Dimensiones a los valores de fábrica? " +
-      "Se pierden los valores personalizados de esta pestaña.",
-  },
-);
-
-const pestanaTema = crearPestanaApariencia(
-  panelTema,
   refrescarTrasCambioApariencia,
   {
     grupos: [
@@ -1348,11 +1298,13 @@ const pestanaTema = crearPestanaApariencia(
       "color-texto",
       "color-opacidad-elementos",
       "opacidad-indicadores",
+      "texto",
+      "dimensiones",
     ],
     incluirSelectorTema: true,
-    incluirEscala: false,
+    incluirEscala: true,
     textoConfirmacionRestablecer:
-      "¿Restablecer todos los valores de Tema a los de fábrica? " +
+      "¿Restablecer todos los valores de Apariencia a los de fábrica? " +
       "Se pierden los valores personalizados de esta pestaña.",
   },
 );
@@ -1444,7 +1396,6 @@ const TODAS_LAS_PESTANAS: ReadonlyArray<readonly [HTMLButtonElement, Pestana]> =
   [
     [tabGeneral, pestanaGeneral],
     [tabApariencia, pestanaApariencia],
-    [tabTema, pestanaTema],
     [tabTeclas, pestanaTeclas],
     [tabAvanzado, pestanaAvanzado],
   ];
@@ -1561,7 +1512,6 @@ botonGuardarGlobal.addEventListener("click", async () => {
   const recolecciones = [
     pestanaGeneral,
     pestanaApariencia,
-    pestanaTema,
     pestanaTeclas,
   ].map((pestana) => ({ pestana, resultado: pestana.validarYRecolectar() }));
 
@@ -1621,7 +1571,7 @@ botonGuardarGlobal.addEventListener("click", async () => {
 // ======================================================
 // 👁️ VISIBILIDAD DE "Aplicar cambios"
 // ------------------------------------------------------
-// Solo debe verse si hay algo pendiente en CUALQUIERA de las 4
+// Solo debe verse si hay algo pendiente en CUALQUIERA de las
 // pestañas (todas exponen hayEdicionesPendientes() como API pull,
 // no hay un evento de cambio centralizado) — se resuelve con un
 // polling liviano, mismo criterio que el intervalo de
@@ -1645,6 +1595,5 @@ actualizarVisibilidadGuardarGlobal();
 
 pestanaGeneral.cargar();
 pestanaApariencia.cargar();
-pestanaTema.cargar();
 pestanaTeclas.cargar();
 pestanaAvanzado.cargar();
