@@ -470,10 +470,7 @@ pub fn leer_ancho_panel_ayuda() -> Result<Option<u32>, String> {
 pub fn guardar_visible_panel_ayuda(visible: bool) -> Result<(), String> {
     let mut mapa = leer_mapa_completo()?;
 
-    mapa.insert(
-        CLAVE_AYUDA_VISIBLE.to_string(),
-        visible.to_string(),
-    );
+    mapa.insert(CLAVE_AYUDA_VISIBLE.to_string(), visible.to_string());
 
     escribir_mapa_completo(&mapa)
 }
@@ -1358,11 +1355,36 @@ pub fn restablecer_todos_los_overrides_css() -> Result<(), String> {
     escribir_mapa_completo(&mapa)
 }
 
+// Al borrar un Valor Personalizado no basta con quitar el override:
+// si el tema de sesión trae para esa variable un valor propio que
+// difiere del de fábrica, hay que dejarlo grabado como override —
+// si no, la variable queda sin entrada en el mapa y cae directo al
+// literal de styl_variables.css en vez de al valor del tema actual
+// (mismo criterio "diff disperso" que ya usa aplicar_apariencia).
 pub fn restablecer_claves_css(claves: &[String]) -> Result<(), String> {
+    let catalogo = cargar_catalogo_css();
+
+    let base = sesion_apariencia_actual().ok().map(|(_, _, base)| base);
+
     let mut mapa = leer_mapa_completo()?;
 
     for clave in claves {
         mapa.remove(&format!("{}{}", PREFIJO_CSS, clave));
+
+        let Some(entrada) = catalogo
+            .iter()
+            .find(|entrada| entrada.nivel == 0 && &entrada.id == clave)
+        else {
+            continue;
+        };
+
+        let Some(valor_tema) = base.as_ref().and_then(|base| base.get(clave)) else {
+            continue;
+        };
+
+        if !valor_tema.eq_ignore_ascii_case(&entrada.valor_defecto) {
+            mapa.insert(format!("{}{}", PREFIJO_CSS, clave), valor_tema.clone());
+        }
     }
 
     escribir_mapa_completo(&mapa)
@@ -1678,6 +1700,18 @@ pub fn sesion_apariencia_reiniciar() -> (String, String) {
 // persiste cuál es el tema aplicado (guardar_tema_aplicado).
 // ======================================================
 
+// ======================================================
+// 🔗 VÍNCULOS DE COLOR (pestaña Tema)
+// ------------------------------------------------------
+// Pares (fuente, [dependientes]) que deben seguir el color de
+// "fuente" mientras no se editen aparte — ver aplicar_apariencia.
+// ======================================================
+
+const VINCULOS_COLOR: &[(&str, &[&str])] = &[(
+    "highlight",
+    &["text-highlight", "indicador-coordenada-color"],
+)];
+
 pub fn aplicar_apariencia(cambios: &[(String, String)]) -> Result<(), Vec<(String, String)>> {
     let catalogo = cargar_catalogo_css();
 
@@ -1718,14 +1752,60 @@ pub fn aplicar_apariencia(cambios: &[(String, String)]) -> Result<(), Vec<(Strin
     // los `cambios` de este guardado.
     let overrides_vigentes = leer_overrides_css().map_err(|error| vec![(String::new(), error)])?;
 
+    let base_pura = base.clone();
+
     let mut valores_finales = base;
 
     for (clave, valor) in overrides_vigentes {
         valores_finales.insert(clave, valor);
     }
 
-    for (clave, valor) in cambios {
-        valores_finales.insert(clave.clone(), valor.trim().to_string());
+    // Vínculo de color: "text-highlight" e "indicador-coordenada-color"
+    // deben seguir a "highlight" mientras no se editaron aparte. Se
+    // detecta comparando por VALOR, no por una bandera persistida: si
+    // el valor vigente del dependiente todavía coincide con el valor
+    // viejo de "highlight" (antes de este cambio), se lo considera
+    // "sin editar" y se actualiza también; si ya diverge, quedó
+    // desvinculado y se deja como está.
+    let mut cambios_finales: Vec<(String, String)> = cambios
+        .iter()
+        .map(|(clave, valor)| (clave.clone(), valor.trim().to_string()))
+        .collect();
+
+    for (fuente, dependientes) in VINCULOS_COLOR {
+        let Some(nuevo) = cambios_finales
+            .iter()
+            .find(|(clave, _)| clave == fuente)
+            .map(|(_, valor)| valor.clone())
+        else {
+            continue;
+        };
+
+        let Some(viejo) = valores_finales.get(*fuente).cloned() else {
+            continue;
+        };
+
+        for dependiente in *dependientes {
+            let ya_editado_directo = cambios_finales
+                .iter()
+                .any(|(clave, _)| clave == dependiente);
+
+            if ya_editado_directo {
+                continue;
+            }
+
+            let sigue_vinculado = valores_finales
+                .get(*dependiente)
+                .is_some_and(|valor| valor.eq_ignore_ascii_case(&viejo));
+
+            if sigue_vinculado {
+                cambios_finales.push((dependiente.to_string(), nuevo.clone()));
+            }
+        }
+    }
+
+    for (clave, valor) in &cambios_finales {
+        valores_finales.insert(clave.clone(), valor.clone());
     }
 
     let mut mapa = leer_mapa_completo().map_err(|error| vec![(String::new(), error)])?;
@@ -1751,7 +1831,7 @@ pub fn aplicar_apariencia(cambios: &[(String, String)]) -> Result<(), Vec<(Strin
     guardar_tema_aplicado(&nombre_sesion, &origen_sesion)
         .map_err(|error| vec![(String::new(), error)])?;
 
-    establecer_sesion_apariencia(Some((nombre_sesion, origen_sesion, valores_finales)));
+    establecer_sesion_apariencia(Some((nombre_sesion, origen_sesion, base_pura)));
 
     Ok(())
 }

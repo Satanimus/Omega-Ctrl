@@ -34,22 +34,6 @@ import { invoke } from "@tauri-apps/api/core";
 // overrides, restablecer, etc.) se quedaba pisando el valor viejo.
 let clavesAplicadasPrevias: string[] = [];
 
-// Convierte un color hex (#rrggbb) a rgba(...) con el alpha dado —
-// usado para los "blobs" decorativos de fondo-general (ver más
-// abajo), que antes eran rgba(0,212,255,.15)/rgba(13,110,253,.15)
-// fijos en styl_layout.css sin relación con fondo-general-color1/2.
-function hexARgba(hex: string, alpha: number): string {
-  const limpio = hex.replace("#", "");
-
-  const bigint = Number.parseInt(limpio, 16);
-
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 export async function aplicarOverridesApariencia(): Promise<void> {
   try {
     const overrides = await invoke<Record<string, string>>(
@@ -74,29 +58,18 @@ export async function aplicarOverridesApariencia(): Promise<void> {
 
     clavesAplicadasPrevias = [...clavesNuevas];
 
-    // [FIX] Antes .app/.layout (styl_layout.css) traían dos
-    // radial-gradient fijos (cyan/azul de marca) apilados ENCIMA de
-    // var(--fondo-general), sin relación con fondo-general-color1/2:
-    // en modo "Plano" seguían viéndose esos dos blobs en las
-    // esquinas (con solo el centro en el color plano elegido), y en
-    // cualquier modo no reaccionaban a un cambio de Color 1/Color 2.
-    // --fondo-general se arma acá completo (blobs incluidos) según
-    // el modo, y se usa igual en las 3 ventanas (html,body en
-    // styl_general.css; .app/.layout en styl_layout.css): en "Plano"
-    // es el color 1 solo, sin blobs; en "Degradado" son los blobs
-    // (coloreados con color 1/color 2 reales, no fijos) más el
-    // degradado lineal de base.
+    // --fondo-general se arma acá completo según el modo, y se usa
+    // igual en las 3 ventanas (html,body en styl_general.css;
+    // .app/.layout en styl_layout.css): en "Plano" es el color 1
+    // solo; en "Degradado" es el degradado lineal entre color 1 y
+    // color 2 (sin blobs radiales en las esquinas).
     const modo = overrides["fondo-general-modo"] ?? "degradado";
-    const color1 = overrides["fondo-general-color1"] ?? "#00292e";
-    const color2 = overrides["fondo-general-color2"] ?? "#000924";
 
     raiz.style.setProperty(
       "--fondo-general",
       modo === "degradado"
-        ? `radial-gradient(at 0% 0%, ${hexARgba(color1, 0.15)} 0px, transparent 50%), ` +
-            `radial-gradient(at 100% 100%, ${hexARgba(color2, 0.15)} 0px, transparent 50%), ` +
-            "linear-gradient(180deg, var(--fondo-general-color1), var(--fondo-general-color2))"
-        : "var(--fondo-general-color1)",
+        ? "linear-gradient(180deg, var(--wall-1), var(--wall-2))"
+        : "var(--wall-1)",
     );
   } catch (error) {
     console.error(

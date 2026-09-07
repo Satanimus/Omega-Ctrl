@@ -56,9 +56,9 @@
 
   --bg: #0f0f14;
 
-  --fondo-general-color1: #00292e;
+  --wall-1: #00292e;
 
-  --fondo-general-color2: #000924;
+  --wall-2: #000924;
 
   /* Fondo unificado de las 3 ventanas con decoración (Principal,
       Configuración, Coordenadas — ver html,body en styl_general.css
@@ -67,7 +67,7 @@
       corrió, esta variable ya resuelve a un valor válido. Cuando el
       modo es "degradado", core_apariencia.ts la reemplaza en
       caliente por el gradient con blobs (color1/color2 reales). */
-  --fondo-general: var(--fondo-general-color1);
+  --fondo-general: var(--wall-1);
 
   --panel: #14141e;
 
@@ -164,12 +164,6 @@
   --green: color-mix(in srgb, var(--green-dark) 80%, white 20%);
 
   /* ==========================
-       🎨 Color fila y fila resaltada
-       ========================== */
-
-  --row-hover-bg: #0400ff3c;
-
-  /* ==========================
        Colores de filas
        ========================== */
 
@@ -233,8 +227,6 @@
        Columnas
        ========================== */
 
-  --col-min-width: 52px;
-
   --col-num: 42px;
 
   /* Ancho fijo del carril de números (fuera de la tabla,
@@ -265,15 +257,7 @@
        --col-type. */
   --col-behavior: 60px;
 
-  --col-color: 52px;
-
-  /* Ancho de la futura columna "Opciones" (⁝), Etapa C/D.
-       Se define ya para no volver a tocar este archivo en
-       esa etapa. --col-color se elimina cuando la columna
-       Color desaparezca de la tabla (Etapa B). */
   --col-options: 42px;
-
-  --col-note: 220px;
 
   /* Tabla en árbol de Apariencia (ventana Configuración,
        ver vent_configuracion_apariencia.ts, Etapa E). */
@@ -284,12 +268,6 @@
   /* H11: columna Editar/Valor Personalizado fusionada en una sola
       (antes 40px + 220px separadas). */
   --col-config-personalizado: 260px;
-
-  /* ==========================
-       Mínimos columnas
-       ========================== */
-
-  --col-min: 52px;
 
   /* ==========================
        Animaciones

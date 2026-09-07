@@ -62,8 +62,8 @@ nivel	id	nombre_ui	valor_defecto	tipo
 1	color-tema	Color de tema		
 2	fondo-general	Fondo general		
 0	fondo-general-modo	Modo	degradado	modo
-0	fondo-general-color1	Color 1	#00292e	color
-0	fondo-general-color2	Color 2	#000924	color
+0	wall-1	Color 1	#00292e	color
+0	wall-2	Color 2	#000924	color
 2	highlight	Resaltado (UI)		
 0	highlight	Claro	#00aeff	color
 0	highlight-dark	Oscuro	#007db8	color

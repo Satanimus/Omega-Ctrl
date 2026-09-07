@@ -22,7 +22,7 @@
       "csp": null,
       "assetProtocol": {
         "enable": true,
-        "scope": ["$DATA/RemapH/Portapapeles/**"]
+        "scope": ["$DATA/RemapH/Usuario/Portapapeles/**"]
       }
     }
   },
