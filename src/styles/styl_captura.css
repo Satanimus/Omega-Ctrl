@@ -7,6 +7,12 @@
    de esta ventana (WebviewWindowBuilder .transparent(true)
    en comandos.rs). Reutiliza solo las variables de color/
    tipografía centralizadas en styl_variables.css.
+
+   Color/Opacidad de encabezado (.captura-header) y cuerpo
+   (.captura-cuerpo) usan las mismas 4 variables que
+   styl_indicador_macro.css — configurables juntas desde
+   pestaña Apariencia → "Indicador (ventana)" (catálogo
+   apariencia.tsv): un solo control para ambas ventanas.
    ====================================================== */
 
 * {
@@ -47,7 +53,11 @@ body {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  background: var(--highlight-dark);
+  background: color-mix(
+    in srgb,
+    var(--indicador-macro-encabezado-color) var(--indicador-macro-encabezado-opacidad),
+    transparent
+  );
   cursor: move;
 }
 
@@ -84,7 +94,11 @@ body {
   flex-direction: column;
   gap: 4px;
   justify-content: center;
-  background: color-mix(in srgb, var(--panel) 85%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--indicador-macro-fondo-color) var(--indicador-macro-fondo-opacidad),
+    transparent
+  );
 }
 
 .captura-linea {

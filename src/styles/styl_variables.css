@@ -319,13 +319,13 @@
       3 modos (Grabación/Play/Ubicar, misma ventana). El texto ya
       no es configurable — queda fijo al 100% (ver
       .indicador-macro-texto en styl_indicador_macro.css). */
-  --indicador-macro-encabezado-color: #007db8;
+  --indicador-macro-encabezado-color: #404040;
 
-  --indicador-macro-encabezado-opacidad: 100%;
+  --indicador-macro-encabezado-opacidad: 80%;
 
   --indicador-macro-fondo-color: #14141e;
 
-  --indicador-macro-fondo-opacidad: 85%;
+  --indicador-macro-fondo-opacidad: 80%;
 
   /* Marcador de preview de la ventana de captura de coordenada
       (.captura-marcador-preview/.captura-marcador-confirmacion en

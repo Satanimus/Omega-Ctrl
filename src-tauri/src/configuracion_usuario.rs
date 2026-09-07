@@ -1739,16 +1739,82 @@ pub fn sesion_apariencia_reiniciar() -> (String, String) {
 // ======================================================
 
 // ======================================================
-// 🔗 VÍNCULOS DE COLOR (pestaña Tema)
+// 🔗 VÍNCULOS DE COLOR (pestaña Tema) — genérico
 // ------------------------------------------------------
-// Pares (fuente, [dependientes]) que deben seguir el color de
-// "fuente" mientras no se editen aparte — ver aplicar_apariencia.
+// Reemplaza la lista fija que existía antes (mantenida a mano,
+// entrada por entrada): ahora se deriva sola del catálogo, así que
+// cualquier color NUEVO que se agregue a apariencia.tsv con el
+// mismo valor_defecto (hex) que un color de tema queda vinculado
+// automáticamente, sin tocar este archivo.
+//
+// Regla (igual que antes, solo que ahora aplica a todos los
+// colores, no a una lista curada):
+//   • "Fuente" = cualquier color de nivel 0 dentro de la sección
+//     nivel 1 "Color de tema" (primer bloque de apariencia.tsv,
+//     ver id color-tema — el resto de las secciones no cuentan como
+//     fuente, un color de otra sección no "presta" su valor).
+//   • "Dependiente" = cualquier OTRO color de nivel 0 (de cualquier
+//     sección, incluida color-tema misma) cuyo valor_defecto de
+//     fábrica coincide (case-insensitive) con el de esa fuente.
+//   • Al aplicar un cambio a la fuente, cada dependiente se
+//     actualiza igual SOLO si su valor vigente todavía coincide con
+//     el valor VIEJO de la fuente (ver el bucle en
+//     aplicar_apariencia) — en cuanto el usuario edita el
+//     dependiente a mano, deja de coincidir y se desvincula solo,
+//     sin necesidad de una bandera aparte.
+//
+// Mismo criterio que construirMapaColoresTema() en
+// vent_configuracion_apariencia.ts (que hace este mismo match por
+// hex, pero solo para mostrar el nombre en la UI) — acá se usa,
+// además, para decidir qué se actualiza en cascada.
 // ======================================================
 
-const VINCULOS_COLOR: &[(&str, &[&str])] = &[(
-    "highlight",
-    &["text-highlight", "indicador-coordenada-color"],
-)];
+fn vinculos_color(catalogo: &[EntradaCatalogoCss]) -> Vec<(String, Vec<String>)> {
+    // Límites de la sección "Color de tema": desde la fila nivel 1
+    // con id "color-tema" hasta la próxima fila nivel 1 (o el final
+    // del catálogo). cargar_catalogo_css() conserva TODAS las filas
+    // (niveles 0/1/2/3) en un solo Vec plano en orden de archivo —
+    // por eso alcanza con recorrerlo una vez por posición.
+    let indice_inicio = catalogo
+        .iter()
+        .position(|entrada| entrada.nivel == 1 && entrada.id == "color-tema");
+
+    let Some(indice_inicio) = indice_inicio else {
+        return Vec::new();
+    };
+
+    let indice_fin = catalogo
+        .iter()
+        .enumerate()
+        .skip(indice_inicio + 1)
+        .find(|(_, entrada)| entrada.nivel == 1)
+        .map(|(indice, _)| indice)
+        .unwrap_or(catalogo.len());
+
+    let fuentes = catalogo[indice_inicio..indice_fin]
+        .iter()
+        .filter(|entrada| entrada.nivel == 0 && entrada.tipo == TipoValorCss::Color);
+
+    fuentes
+        .map(|fuente| {
+            let dependientes: Vec<String> = catalogo
+                .iter()
+                .filter(|entrada| {
+                    entrada.nivel == 0
+                        && entrada.tipo == TipoValorCss::Color
+                        && entrada.id != fuente.id
+                        && entrada
+                            .valor_defecto
+                            .eq_ignore_ascii_case(&fuente.valor_defecto)
+                })
+                .map(|entrada| entrada.id.clone())
+                .collect();
+
+            (fuente.id.clone(), dependientes)
+        })
+        .filter(|(_, dependientes)| !dependientes.is_empty())
+        .collect()
+}
 
 pub fn aplicar_apariencia(cambios: &[(String, String)]) -> Result<(), Vec<(String, String)>> {
     let catalogo = cargar_catalogo_css();
@@ -1798,32 +1864,33 @@ pub fn aplicar_apariencia(cambios: &[(String, String)]) -> Result<(), Vec<(Strin
         valores_finales.insert(clave, valor);
     }
 
-    // Vínculo de color: "text-highlight" e "indicador-coordenada-color"
-    // deben seguir a "highlight" mientras no se editaron aparte. Se
-    // detecta comparando por VALOR, no por una bandera persistida: si
-    // el valor vigente del dependiente todavía coincide con el valor
-    // viejo de "highlight" (antes de este cambio), se lo considera
-    // "sin editar" y se actualiza también; si ya diverge, quedó
-    // desvinculado y se deja como está.
+    // Vínculo de color (genérico, ver vinculos_color()): cualquier
+    // color cuyo valor de fábrica coincide con un color de tema debe
+    // seguirlo mientras no se editó aparte. Se detecta comparando
+    // por VALOR, no por una bandera persistida: si el valor vigente
+    // del dependiente todavía coincide con el valor viejo de la
+    // fuente (antes de este cambio), se lo considera "sin editar" y
+    // se actualiza también; si ya diverge, quedó desvinculado y se
+    // deja como está.
     let mut cambios_finales: Vec<(String, String)> = cambios
         .iter()
         .map(|(clave, valor)| (clave.clone(), valor.trim().to_string()))
         .collect();
 
-    for (fuente, dependientes) in VINCULOS_COLOR {
+    for (fuente, dependientes) in vinculos_color(catalogo) {
         let Some(nuevo) = cambios_finales
             .iter()
-            .find(|(clave, _)| clave == fuente)
+            .find(|(clave, _)| *clave == fuente)
             .map(|(_, valor)| valor.clone())
         else {
             continue;
         };
 
-        let Some(viejo) = valores_finales.get(*fuente).cloned() else {
+        let Some(viejo) = valores_finales.get(&fuente).cloned() else {
             continue;
         };
 
-        for dependiente in *dependientes {
+        for dependiente in &dependientes {
             let ya_editado_directo = cambios_finales
                 .iter()
                 .any(|(clave, _)| clave == dependiente);
@@ -1833,11 +1900,11 @@ pub fn aplicar_apariencia(cambios: &[(String, String)]) -> Result<(), Vec<(Strin
             }
 
             let sigue_vinculado = valores_finales
-                .get(*dependiente)
+                .get(dependiente)
                 .is_some_and(|valor| valor.eq_ignore_ascii_case(&viejo));
 
             if sigue_vinculado {
-                cambios_finales.push((dependiente.to_string(), nuevo.clone()));
+                cambios_finales.push((dependiente.clone(), nuevo.clone()));
             }
         }
     }

@@ -15,7 +15,10 @@
    el punto de estado y el texto. Color/Opacidad de Encabezado
    y Fondo son configurables (pestaña Apariencia → "Indicador
    (ventana)", catálogo apariencia.tsv) — el texto queda fijo
-   al 100%, ya no es configurable.
+   al 100%, ya no es configurable. Esas mismas 4 variables
+   también controlan .captura-header/.captura-cuerpo en
+   styl_captura.css: un solo control de Apariencia para ambas
+   ventanas.
    ====================================================== */
 
 * {
