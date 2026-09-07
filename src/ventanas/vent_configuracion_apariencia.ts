@@ -567,7 +567,9 @@ function crearFilaArbol(
   const sinValorPropio = nodo.hijos.length === 0;
 
   if (sinValorPropio) {
-    botonPersonalizado.classList.add("configuracion-arbol-personalizado--sin-valor");
+    botonPersonalizado.classList.add(
+      "configuracion-arbol-personalizado--sin-valor",
+    );
     botonPersonalizado.disabled = true;
   }
 
@@ -767,7 +769,8 @@ export function crearPestanaApariencia(
 
   const botonOpcionesTema = document.createElement("button");
   botonOpcionesTema.type = "button";
-  botonOpcionesTema.className = "ui-btn popup-opcion configuracion-tema-opciones";
+  botonOpcionesTema.className =
+    "ui-btn popup-opcion configuracion-tema-opciones";
   botonOpcionesTema.title = "Guardar / Renombrar / Eliminar tema";
   botonOpcionesTema.textContent = "…";
 
@@ -846,8 +849,8 @@ export function crearPestanaApariencia(
     mostrarPopup(lista, evento.clientX, evento.clientY);
   }
 
-  // G2: popup del botón "…" — Guardar como / Guardar valores
-  // editados / Renombrar / Eliminar (todo lo que no es elegir tema).
+  // G2: popup del botón "…" — Guardar como / Guardar cambios /
+  // Renombrar / Eliminar (todo lo que no es elegir tema).
   function abrirPopupOpcionesTema(evento: MouseEvent): void {
     let confirmandoEliminar = false;
 
@@ -866,6 +869,21 @@ export function crearPestanaApariencia(
       botonGuardarComo.addEventListener("click", () => {
         abrirFormularioNombre("", evento, async (nombre) => {
           await invoke("configuracion_tema_guardar_como", { nombre });
+
+          // Carga el tema recién creado en la sesión: el botón de
+          // arriba pasa a mostrar su nombre y los valores editados
+          // quedan como el nuevo "valor por defecto" (sin marca de
+          // "(editado)", ya que ahora coinciden con el archivo).
+          await invoke("configuracion_tema_cargar", {
+            nombre,
+            origen: "usuario",
+          });
+
+          nombreTemaSesion = nombre;
+          origenTemaSesion = "usuario";
+          huboCargaDeTema = true;
+
+          await recargarTablaApariencia();
         });
       });
 
@@ -880,11 +898,11 @@ export function crearPestanaApariencia(
         separadorUsuario.className = "app-popup-separador";
         lista.append(separadorUsuario);
 
-        // G3: Guardar valores editados
+        // G3: Guardar cambios (directo al archivo del tema de usuario)
         if (hayPersonalizadosSesion) {
           const botonGuardarEditado = document.createElement("button");
           botonGuardarEditado.className = "ui-btn";
-          botonGuardarEditado.textContent = "Guardar valores editados";
+          botonGuardarEditado.textContent = "Guardar cambios";
 
           botonGuardarEditado.addEventListener("click", async () => {
             await invoke("configuracion_tema_guardar_editado", {
