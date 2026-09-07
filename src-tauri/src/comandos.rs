@@ -2236,10 +2236,12 @@ fn tipo_css_a_texto(tipo: &configuracion_usuario::TipoValorCss) -> String {
 }
 
 #[tauri::command]
-pub async fn configuracion_listar_apariencia() -> Result<Vec<ConfiguracionFilaCssUI>, String> {
+pub async fn configuracion_listar_apariencia(
+    app: tauri::AppHandle,
+) -> Result<Vec<ConfiguracionFilaCssUI>, String> {
     let overrides = configuracion_usuario::leer_overrides_css()?;
 
-    let (_, _, base) = configuracion_usuario::sesion_apariencia_actual()?;
+    let (_, _, base) = configuracion_usuario::sesion_apariencia_actual(&app)?;
 
     let filas = configuracion_usuario::cargar_catalogo_css()
         .iter()
@@ -2275,6 +2277,7 @@ pub async fn configuracion_listar_apariencia() -> Result<Vec<ConfiguracionFilaCs
 
 #[tauri::command]
 pub async fn configuracion_guardar_lote_apariencia(
+    app: tauri::AppHandle,
     cambios: Vec<ConfiguracionCambioUI>,
 ) -> Result<ConfiguracionResultadoGuardadoUI, String> {
     let pares: Vec<(String, String)> = cambios
@@ -2282,7 +2285,7 @@ pub async fn configuracion_guardar_lote_apariencia(
         .map(|cambio| (cambio.clave, cambio.valor))
         .collect();
 
-    match configuracion_usuario::aplicar_apariencia(&pares) {
+    match configuracion_usuario::aplicar_apariencia(&app, &pares) {
         Ok(()) => Ok(ConfiguracionResultadoGuardadoUI {
             errores: Vec::new(),
         }),
@@ -2302,14 +2305,17 @@ pub async fn configuracion_guardar_lote_apariencia(
 // de Apariencia cuando el usuario borró un Valor Personalizado que
 // ya estaba persistido (ver vent_configuracion_apariencia.ts).
 #[tauri::command]
-pub async fn configuracion_restablecer_claves_css(claves: Vec<String>) -> Result<(), String> {
-    configuracion_usuario::restablecer_claves_css(&claves)
+pub async fn configuracion_restablecer_claves_css(
+    app: tauri::AppHandle,
+    claves: Vec<String>,
+) -> Result<(), String> {
+    configuracion_usuario::restablecer_claves_css(&app, &claves)
 }
 
 #[tauri::command]
-pub async fn configuracion_restablecer_apariencia() -> Result<(), String> {
-    let (nombre, origen, _) = configuracion_usuario::sesion_apariencia_actual()?;
-    configuracion_usuario::tema_sesion_cargar(&nombre, &origen).map(|_| ())
+pub async fn configuracion_restablecer_apariencia(app: tauri::AppHandle) -> Result<(), String> {
+    let (nombre, origen, _) = configuracion_usuario::sesion_apariencia_actual(&app)?;
+    configuracion_usuario::tema_sesion_cargar(&app, &nombre, &origen).map(|_| ())
 }
 
 // ======================================================
@@ -2367,8 +2373,10 @@ pub struct TemaListadoUI {
 }
 
 #[tauri::command]
-pub async fn configuracion_tema_listar() -> Result<Vec<TemaListadoUI>, String> {
-    Ok(configuracion_usuario::listar_temas()?
+pub async fn configuracion_tema_listar(
+    app: tauri::AppHandle,
+) -> Result<Vec<TemaListadoUI>, String> {
+    Ok(configuracion_usuario::listar_temas(&app)?
         .into_iter()
         .map(|tema| TemaListadoUI {
             nombre: tema.nombre,
@@ -2379,10 +2387,11 @@ pub async fn configuracion_tema_listar() -> Result<Vec<TemaListadoUI>, String> {
 
 #[tauri::command]
 pub async fn configuracion_tema_cargar(
+    app: tauri::AppHandle,
     nombre: String,
     origen: String,
 ) -> Result<HashMap<String, String>, String> {
-    configuracion_usuario::tema_sesion_cargar(&nombre, &origen)
+    configuracion_usuario::tema_sesion_cargar(&app, &nombre, &origen)
 }
 
 #[tauri::command]
@@ -2397,20 +2406,23 @@ pub async fn configuracion_tema_guardar_editado(nombre: String) -> Result<(), St
 
 #[tauri::command]
 pub async fn configuracion_tema_renombrar(
+    app: tauri::AppHandle,
     nombre_actual: String,
     nombre_nuevo: String,
 ) -> Result<(), String> {
-    configuracion_usuario::renombrar_tema(&nombre_actual, &nombre_nuevo)
+    configuracion_usuario::renombrar_tema(&app, &nombre_actual, &nombre_nuevo)
 }
 
 #[tauri::command]
-pub async fn configuracion_tema_eliminar(nombre: String) -> Result<(), String> {
-    configuracion_usuario::eliminar_tema(&nombre)
+pub async fn configuracion_tema_eliminar(app: tauri::AppHandle, nombre: String) -> Result<(), String> {
+    configuracion_usuario::eliminar_tema(&app, &nombre)
 }
 
 #[tauri::command]
-pub async fn configuracion_apariencia_sesion_actual() -> Result<TemaListadoUI, String> {
-    let (nombre, origen, _) = configuracion_usuario::sesion_apariencia_actual()?;
+pub async fn configuracion_apariencia_sesion_actual(
+    app: tauri::AppHandle,
+) -> Result<TemaListadoUI, String> {
+    let (nombre, origen, _) = configuracion_usuario::sesion_apariencia_actual(&app)?;
     Ok(TemaListadoUI { nombre, origen })
 }
 

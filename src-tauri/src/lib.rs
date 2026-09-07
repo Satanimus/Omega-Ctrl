@@ -97,7 +97,7 @@ pub fn run() {
             // Ventana de Configuración). Debe ir después de que
             // exista la carpeta de usuario, pero no depende de
             // ninguna ventana — se hace apenas arranca.
-            configuracion_usuario::cargar_al_iniciar();
+            configuracion_usuario::cargar_al_iniciar(app.handle());
 
             // Al cerrarse la ventana principal ("main"), fuerza el
             // cierre de cualquier ventana secundaria que siga abierta

@@ -69,6 +69,8 @@ use crate::config;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
+use tauri::path::BaseDirectory;
+use tauri::Manager;
 
 // ======================================================
 // 📁 OBTENER CARPETA USUARIO
@@ -120,6 +122,56 @@ pub(crate) fn carpeta_temas() -> Result<PathBuf, String> {
     fs::create_dir_all(&carpeta).map_err(|error| error.to_string())?;
 
     Ok(carpeta)
+}
+
+// ======================================================
+// 📁 CARPETA DE TEMAS DEL PROGRAMA (solo lectura)
+// ------------------------------------------------------
+// Vive junto al ejecutable (recurso empaquetado por Tauri,
+// declarado en tauri.conf.json → bundle.resources), no
+// dentro de Usuario/. Acá viven los temas predefinidos
+// (Default.theme y cualquier .theme que se agregue a mano);
+// el usuario nunca escribe en esta carpeta desde la app.
+// ======================================================
+
+pub(crate) fn carpeta_temas_programa(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    app.path()
+        .resolve("themes", BaseDirectory::Resource)
+        .map_err(|error| error.to_string())
+}
+
+// ======================================================
+// 🎨 LISTAR TEMAS DEL PROGRAMA (predefinidos)
+// ------------------------------------------------------
+// Cualquier .theme presente en esta carpeta cuenta como
+// predefinido — no hay lista hardcodeada de nombres, ver
+// configuracion_usuario.rs::es_tema_predefinido/listar_temas.
+// ======================================================
+
+pub(crate) fn temas_programa(app: &tauri::AppHandle) -> Result<Vec<String>, String> {
+    let carpeta = carpeta_temas_programa(app)?;
+
+    let mut nombres = Vec::new();
+
+    let entradas = fs::read_dir(&carpeta).map_err(|error| error.to_string())?;
+
+    for entrada in entradas {
+        let ruta = entrada.map_err(|error| error.to_string())?.path();
+
+        let Some(nombre) = ruta.file_name().and_then(|nombre| nombre.to_str()) else {
+            continue;
+        };
+
+        let Some(nombre) = nombre.strip_suffix(".theme") else {
+            continue;
+        };
+
+        nombres.push(nombre.to_string());
+    }
+
+    nombres.sort();
+
+    Ok(nombres)
 }
 
 // ======================================================

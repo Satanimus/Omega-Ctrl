@@ -576,10 +576,15 @@ pub fn primer_inicio() -> bool {
 
 const CLAVE_TEMA_NOMBRE: &str = "tema.nombre";
 const CLAVE_TEMA_ORIGEN: &str = "tema.origen";
-const NOMBRES_TEMAS_PREDEFINIDOS: &[&str] = &["Default"];
 
-fn es_tema_predefinido(nombre: &str) -> bool {
-    NOMBRES_TEMAS_PREDEFINIDOS.contains(&nombre)
+// Predefinido = existe como .theme en la carpeta del programa
+// (resources/themes, ver usuario::carpeta_temas_programa). Sin
+// lista hardcodeada: cualquier .theme agregado ahí se trata como
+// predefinido automáticamente.
+fn es_tema_predefinido(app: &tauri::AppHandle, nombre: &str) -> bool {
+    usuario::carpeta_temas_programa(app)
+        .map(|carpeta| carpeta.join(format!("{}.theme", nombre)).exists())
+        .unwrap_or(false)
 }
 
 static TEMA_APLICADO: Mutex<(String, String)> = Mutex::new((String::new(), String::new()));
@@ -613,7 +618,7 @@ pub fn guardar_tema_aplicado(nombre: &str, origen: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub fn cargar_tema_aplicado_desde_config() {
+pub fn cargar_tema_aplicado_desde_config(app: &tauri::AppHandle) {
     let mapa = match leer_mapa_completo() {
         Ok(mapa) => mapa,
         Err(_) => {
@@ -642,7 +647,7 @@ pub fn cargar_tema_aplicado_desde_config() {
         Err(_) => false,
     };
 
-    if existe || es_tema_predefinido(&nombre) {
+    if existe || es_tema_predefinido(app, &nombre) {
         establecer_tema_aplicado_en_memoria(&nombre, &origen);
     } else {
         establecer_tema_aplicado_en_memoria("Default", "predefinido");
@@ -957,9 +962,8 @@ pub fn restablecer_claves(claves: &[&str]) -> Result<(), String> {
 // sigue con el resto.
 // ======================================================
 
-pub fn cargar_al_iniciar() {
-    guardar_tema_por_defecto_si_falta();
-    cargar_tema_aplicado_desde_config();
+pub fn cargar_al_iniciar(app: &tauri::AppHandle) {
+    cargar_tema_aplicado_desde_config(app);
 
     let overrides = match leer_overrides() {
         Ok(mapa) => mapa,
@@ -1399,10 +1403,10 @@ pub fn restablecer_todos_los_overrides_css() -> Result<(), String> {
 // si no, la variable queda sin entrada en el mapa y cae directo al
 // literal de styl_variables.css en vez de al valor del tema actual
 // (mismo criterio "diff disperso" que ya usa aplicar_apariencia).
-pub fn restablecer_claves_css(claves: &[String]) -> Result<(), String> {
+pub fn restablecer_claves_css(app: &tauri::AppHandle, claves: &[String]) -> Result<(), String> {
     let catalogo = cargar_catalogo_css();
 
-    let base = sesion_apariencia_actual().ok().map(|(_, _, base)| base);
+    let base = sesion_apariencia_actual(app).ok().map(|(_, _, base)| base);
 
     let mut mapa = leer_mapa_completo()?;
 
@@ -1482,40 +1486,6 @@ pub fn exportar_tema(ruta: &std::path::Path) -> Result<(), String> {
 }
 
 // ======================================================
-// 🎨 TEMA POR DEFECTO EN Usuario/Themes/
-// ------------------------------------------------------
-// Se llama una sola vez al iniciar (cargar_al_iniciar). Si
-// Default.theme ya existe no se toca (no pisa un tema que
-// el usuario haya guardado ahí a mano con ese nombre).
-// ======================================================
-
-pub fn guardar_tema_por_defecto_si_falta() {
-    let ruta = match usuario::carpeta_temas() {
-        Ok(carpeta) => carpeta.join("Default.theme"),
-        Err(error) => {
-            eprintln!("⚠️ No se pudo resolver Usuario/Themes/: {}", error);
-            return;
-        }
-    };
-
-    if ruta.exists() {
-        return;
-    }
-
-    let contenido = match contenido_tema(false) {
-        Ok(contenido) => contenido,
-        Err(error) => {
-            eprintln!("⚠️ No se pudo generar el tema por defecto: {}", error);
-            return;
-        }
-    };
-
-    if let Err(error) = fs::write(&ruta, contenido) {
-        eprintln!("⚠️ No se pudo guardar el tema por defecto: {}", error);
-    }
-}
-
-// ======================================================
 // 💾 GUARDAR TEMA (automático, dentro de Usuario/Themes/)
 // ------------------------------------------------------
 // Sin diálogo nativo: mientras no exista el selector de
@@ -1547,17 +1517,17 @@ pub struct TemaListado {
     pub origen: String,
 }
 
-pub fn listar_temas() -> Result<Vec<TemaListado>, String> {
-    let mut lista: Vec<TemaListado> = NOMBRES_TEMAS_PREDEFINIDOS
-        .iter()
+pub fn listar_temas(app: &tauri::AppHandle) -> Result<Vec<TemaListado>, String> {
+    let mut lista: Vec<TemaListado> = usuario::temas_programa(app)?
+        .into_iter()
         .map(|nombre| TemaListado {
-            nombre: nombre.to_string(),
+            nombre,
             origen: "predefinido".to_string(),
         })
         .collect();
 
     for nombre in usuario::temas()? {
-        if es_tema_predefinido(&nombre) {
+        if es_tema_predefinido(app, &nombre) {
             continue;
         }
 
@@ -1582,40 +1552,41 @@ pub fn listar_temas() -> Result<Vec<TemaListado>, String> {
 // ======================================================
 
 pub fn cargar_tema_por_nombre(
+    app: &tauri::AppHandle,
     nombre: &str,
     origen: &str,
 ) -> Result<HashMap<String, String>, String> {
     let catalogo = cargar_catalogo_css();
 
-    let overrides_archivo: HashMap<String, String> = if origen == "predefinido" {
-        HashMap::new()
+    let carpeta = if origen == "predefinido" {
+        usuario::carpeta_temas_programa(app)?
     } else {
-        let ruta = usuario::carpeta_temas()?.join(format!("{}.theme", nombre));
-
-        if !ruta.exists() {
-            return Err(format!("El tema \"{}\" no existe", nombre));
-        }
-
-        let texto = fs::read_to_string(&ruta).map_err(|error| error.to_string())?;
-
-        let mut mapa = HashMap::new();
-
-        for linea in texto.lines() {
-            let linea = linea.trim();
-
-            if linea.is_empty() || linea.starts_with('#') {
-                continue;
-            }
-
-            let Some((clave, valor)) = linea.split_once('=') else {
-                continue;
-            };
-
-            mapa.insert(clave.trim().to_string(), valor.trim().to_string());
-        }
-
-        mapa
+        usuario::carpeta_temas()?
     };
+
+    let ruta = carpeta.join(format!("{}.theme", nombre));
+
+    if !ruta.exists() {
+        return Err(format!("El tema \"{}\" no existe", nombre));
+    }
+
+    let texto = fs::read_to_string(&ruta).map_err(|error| error.to_string())?;
+
+    let mut overrides_archivo = HashMap::new();
+
+    for linea in texto.lines() {
+        let linea = linea.trim();
+
+        if linea.is_empty() || linea.starts_with('#') {
+            continue;
+        }
+
+        let Some((clave, valor)) = linea.split_once('=') else {
+            continue;
+        };
+
+        overrides_archivo.insert(clave.trim().to_string(), valor.trim().to_string());
+    }
 
     let mut resultado = HashMap::new();
 
@@ -1647,7 +1618,9 @@ pub fn cargar_tema_por_nombre(
 static SESION_APARIENCIA: Mutex<Option<(String, String, HashMap<String, String>)>> =
     Mutex::new(None);
 
-pub fn sesion_apariencia_actual() -> Result<(String, String, HashMap<String, String>), String> {
+pub fn sesion_apariencia_actual(
+    app: &tauri::AppHandle,
+) -> Result<(String, String, HashMap<String, String>), String> {
     {
         let mutex = SESION_APARIENCIA.lock().unwrap();
 
@@ -1658,7 +1631,7 @@ pub fn sesion_apariencia_actual() -> Result<(String, String, HashMap<String, Str
 
     let (nombre, origen) = tema_aplicado_actual();
 
-    let valores = cargar_tema_por_nombre(&nombre, &origen)?;
+    let valores = cargar_tema_por_nombre(app, &nombre, &origen)?;
 
     Ok((nombre, origen, valores))
 }
@@ -1697,8 +1670,12 @@ fn limpiar_overrides_css() -> Result<(), String> {
 // como pide la especificación.
 // ======================================================
 
-pub fn tema_sesion_cargar(nombre: &str, origen: &str) -> Result<HashMap<String, String>, String> {
-    let valores = cargar_tema_por_nombre(nombre, origen)?;
+pub fn tema_sesion_cargar(
+    app: &tauri::AppHandle,
+    nombre: &str,
+    origen: &str,
+) -> Result<HashMap<String, String>, String> {
+    let valores = cargar_tema_por_nombre(app, nombre, origen)?;
 
     limpiar_overrides_css()?;
 
@@ -1816,7 +1793,10 @@ fn vinculos_color(catalogo: &[EntradaCatalogoCss]) -> Vec<(String, Vec<String>)>
         .collect()
 }
 
-pub fn aplicar_apariencia(cambios: &[(String, String)]) -> Result<(), Vec<(String, String)>> {
+pub fn aplicar_apariencia(
+    app: &tauri::AppHandle,
+    cambios: &[(String, String)],
+) -> Result<(), Vec<(String, String)>> {
     let catalogo = cargar_catalogo_css();
 
     let mut errores: Vec<(String, String)> = Vec::new();
@@ -1845,7 +1825,7 @@ pub fn aplicar_apariencia(cambios: &[(String, String)]) -> Result<(), Vec<(Strin
     }
 
     let (nombre_sesion, origen_sesion, base) =
-        sesion_apariencia_actual().map_err(|error| vec![(String::new(), error)])?;
+        sesion_apariencia_actual(app).map_err(|error| vec![(String::new(), error)])?;
 
     // `base` es el tema crudo (sin overrides) — sirve para la columna
     // "Valor por Defecto" pero NO para persistir, o los overrides ya
@@ -1983,8 +1963,12 @@ pub fn guardar_tema_editado(nombre: &str) -> Result<(), String> {
     fs::write(ruta, contenido).map_err(|error| error.to_string())
 }
 
-pub fn renombrar_tema(nombre_actual: &str, nombre_nuevo: &str) -> Result<(), String> {
-    if es_tema_predefinido(nombre_actual) {
+pub fn renombrar_tema(
+    app: &tauri::AppHandle,
+    nombre_actual: &str,
+    nombre_nuevo: &str,
+) -> Result<(), String> {
+    if es_tema_predefinido(app, nombre_actual) {
         return Err("No se puede renombrar un tema predefinido".to_string());
     }
 
@@ -2017,8 +2001,8 @@ pub fn renombrar_tema(nombre_actual: &str, nombre_nuevo: &str) -> Result<(), Str
     Ok(())
 }
 
-pub fn eliminar_tema(nombre: &str) -> Result<(), String> {
-    if es_tema_predefinido(nombre) {
+pub fn eliminar_tema(app: &tauri::AppHandle, nombre: &str) -> Result<(), String> {
+    if es_tema_predefinido(app, nombre) {
         return Err("No se puede eliminar un tema predefinido".to_string());
     }
 
