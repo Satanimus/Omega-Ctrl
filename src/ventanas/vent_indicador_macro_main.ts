@@ -4,7 +4,11 @@
 // Punto de entrada de la ventana overlay Indicador_Macro
 // (indicador_macro.html — página independiente, ver
 // vite.config.ts). Reemplaza a vent_grabacion_macro_main.ts:
-// misma ventana/label, ahora con dos modos.
+// misma ventana/label, ahora con tres modos.
+//
+// Estilo tipo card (header + cuerpo), mismo criterio visual que
+// "Modo Captura" (vent_captura_main.ts/styl_captura.css): ancho
+// ajustado al contenido en vez de fijo, ver crearCard() más abajo.
 //
 // Modo "grabacion": el nombre de la tecla toggle llega una
 // sola vez por query param (?modo=grabacion&tecla=...),
@@ -43,10 +47,12 @@ import "../styles/styl_indicador_macro.css";
 
 void aplicarOverridesApariencia();
 
-// Espejo de ALTO_INDICADOR_MACRO_LOGICO en comandos.rs — el ancho se
-// ajusta al contenido (ver ajustarAnchoAlContenido), el alto queda
-// fijo.
-const ALTO_INDICADOR_MACRO_LOGICO = 40;
+// Alto de la ventana: al igual que el ancho, se mide del contenido
+// real (no un valor fijo) — con header+cuerpo variando de alto
+// entre skins/tamaños de fuente configurables (pestaña Apariencia),
+// un alto fijo podía quedar corto y cortar el borde inferior de la
+// card. ALTO_INDICADOR_MACRO_LOGICO en comandos.rs sigue existiendo
+// solo como tamaño inicial antes de que haya contenido que medir.
 
 type ModoIndicadorMacro = "grabacion" | "play" | "ubicar";
 
@@ -180,42 +186,145 @@ async function guardarPosicionTrasArrastre(
 // ------------------------------------------------------
 // La ventana nace con un ancho fijo (comandos.rs, solo para el
 // primer instante antes de que haya contenido que medir). Acá se
-// ajusta al ancho real del contenido (punto + texto + padding) cada
-// vez que el texto cambia, para que "🟢 03 / 15" no quede tan ancho
-// como "Presione Control Izquierdo + F1 para grabar" ni viceversa.
-// raiz tiene width:100% por CSS (llena la ventana) — se fuerza a
-// max-content un instante para medir su ancho natural y se revierte.
+// ajusta al ancho real del contenido (header + cuerpo, el más ancho
+// de los dos manda) cada vez que el texto cambia, para que
+// "🟢 03 / 15" no quede tan ancho como "Presione Control Izquierdo +
+// F1 para grabar" ni viceversa. card tiene width:100% por CSS
+// (llena la ventana) — se fuerza a max-content un instante para
+// medir su ancho natural y se revierte.
 // ======================================================
 
-function ajustarAnchoAlContenido(raiz: HTMLElement): void {
-  raiz.style.width = "max-content";
-  const ancho = Math.ceil(raiz.getBoundingClientRect().width);
-  raiz.style.width = "";
+// ======================================================
+// 📏 TAMAÑO AL CONTENIDO (ancho + alto)
+// ------------------------------------------------------
+// La ventana nace con un tamaño fijo (comandos.rs, solo para el
+// primer instante antes de que haya contenido que medir). Acá se
+// ajusta al tamaño real del contenido (header + cuerpo) cada vez
+// que el texto cambia, para que "🟢 03 / 15" no quede tan ancho
+// como "Presione Control Izquierdo + F1 para grabar" ni viceversa,
+// y para que el alto siga a header+cuerpo (fuente/skin de Apariencia
+// pueden cambiar esa altura) sin cortar el borde de la card. card
+// tiene width/height:100% por CSS (llena la ventana) — se fuerza a
+// max-content/auto un instante para medir su tamaño natural y se
+// revierte.
+// ======================================================
+
+function ajustarTamañoAlContenido(card: HTMLElement): void {
+  card.style.width = "max-content";
+  card.style.height = "auto";
+
+  const rect = card.getBoundingClientRect();
+  const ancho = Math.ceil(rect.width);
+  const alto = Math.ceil(rect.height);
+
+  card.style.width = "";
+  card.style.height = "";
 
   void getCurrentWindow()
-    .setSize(new LogicalSize(ancho, ALTO_INDICADOR_MACRO_LOGICO))
+    .setSize(new LogicalSize(ancho, alto))
     .catch(() => {
       // Ventana en cierre — nada que hacer.
     });
 }
 
 // ======================================================
-// 🔴 MODO GRABACIÓN
+// 🏗️ ARMAR CARD (header + cuerpo)
+// ------------------------------------------------------
+// Mismo estilo que la ventana "Modo Captura" (vent_captura_main.ts):
+// header con ícono de arrastre (⠿), título y botón Cancelar; debajo,
+// el cuerpo con el punto de estado y el texto — ya existentes en
+// los 3 modos. El header es la única zona de arrastre (antes lo era
+// la ventana entera) para no competir con el click del botón
+// Cancelar.
 // ======================================================
 
-function iniciarModoGrabacion(raiz: HTMLElement, tecla: string): void {
+interface CardIndicadorMacro {
+  card: HTMLElement;
+  punto: HTMLSpanElement;
+  texto: HTMLSpanElement;
+}
+
+function crearCard(raiz: HTMLElement, titulo: string): CardIndicadorMacro {
+  const card = document.createElement("div");
+  card.className = "indicador-macro-card";
+
+  const header = document.createElement("div");
+  header.className = "indicador-macro-header";
+
+  const icono = document.createElement("span");
+  icono.className = "indicador-macro-header-icono";
+  icono.textContent = "⠿";
+
+  const tituloSpan = document.createElement("span");
+  tituloSpan.className = "indicador-macro-header-titulo";
+  tituloSpan.textContent = titulo;
+
+  const botonCancelar = document.createElement("button");
+  botonCancelar.className = "indicador-macro-cancelar";
+  botonCancelar.textContent = "Cancelar";
+  botonCancelar.addEventListener("click", () => void cancelar());
+
+  header.append(icono, tituloSpan, botonCancelar);
+  activarArrastre(header);
+
+  const cuerpo = document.createElement("div");
+  cuerpo.className = "indicador-macro-cuerpo";
+
   const punto = document.createElement("span");
   punto.className = "indicador-macro-punto";
-  punto.dataset.estado = "armada";
 
   const texto = document.createElement("span");
   texto.className = "indicador-macro-texto";
+
+  cuerpo.append(punto, texto);
+  card.append(header, cuerpo);
+  raiz.append(card);
+
+  return { card, punto, texto };
+}
+
+// Regla 7 (mismo criterio que vent_captura_main.ts): Esc cancela
+// esta ventana, igual que el botón Cancelar del header.
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape") void cancelar();
+});
+
+// Se fija en iniciar() según el modo — cada modo cancela distinto
+// (ver iniciarModoGrabacion/Play/Ubicar).
+let cancelar: () => void | Promise<void> = () => {
+  void invoke("cerrar_ventana_indicador_macro").catch(() => {});
+};
+
+// ======================================================
+// 🔴 MODO GRABACIÓN
+// ------------------------------------------------------
+// Cancelar acá replica cancelarArmado() del editor (ver
+// comp_popup_macro_editor.ts): detiene la grabación armada/activa Y
+// cierra esta ventana — el editor, con la grabación ya en
+// "inactiva", no dispara su propio cierre para la transición
+// armada→inactiva (solo lo hace para activa→inactiva, ver
+// finalizarGrabacion), así que esta ventana debe cerrarse sola.
+// ======================================================
+
+function iniciarModoGrabacion(raiz: HTMLElement, tecla: string): void {
+  const { card, punto, texto } = crearCard(raiz, "Grabador de Macro");
+
+  punto.dataset.estado = "armada";
   texto.textContent = textoEstadoGrabacion(tecla, "armada");
 
-  raiz.append(punto, texto);
-  ajustarAnchoAlContenido(raiz);
+  ajustarTamañoAlContenido(card);
 
   let estadoActual: EstadoGrabacionMacro = "armada";
+
+  cancelar = () => {
+    invoke("detener_grabacion_macro").catch((error) => {
+      console.error("❌ No se pudo cancelar la grabación:", error);
+    });
+
+    invoke("cerrar_ventana_indicador_macro").catch((error) => {
+      console.error("❌ No se pudo cerrar el indicador de grabación:", error);
+    });
+  };
 
   setInterval(() => {
     invoke<EstadoGrabacionMacro>("obtener_estado_grabacion_macro")
@@ -231,7 +340,7 @@ function iniciarModoGrabacion(raiz: HTMLElement, tecla: string): void {
         estadoActual = nuevoEstado;
         punto.dataset.estado = nuevoEstado;
         texto.textContent = textoEstadoGrabacion(tecla, nuevoEstado);
-        ajustarAnchoAlContenido(raiz);
+        ajustarTamañoAlContenido(card);
       })
       .catch(() => {
         // Ventana huérfana/en cierre — nada que hacer.
@@ -244,26 +353,24 @@ function iniciarModoGrabacion(raiz: HTMLElement, tecla: string): void {
 // ------------------------------------------------------
 // El catch silencioso deja el contador sin actualizar ante un
 // fallo — mismo criterio de tolerancia a fallos que el polling
-// de modo Grabación.
+// de modo Grabación. Cancelar acá solo cierra la ventana (no hay
+// grabación que detener — la macro sigue ejecutándose igual, el
+// indicador es solo visual).
 // ======================================================
 
 function iniciarModoPlay(raiz: HTMLElement): void {
-  const punto = document.createElement("span");
-  punto.className = "indicador-macro-punto";
-  punto.dataset.estado = "play";
+  const { card, punto, texto } = crearCard(raiz, "Reproduciendo Macro");
 
-  const texto = document.createElement("span");
-  texto.className = "indicador-macro-texto";
+  punto.dataset.estado = "play";
   texto.textContent = "00 / 00";
 
-  raiz.append(punto, texto);
-  ajustarAnchoAlContenido(raiz);
+  ajustarTamañoAlContenido(card);
 
   setInterval(() => {
     invoke<ProgresoIndicadorMacro>("obtener_progreso_indicador_macro")
       .then((progreso) => {
         texto.textContent = textoProgresoPlay(progreso);
-        ajustarAnchoAlContenido(raiz);
+        ajustarTamañoAlContenido(card);
       })
       .catch(() => {
         // Ventana en cierre — nada que hacer.
@@ -274,28 +381,24 @@ function iniciarModoPlay(raiz: HTMLElement): void {
 // ======================================================
 // 📍 MODO UBICAR
 // ------------------------------------------------------
-// Texto fijo, sin polling — el arrastre y el guardado de posición
-// son los mismos de siempre (activarArrastre/guardarPosicionTrasArrastre).
+// Texto fijo, sin polling — el arrastre (ahora limitado al header)
+// y el guardado de posición son los mismos de siempre
+// (activarArrastre/guardarPosicionTrasArrastre). Cancelar solo
+// cierra la ventana, igual que "Guardar" en el popup Extra de Macro.
 // ======================================================
 
 function iniciarModoUbicar(raiz: HTMLElement): void {
-  const punto = document.createElement("span");
-  punto.className = "indicador-macro-punto";
-  punto.dataset.estado = "play";
+  const { card, punto, texto } = crearCard(raiz, "Ubicar Indicador");
 
-  const texto = document.createElement("span");
-  texto.className = "indicador-macro-texto";
+  punto.dataset.estado = "play";
   texto.textContent = "Arrastrame";
 
-  raiz.append(punto, texto);
-  ajustarAnchoAlContenido(raiz);
+  ajustarTamañoAlContenido(card);
 }
 
 function iniciar(): void {
   const raiz = document.getElementById("indicador-macro");
   if (!raiz) return;
-
-  activarArrastre(raiz);
 
   const parametros = new URLSearchParams(window.location.search);
   const modo = (parametros.get("modo") ?? "grabacion") as ModoIndicadorMacro;

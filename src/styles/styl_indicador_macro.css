@@ -2,12 +2,19 @@
    🟢🔴 styl_indicador_macro.css
    ------------------------------------------------------
    Estilos propios de la ventana overlay Indicador_Macro
-   (modos Grabación y Play). NO importa styl_general.css:
+   (modos Grabación/Play/Ubicar). NO importa styl_general.css:
    esa hoja fija html/body con fondo sólido (var(--bg)), que
    rompería la transparencia de esta ventana
    (WebviewWindowBuilder .transparent(true) en comandos.rs).
    Reutiliza solo las variables de color/tipografía
    centralizadas en styl_variables.css.
+
+   Estructura tipo card (mismo criterio visual que
+   styl_captura.css/"Modo Captura"): header con ícono de
+   arrastre + título + botón Cancelar, y debajo el cuerpo con
+   el punto de estado y el texto. Mismo esquema de color que
+   Captura: borde de la card en --highlight, header en
+   --highlight-dark, cuerpo en --panel.
    ====================================================== */
 
 * {
@@ -31,16 +38,62 @@ body {
 #indicador-macro {
   width: 100%;
   height: 100%;
+}
+
+.indicador-macro-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--highlight);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.indicador-macro-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--highlight-dark);
+  cursor: move;
+}
+
+.indicador-macro-header-icono {
+  opacity: 0.7;
+}
+
+.indicador-macro-header-titulo {
+  flex: 1;
+  font-size: var(--fs11);
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.indicador-macro-cancelar {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: var(--fs11);
+  cursor: pointer;
+}
+
+.indicador-macro-cancelar:hover {
+  border-color: var(--highlight-red);
+  color: var(--text-red);
+}
+
+.indicador-macro-cuerpo {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 10px;
-  /* Fondo semi-transparente — llama la atención sobre el
-     escritorio sin tapar del todo lo que hay detrás. La ventana en
-     sí ya es del tamaño exacto del cartel (200x40, ver comandos.rs),
-     así que esto cubre toda la ventana. Opacidad configurable
-     (pestaña Apariencia de Configuración, catálogo apariencia.tsv). */
-  background: color-mix(in srgb, var(--highlight-dark) var(--indicador-macro-fondo-opacidad), transparent);
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--panel) 85%, transparent);
 }
 
 .indicador-macro-punto {

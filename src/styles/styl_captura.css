@@ -37,8 +37,7 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: color-mix(in srgb, var(--panel) 85%, transparent);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--highlight);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -48,7 +47,7 @@ body {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  background: color-mix(in srgb, var(--overlay-contraste) 6%, transparent);
+  background: var(--highlight-dark);
   cursor: move;
 }
 
@@ -85,6 +84,7 @@ body {
   flex-direction: column;
   gap: 4px;
   justify-content: center;
+  background: color-mix(in srgb, var(--panel) 85%, transparent);
 }
 
 .captura-linea {

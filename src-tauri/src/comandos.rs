@@ -1107,7 +1107,7 @@ pub fn obtener_destino_preview_coordenada(id: String) -> Option<(i32, i32)> {
 const LABEL_VENTANA_INDICADOR_MACRO: &str = "indicador_macro";
 const MARGEN_INDICADOR_MACRO_LOGICO: f64 = 16.0;
 const ANCHO_INDICADOR_MACRO_LOGICO: f64 = 200.0;
-const ALTO_INDICADOR_MACRO_LOGICO: f64 = 40.0;
+const ALTO_INDICADOR_MACRO_LOGICO: f64 = 66.0;
 
 /// Percent-encoding mínimo para el query param `tecla` (texto libre
 /// tipo "Control Izquierdo + F1") — sin esto, espacios y "+" rompen
