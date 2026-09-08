@@ -181,6 +181,8 @@ export function crearOpciones(
     clase: "opciones-asa",
   });
 
+  boton.dataset.ayudaId = "popup-opciones-fila";
+
   boton.addEventListener("click", () => {
     alternarOpcionesColumna();
   });

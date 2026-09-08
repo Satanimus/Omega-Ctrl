@@ -94,6 +94,8 @@ export function crearSeparadorHeader(
     clase: "opciones-asa",
   });
 
+  botonOpciones.dataset.ayudaId = "popup-opciones-fila";
+
   botonOpciones.addEventListener("click", () => {
     alternarOpcionesColumna();
   });

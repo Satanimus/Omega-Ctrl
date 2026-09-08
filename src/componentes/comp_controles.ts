@@ -329,6 +329,8 @@ export function crearApp(
 
   boton.title = filaPerfil.app.programa ?? "Uso global";
 
+  boton.dataset.ayudaId = "popup-app";
+
   const icono = document.createElement("span");
 
   icono.className = "app-icono-fallback";

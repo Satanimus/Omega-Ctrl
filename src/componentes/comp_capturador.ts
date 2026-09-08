@@ -72,6 +72,8 @@ export function crearCapturador(
     clase: "capturador",
   });
 
+  boton.dataset.ayudaId = "trigger";
+
   const botonExtra = boton.querySelector(
     ".trigger-extra",
   ) as HTMLDivElement | null;

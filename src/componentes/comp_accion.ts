@@ -51,6 +51,8 @@ export function crearAccion(
     case "menu_express": {
       const boton = crearAccionMenuExpress(filaPerfil);
 
+      boton.dataset.ayudaId = "menu-express-editor";
+
       boton.addEventListener("click", (evento) => {
         abrirEditorMenuExpress(evento, contexto, filaPerfil, alModificar);
       });
@@ -63,6 +65,8 @@ export function crearAccion(
     case "macro": {
       const boton = crearAccionMacro(filaPerfil);
 
+      boton.dataset.ayudaId = "popup-macro-accion";
+
       boton.addEventListener("click", (evento) => {
         abrirPopupMacroAccion(evento, contexto, filaPerfil, alModificar);
       });
@@ -74,6 +78,8 @@ export function crearAccion(
     // comp_popup_portapapeles_editor.ts.
     case "portapapeles": {
       const boton = crearAccionPortapapeles(filaPerfil);
+
+      boton.dataset.ayudaId = "portapapeles-editor";
 
       boton.addEventListener("click", (evento) => {
         abrirEditorPortapapeles(evento, contexto, filaPerfil, alModificar);
