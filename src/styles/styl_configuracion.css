@@ -117,6 +117,25 @@
   text-align: center;
 }
 
+/* Texto explicativo al pie de cada pestaña (debajo de la tabla o del
+   contenido): sin fondo ni borde, color deshabilitado, con margen a
+   los 4 lados para que se lea como una aclaración aparte y no como
+   parte de la tabla/control de arriba. */
+.configuracion-nota-pestana {
+  margin: var(--gap12);
+  color: var(--text-disabled);
+  font-size: var(--fs13);
+  line-height: 1.5;
+}
+
+.configuracion-nota-pestana p {
+  margin: 0 0 var(--gap8) 0;
+}
+
+.configuracion-nota-pestana p:last-child {
+  margin-bottom: 0;
+}
+
 /* ======================================================
    ESCALA GENERAL (pestaña Apariencia)
    ====================================================== */

@@ -567,9 +567,7 @@ function crearFilaArbol(
   const sinValorPropio = nodo.hijos.length === 0;
 
   if (sinValorPropio) {
-    botonPersonalizado.classList.add(
-      "configuracion-arbol-personalizado--sin-valor",
-    );
+    botonPersonalizado.classList.add("configuracion-arbol-personalizado--sin-valor");
     botonPersonalizado.disabled = true;
   }
 
@@ -728,6 +726,10 @@ export interface OpcionesPestanaApariencia {
   incluirEscala: boolean;
 
   textoConfirmacionRestablecer: string;
+
+  // Texto explicativo de la pestaña, mostrado debajo de la tabla con
+  // estilo deshabilitado (ver .configuracion-nota-pestana).
+  notaPestana?: string;
 }
 
 export function crearPestanaApariencia(
@@ -769,8 +771,7 @@ export function crearPestanaApariencia(
 
   const botonOpcionesTema = document.createElement("button");
   botonOpcionesTema.type = "button";
-  botonOpcionesTema.className =
-    "ui-btn popup-opcion configuracion-tema-opciones";
+  botonOpcionesTema.className = "ui-btn popup-opcion configuracion-tema-opciones";
   botonOpcionesTema.title = "Guardar / Renombrar / Eliminar tema";
   botonOpcionesTema.textContent = "…";
 
@@ -859,6 +860,40 @@ export function crearPestanaApariencia(
       lista.className = "popup-lista";
 
       // ----------------------------------
+      // G3: Guardar cambios (directo al archivo del tema de usuario)
+      // — va arriba de "Guardar como".
+      // ----------------------------------
+
+      if (origenTemaSesion === "usuario" && hayPersonalizadosSesion) {
+        const botonGuardarEditado = document.createElement("button");
+        botonGuardarEditado.className = "ui-btn";
+        botonGuardarEditado.textContent = "Guardar cambios";
+
+        botonGuardarEditado.addEventListener("click", async () => {
+          await invoke("configuracion_tema_guardar_editado", {
+            nombre: nombreTemaSesion,
+          });
+
+          // Recarga el mismo tema recién sobreescrito: limpia el
+          // override "personalizado" en sesión (ahora coincide con
+          // el archivo) para que desaparezcan el "(editado)" del
+          // botón y el resaltado de la columna editada.
+          await invoke("configuracion_tema_cargar", {
+            nombre: nombreTemaSesion,
+            origen: origenTemaSesion,
+          });
+
+          huboCargaDeTema = true;
+
+          await recargarTablaApariencia();
+
+          ocultarPopup();
+        });
+
+        lista.append(botonGuardarEditado);
+      }
+
+      // ----------------------------------
       // Guardar como
       // ----------------------------------
 
@@ -897,25 +932,6 @@ export function crearPestanaApariencia(
         const separadorUsuario = document.createElement("div");
         separadorUsuario.className = "app-popup-separador";
         lista.append(separadorUsuario);
-
-        // G3: Guardar cambios (directo al archivo del tema de usuario)
-        if (hayPersonalizadosSesion) {
-          const botonGuardarEditado = document.createElement("button");
-          botonGuardarEditado.className = "ui-btn";
-          botonGuardarEditado.textContent = "Guardar cambios";
-
-          botonGuardarEditado.addEventListener("click", async () => {
-            await invoke("configuracion_tema_guardar_editado", {
-              nombre: nombreTemaSesion,
-            });
-
-            await recargarTablaApariencia();
-
-            ocultarPopup();
-          });
-
-          lista.append(botonGuardarEditado);
-        }
 
         // G4/H5: Renombrar — reutiliza abrirFormularioNombre
         const botonRenombrar = document.createElement("button");
@@ -1310,6 +1326,17 @@ export function crearPestanaApariencia(
       tr.classList.remove("configuracion-arbol-error");
     }
 
+    // El botón de tema ("Nombre (editado)" y la visibilidad de
+    // "Guardar cambios" en su popup) solo se refrescaba en
+    // recargarTablaApariencia() (abrir ventana / Cargar tema), nunca
+    // tras un Aplicar cambios normal: quedaba mostrando el estado
+    // previo hasta reabrir la ventana. Se sincroniza acá con el
+    // estado recién persistido.
+    const filasActualizadas = await invoke<FilaCssCruda[]>(
+      "configuracion_listar_apariencia",
+    );
+    actualizarBotonSelectorTema(filasActualizadas);
+
     await despuesDeAplicar();
   }
 
@@ -1358,6 +1385,13 @@ export function crearPestanaApariencia(
     if (opciones.incluirSelectorTema) {
       panel.prepend(crearFilaTema());
     }
+  }
+
+  if (opciones.notaPestana) {
+    const nota = document.createElement("p");
+    nota.className = "configuracion-nota-pestana";
+    nota.textContent = opciones.notaPestana;
+    panel.append(nota);
   }
 
   return {

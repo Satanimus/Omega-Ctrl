@@ -169,12 +169,7 @@ panelTeclas.className = "configuracion-panel oculto";
 const panelAvanzado = document.createElement("div");
 panelAvanzado.className = "configuracion-panel oculto";
 
-cuerpo.append(
-  panelGeneral,
-  panelApariencia,
-  panelTeclas,
-  panelAvanzado,
-);
+cuerpo.append(panelGeneral, panelApariencia, panelTeclas, panelAvanzado);
 
 card.append(tabs, cuerpo);
 raiz.append(card);
@@ -608,6 +603,10 @@ interface OpcionesPestana {
   // al backend que recargue el resto de ventanas y así se vea el
   // cambio — ver configuracion_refrescar_ventanas_apariencia).
   despuesDeAplicar?: () => Promise<void>;
+
+  // Texto explicativo de la pestaña, mostrado debajo de la tabla con
+  // estilo deshabilitado (ver .configuracion-nota-pestana).
+  notaPestana?: string;
 }
 
 // Resultado de intentar juntar los cambios pendientes de una pestaña,
@@ -644,6 +643,7 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     restablecer,
     textoConfirmacionRestablecer,
     despuesDeAplicar,
+    notaPestana,
   } = opciones;
 
   // ----------------------------------------------------
@@ -680,6 +680,13 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
   mensajeError.className = "configuracion-error oculto";
 
   panel.append(scrollTabla, mensajeError);
+
+  if (notaPestana) {
+    const nota = document.createElement("p");
+    nota.className = "configuracion-nota-pestana";
+    nota.textContent = notaPestana;
+    panel.append(nota);
+  }
 
   // ----------------------------------------------------
   // Estado propio de esta pestaña
@@ -1135,6 +1142,11 @@ const pestanaGeneral = crearPestanaEditable({
   textoConfirmacionRestablecer:
     "¿Restablecer todos los valores de General a los de fábrica? " +
     "Se pierden los valores personalizados de esta pestaña.",
+
+  notaPestana:
+    "¡Personaliza tu experiencia! Edita teclas y atajos del programa. " +
+    "Además, puedes ajustar los tiempos para reconocimiento de " +
+    "combinación de teclas disparadoras y teclas emuladas a la salida.",
 });
 
 // ======================================================
@@ -1288,6 +1300,10 @@ const pestanaTeclas = crearPestanaEditable({
   textoConfirmacionRestablecer:
     "¿Restablecer todos los nombres de Teclas a los de fábrica? " +
     "Se pierden los nombres personalizados de esta pestaña.",
+
+  notaPestana:
+    "¿Quieres darle otro nombre a una tecla o botón en la interfaz? " +
+    "No afecta el funcionamiento del programa.",
 });
 
 // aplicarOverridesApariencia() actualiza ESTA ventana (la Ventana de
@@ -1326,6 +1342,9 @@ const pestanaApariencia = crearPestanaApariencia(
     textoConfirmacionRestablecer:
       "¿Restablecer todos los valores de Apariencia a los de fábrica? " +
       "Se pierden los valores personalizados de esta pestaña.",
+    notaPestana:
+      "Dale tu estilo a la interfaz... Edita temas y crea nuevas " +
+      "combinaciones de colores.",
   },
 );
 
@@ -1357,6 +1376,35 @@ opcionPortable.textContent = "Portable";
 selectorModoMotor.append(opcionInterception, opcionPortable);
 
 panelAvanzado.append(tituloModoMotor, selectorModoMotor);
+
+// Texto explicativo al pie, mismo criterio que las demás pestañas
+// (ver .configuracion-nota-pestana) — acá con varios párrafos, así
+// que el estilo se aplica al contenedor y cada <p> hijo hereda.
+const notaAvanzado = document.createElement("div");
+notaAvanzado.className = "configuracion-nota-pestana";
+
+const notaAvanzadoIntro = document.createElement("p");
+notaAvanzadoIntro.textContent =
+  "¿El modo Portable no es suficiente? Interception es un driver a " +
+  "nivel de kernel: intercepta cada evento de teclado/mouse antes de " +
+  "que Windows lo entregue a las demás apps, lo que permite un " +
+  "bloqueo más confiable que los hooks del modo Portable. A cambio, " +
+  "requiere instalarlo con permisos de administrador (y reiniciar), " +
+  "y algunos anticheats lo detectan como riesgo de seguridad y lo " +
+  "bloquean.";
+
+const notaAvanzadoPaso1 = document.createElement("p");
+notaAvanzadoPaso1.textContent =
+  "Paso 1: instala el driver Interception desde su repositorio " +
+  "oficial: https://github.com/oblitum/Interception";
+
+const notaAvanzadoPaso2 = document.createElement("p");
+notaAvanzadoPaso2.textContent =
+  "Paso 2: selecciona acá el modo Driver y aplica cambios. ¡Listo!";
+
+notaAvanzado.append(notaAvanzadoIntro, notaAvanzadoPaso1, notaAvanzadoPaso2);
+
+panelAvanzado.append(notaAvanzado);
 
 // Último modo confirmado por el backend (no el elegido en el
 // <select>, que puede tener un cambio pendiente sin guardar todavía).
@@ -1529,11 +1577,9 @@ botonGuardarGlobal.addEventListener("click", async () => {
   // tabla. Si CUALQUIERA falla, se bloquea el guardado completo (no
   // se guarda nada, ni siquiera lo válido de otras pestañas) — ver
   // respuesta a la consulta sobre errores en pestaña no activa.
-  const recolecciones = [
-    pestanaGeneral,
-    pestanaApariencia,
-    pestanaTeclas,
-  ].map((pestana) => ({ pestana, resultado: pestana.validarYRecolectar() }));
+  const recolecciones = [pestanaGeneral, pestanaApariencia, pestanaTeclas].map(
+    (pestana) => ({ pestana, resultado: pestana.validarYRecolectar() }),
+  );
 
   const huboErrores = recolecciones.some(
     ({ resultado }) => resultado.erroresLocales.length > 0,
