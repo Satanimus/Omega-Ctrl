@@ -257,6 +257,17 @@
   z-index: 9999;
 }
 
+/* [FIX] El editor de Macro (único popup fijo, ver mostrarPopupFijo)
+   ya no cubre la toolbar: se achica desde arriba (top en vez de
+   inset:0) para dejarla afuera de su rectángulo, así sus botones
+   (⚙ panel lateral, Ayuda...) se pueden seguir clickeando con el
+   editor abierto. El resto (tabla, panel lateral, panel de ayuda)
+   sigue bloqueado a propósito — son los que descartarían los
+   cambios del editor sin pasar por su Cancelar/Guardar. */
+.popup-capa[data-fijo="true"] {
+  top: var(--toolbar-height);
+}
+
 .popup-capa > div {
   width: max-content;
 

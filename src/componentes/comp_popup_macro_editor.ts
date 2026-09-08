@@ -197,6 +197,34 @@ function crearSeparador(): HTMLElement {
 }
 
 // ======================================================
+// 📐 ANCHO DEL EDITOR — SIGUE A LA TABLA, NO A LA VENTANA
+// ------------------------------------------------------
+// El editor ya no ocupa siempre el ancho completo de la ventana
+// (left/right:0 fijos en CSS): si el panel lateral (config/perfil)
+// y/o el panel de ayuda están abiertos, debe quedar entre ambos,
+// con el mismo ancho que la tabla (.tabla, flex:1 en .layout-cuerpo
+// — ver ui_layout.ts). Si ambos están cerrados, .tabla ya ocupa el
+// ancho completo por sí sola, así que no hace falta un caso aparte.
+// Se mide el rect real de .tabla (no el de los paneles) porque su
+// ancho YA refleja el de ambos paneles sin duplicar esa cuenta acá.
+function sincronizarAnchoEditorMacro(): void {
+  const tablaElemento = document.querySelector<HTMLElement>(".tabla");
+
+  const popupElemento = document.querySelector<HTMLElement>(
+    ".popup-macro-editor",
+  );
+
+  if (!tablaElemento || !popupElemento) {
+    return;
+  }
+
+  const rect = tablaElemento.getBoundingClientRect();
+
+  popupElemento.style.left = `${rect.left}px`;
+  popupElemento.style.right = `${window.innerWidth - rect.right}px`;
+}
+
+// ======================================================
 // 💾 GUARDADO EN CACHE (con debounce)
 // ------------------------------------------------------
 // macro_guardar_paso escribe SOLO en la copia de cache
@@ -858,6 +886,14 @@ function montarEditor(
   let renombrando = false;
 
   let controladorArrastre: ControladorArrastre | null = null;
+
+  // Observa .tabla para reajustar el ancho del editor cada vez que
+  // el panel lateral o el de ayuda se abren/cierran o se
+  // redimensionan (ver sincronizarAnchoEditorMacro) — el editor ya
+  // no bloquea la ventana principal (ver mostrarPopupFijo/dataset
+  // "fijo" en comp_popup_contenedor.ts), así que esos paneles se
+  // pueden alternar con el editor abierto y este debe seguirlos.
+  let observadorAnchoTabla: ResizeObserver | null = null;
 
   // Limpieza del listener "click afuera" (más abajo, en dibujar())
   // del redibujado ANTERIOR — cada dibujar() con una caja anidada
@@ -1529,6 +1565,12 @@ function montarEditor(
   function cerrarEditor(): void {
     void cerrarPreviosMacro();
 
+    if (observadorAnchoTabla) {
+      observadorAnchoTabla.disconnect();
+
+      observadorAnchoTabla = null;
+    }
+
     if (controladorArrastre) {
       controladorArrastre.destruir();
 
@@ -1815,6 +1857,24 @@ function montarEditor(
     }
 
     mostrarPopupFijo(popup);
+
+    // El popup es un elemento NUEVO en cada redibujado (mostrarPopupFijo
+    // reemplaza el contenido de la capa) — hay que reaplicarle el
+    // left/right medido, el ResizeObserver de abajo no dispara solo
+    // por esto (no cambió el tamaño de .tabla).
+    sincronizarAnchoEditorMacro();
+
+    if (!observadorAnchoTabla) {
+      const tablaElemento = document.querySelector<HTMLElement>(".tabla");
+
+      if (tablaElemento) {
+        observadorAnchoTabla = new ResizeObserver(() => {
+          sincronizarAnchoEditorMacro();
+        });
+
+        observadorAnchoTabla.observe(tablaElemento);
+      }
+    }
 
     // Restaurar scroll de la lista de pasos (spec punto 4) — mismo
     // motivo que el alto arriba: hay que esperar a que

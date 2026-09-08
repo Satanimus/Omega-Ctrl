@@ -124,6 +124,16 @@ function mostrarPopupInterno(
 
   popupFijoActual = fijo;
 
+  // [FIX] .popup-capa cubre toda la ventana (position:fixed; inset:0)
+  // para poder cerrar los popups normales con click afuera — pero el
+  // editor de Macro (único que usa mostrarPopupFijo) debe dejar la
+  // toolbar afuera de ese bloqueo mientras está abierto (spec: se
+  // debe poder abrir/cerrar el panel de ayuda desde ahí con el editor
+  // abierto, sin poder tocar la tabla ni el panel lateral). data-fijo
+  // recorta la capa por arriba (top: var(--toolbar-height), ver
+  // styl_layout.css) para excluir la toolbar de su rectángulo.
+  capaPopup.dataset.fijo = fijo ? "true" : "false";
+
   // Usar el origen explícito o el último botón pulsado
   origenActual = origen ?? ultimoBotonPulsado ?? null;
 
@@ -233,6 +243,8 @@ export function ocultarPopup(): void {
   capaPopup.style.display = "none";
 
   popupFijoActual = false;
+
+  capaPopup.dataset.fijo = "false";
 
   if (origenActual) {
     origenActual.dataset.abierto = "false";
