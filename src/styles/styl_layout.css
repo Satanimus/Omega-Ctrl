@@ -760,11 +760,20 @@
   gap: var(--gap8);
 }
 
-.popup-extra-fila-acciones .familia-highdark,
-.popup-extra-fila-acciones .popup-extra-probar {
+.popup-extra-fila-acciones .familia-highdark {
   flex: 1;
   width: auto;
   font-weight: 600;
+}
+
+/* ⊙ Previsualizar: borde highlight mientras el overlay-marcador
+   de esta fila esté visible — mismo criterio que el botón ⊙ del
+   gestor de coordenadas (.coordenadas-boton-icono-activo). Se
+   apaga solo al cerrarse el overlay (click de nuevo, o al cerrar
+   este popup) — nunca queda pegado entre aperturas. */
+.ui-btn.popup-extra-previsualizar[data-activo="true"] {
+  border-color: var(--highlight);
+  color: var(--text-highlight);
 }
 
 /* ======================================================
@@ -772,8 +781,8 @@
    ------------------------------------------------------
    Pegado al borde derecho de la fila de acciones (margin-
    left:auto empuja todo lo que venga después de Seleccionar/
-   Cambiar+Probar, que sí son flex:1). Mismo patrón que los
-   demás botones "eliminar" ghost del proyecto (ver
+   Cambiar, que sí es flex:1, y ⊙ Previsualizar). Mismo patrón
+   que los demás botones "eliminar" ghost del proyecto (ver
    .panel-lateral-eliminar en styl_panel_lateral.css): en
    reposo, sin borde propio (hereda el ghost transparente de
    .ui-btn); en hover, SIN el brillo cyan que trae .ui-btn:hover

@@ -242,6 +242,15 @@ Indica dónde queda el mouse luego de realizar la acción. Si se queda allá o r
 **📌 Ventana Gestor de Coordenadas**
 Abre una ventana para marcar el punto en pantalla.
 
+## ventana-coordenadas
+**📌 Gestor de Coordenadas guardadas**
+
+Administra las coordenadas que vas guardando para usarlas en tus filas.
+
+`+ Fila coordenada`: Agrega una coordenada nueva a la lista.
+
+`📌 Fijar ventana`: Mantiene esta ventana siempre visible, por encima del resto.
+
 `✓`: Click en el número de fila envía los datos de la coordenada para usarla donde la solicitaste.
 
 ` ⁝ `: Botón de opciones. Permite mover y seleccionar como en ventana principal.

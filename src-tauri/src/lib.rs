@@ -170,7 +170,6 @@ pub fn run() {
             comandos::obtener_xy_preview_coordenada,
             comandos::actualizar_xy_preview_en_vivo,
             comandos::guardar_posicion_preview_coordenada,
-            comandos::probar_coordenada,
             comandos::obtener_cursor_captura,
             comandos::obtener_ventana_activa_captura,
             comandos::obtener_config_captura_activa,

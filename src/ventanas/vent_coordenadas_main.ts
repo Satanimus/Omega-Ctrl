@@ -28,6 +28,11 @@ import {
 } from "../componentes/comp_popup_grupo";
 
 import {
+  crearPanelAyudaCoordenadas,
+  alternarPanelAyudaCoordenadas,
+} from "../componentes/comp_panel_ayuda_coordenadas";
+
+import {
   type CoordenadaBanco,
   type CoordenadaBancoJson,
   convertirCoordenadaBanco,
@@ -47,6 +52,7 @@ import "../styles/styl_botones.css";
 import "../styles/styl_arrastrable.css";
 import "../styles/styl_layout.css";
 import "../styles/styl_coordenadas.css";
+import "../styles/styl_panel_ayuda.css";
 
 void aplicarOverridesApariencia();
 
@@ -78,7 +84,20 @@ botonFijar.className = "btn-ayuda coordenadas-btn-fijar";
 botonFijar.textContent = "📌";
 botonFijar.title = "Fijar ventana";
 
-barraSuperior.append(botonAgregarFila, botonFijar);
+const botonAyuda = document.createElement("button");
+botonAyuda.type = "button";
+botonAyuda.className = "btn-ayuda coordenadas-btn-ayuda";
+botonAyuda.title = "Ayuda";
+botonAyuda.innerHTML = "<span>❔</span>";
+botonAyuda.addEventListener("click", () => {
+  alternarPanelAyudaCoordenadas();
+});
+
+const grupoDerecha = document.createElement("div");
+grupoDerecha.className = "coordenadas-grupo-derecha";
+grupoDerecha.append(botonFijar, botonAyuda);
+
+barraSuperior.append(botonAgregarFila, grupoDerecha);
 
 // --- Tabla ---
 
@@ -233,7 +252,12 @@ scrollTabla.className = "coordenadas-tabla-scroll";
 scrollTabla.append(tabla);
 
 card.append(barraSuperior, scrollTabla);
-raiz.append(card);
+
+const cuerpoVentana = document.createElement("div");
+cuerpoVentana.className = "coordenadas-cuerpo";
+cuerpoVentana.append(card, crearPanelAyudaCoordenadas());
+
+raiz.append(cuerpoVentana);
 raiz.append(crearContenedorPopup());
 
 // ======================================================
@@ -511,39 +535,6 @@ async function alternarPrevisualizacionGlobal(): Promise<void> {
   await cargarLista();
 }
 
-// ======================================================
-// ▶️ PROBAR — Etapa F
-// ======================================================
-
-function probarCoordenadaBanco(coordenada: CoordenadaBanco): void {
-  invoke("probar_coordenada", {
-    ubicacion: TIPO_A_UBICACION[coordenada.tipo] ?? "absoluta",
-    modoVentana: MODO_A_MODO_VENTANA[coordenada.modo] ?? "pixeles",
-    puntoReferencia:
-      PUNTO_REFERENCIA_NUMERO_A_STRING[coordenada.puntoReferencia] ?? "sup_izq",
-    x: coordenada.x,
-    y: coordenada.y,
-  }).catch(() => {});
-}
-
-function crearBotonProbar(coordenada: CoordenadaBanco): HTMLButtonElement {
-  const boton = document.createElement("button");
-  boton.type = "button";
-  boton.className = "coordenadas-boton-icono coordenadas-icono-togglable";
-  boton.textContent = "▶";
-  boton.title = "Probar";
-
-  if (coordenada.tipo !== 1) {
-    boton.disabled = true;
-    boton.classList.add("coordenadas-boton-icono-bloqueado");
-    return boton;
-  }
-
-  boton.addEventListener("click", () => {
-    probarCoordenadaBanco(coordenada);
-  });
-  return boton;
-}
 
 // ======================================================
 // 📌 GENERAR MARCADOR — Etapa E
@@ -1014,7 +1005,6 @@ function crearFila(
   cajaOpciones.append(
     botonAsa,
     botonPreview,
-    crearBotonProbar(coordenada),
     botonEliminar,
   );
   tdOpciones.append(cajaOpciones);

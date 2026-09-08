@@ -8,11 +8,27 @@
    fondo de tabla compartido).
    ====================================================== */
 
+/* ======================================================
+   🧱 CUERPO DE VENTANA
+   ------------------------------------------------------
+   Fila horizontal: card principal + panel de ayuda lateral
+   derecho (comp_panel_ayuda_coordenadas.ts). Antes .coordenadas-card
+   ocupaba 100vh directo desde <main> — ahora ese alto lo da
+   este contenedor, y la card pasa a flex:1 (ver abajo).
+   ====================================================== */
+
+.coordenadas-cuerpo {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .coordenadas-card {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 100vh;
+  flex: 1;
+  min-width: 0;
   padding: var(--gap16);
   gap: var(--gap12);
   background: color-mix(
@@ -20,6 +36,26 @@
     var(--fondo-coordenadas-color) var(--fondo-coordenadas-opacidad),
     transparent
   );
+}
+
+/* Botón ❔ de esta ventana: mismo criterio que
+   .layout:has(.panel-ayuda.abierto) .btn-ayuda (styl_botones.css)
+   en la ventana principal, adaptado a que acá no hay .layout.
+   Acotado a .coordenadas-btn-ayuda para no afectar también a
+   Fijar Ventana (comparte la clase base .btn-ayuda). */
+.coordenadas-cuerpo:has(.panel-ayuda-coordenadas.abierto) .coordenadas-btn-ayuda {
+  background: color-mix(in srgb, var(--highlight) var(--botones-ghost-opacidad-hover), transparent);
+  border-color: var(--highlight);
+  color: var(--text-highlight);
+}
+
+/* Agrupa Fijar Ventana + Ayuda, pegados entre sí y al extremo
+   derecho de la barra superior — independientes del botón
+   "+ Fila coordenada" (justify-content: space-between). */
+.coordenadas-grupo-derecha {
+  display: flex;
+  align-items: center;
+  gap: var(--gap8);
 }
 
 .coordenadas-barra-superior {
@@ -138,11 +174,6 @@
 .coordenadas-boton-icono:hover:not(:disabled) {
   border-color: var(--highlight);
   color: var(--highlight);
-}
-
-.coordenadas-boton-icono-bloqueado {
-  cursor: not-allowed;
-  opacity: 0.35;
 }
 
 .coordenadas-boton-icono-activo {

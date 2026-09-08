@@ -612,8 +612,7 @@
   padding: 0;
 }
 
-/* E.3 — deshabilitado por defecto (Regla 13), mismo patrón que
-   .popup-capa .popup-extra-probar:disabled. */
+/* E.3 — deshabilitado por defecto (Regla 13). */
 .opciones-extra .ui-btn:disabled {
   opacity: 0.4;
 

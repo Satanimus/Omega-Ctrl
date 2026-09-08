@@ -195,25 +195,69 @@ export function cerrarVentanaCapturaCoordenada(): void {
 }
 
 // ======================================================
-// ▶️ PROBAR COORDENADA
+// ⊙ PREVISUALIZAR COORDENADA
 // ------------------------------------------------------
-// Mueve el cursor real al punto calculado (comandos.rs::
-// probar_coordenada) — solo tiene sentido si la coordenada ya
-// fue capturada (x/y no null).
+// Abre el mismo overlay-marcador que usa el gestor de
+// coordenadas (comandos.rs::abrir_ventana_preview_coordenada),
+// pero sobre la coordenada de ESTA fila — funciona para
+// cualquier ubicación (Absoluta/Cursor/Ventana), a diferencia
+// del extinto botón Probar (solo tenía sentido en Absoluta).
+// Id sintético = contexto.id (estable por fila, no ligado al
+// banco de coordenadas). Toggle simple: un click más lo cierra.
 // ======================================================
 
-function probarCoordenada(coordenada: FilaPerfil["coordenada"]): void {
+let idPreviewAbierto: string | null = null;
+
+function idPreviewExtra(contexto: ContextoFila): string {
+  return `extra_${contexto.id}`;
+}
+
+export function cerrarPreviewCoordenadaExtra(): void {
+  if (idPreviewAbierto === null) {
+    return;
+  }
+
+  invoke("cerrar_ventana_preview_coordenada", { id: idPreviewAbierto }).catch(
+    () => {},
+  );
+
+  idPreviewAbierto = null;
+}
+
+function previsualizarCoordenada(
+  contexto: ContextoFila,
+  coordenada: FilaPerfil["coordenada"],
+  boton: HTMLButtonElement,
+): void {
   if (coordenada.x === null || coordenada.y === null) {
     return;
   }
 
-  invoke("probar_coordenada", {
+  const id = idPreviewExtra(contexto);
+
+  if (idPreviewAbierto === id) {
+    cerrarPreviewCoordenadaExtra();
+    boton.dataset.activo = "false";
+    return;
+  }
+
+  cerrarPreviewCoordenadaExtra();
+
+  idPreviewAbierto = id;
+  boton.dataset.activo = "true";
+
+  invoke("abrir_ventana_preview_coordenada", {
+    id,
+    numero: 0,
     ubicacion: coordenada.ubicacion,
     modoVentana: coordenada.modoVentana,
     puntoReferencia: coordenada.puntoReferencia,
     x: coordenada.x,
     y: coordenada.y,
-  }).catch(() => {});
+  }).catch(() => {
+    idPreviewAbierto = null;
+    boton.dataset.activo = "false";
+  });
 }
 
 // ======================================================
@@ -488,6 +532,7 @@ export function abrirPopupExtraTeclaMouse(
 
       if (!coordenada.activa) {
         cerrarVentanaCapturaCoordenada();
+        cerrarPreviewCoordenadaExtra();
       }
 
       reconstruirFila(contexto.id);
@@ -497,7 +542,12 @@ export function abrirPopupExtraTeclaMouse(
   );
 
   if (!coordenada.activa) {
-    mostrarPopup(popup, evento.clientX, evento.clientY);
+    mostrarPopup(
+      popup,
+      evento.clientX,
+      evento.clientY,
+      cerrarPreviewCoordenadaExtra,
+    );
 
     return;
   }
@@ -536,23 +586,24 @@ export function abrirPopupExtraTeclaMouse(
 
   filaSeleccionar.append(botonSeleccionar);
 
-  // Probar solo tiene sentido para Absoluta: Cursor y Ventana
-  // siempre resuelven contra ESTA máquina/ventana en este momento
-  // (el cursor está donde está, la ventana activa somos nosotros
-  // mismos editando el perfil), así que "probar" ahí no ejercita
-  // nada útil — a diferencia del botón ▶ del gestor, que si aplica
-  // a cualquier tipo porque ahí se prueba la coordenada aislada,
-  // no en el contexto de un remap real.
-  if (tieneCoordenada && coordenada.ubicacion === "absoluta") {
-    const botonProbar = document.createElement("button");
-    botonProbar.className = "ui-btn popup-extra-probar";
-    botonProbar.textContent = "▶ Probar";
-    botonProbar.title = "Mover mouse a coordenada";
-    botonProbar.addEventListener("click", () => {
-      probarCoordenada(coordenada);
+  // Previsualizar: disponible para cualquier ubicación (Absoluta/
+  // Cursor/Ventana) — a diferencia del extinto botón Probar, acá
+  // no hace falta filtrar por tipo. Queda con borde highlight
+  // (data-activo) mientras el overlay de ESTA fila esté visible;
+  // se apaga solo, nunca queda "pegado" tras cerrar el popup
+  // (cerrarPreviewCoordenadaExtra ya resetea idPreviewAbierto).
+  if (tieneCoordenada) {
+    const botonPrevisualizar = document.createElement("button");
+    botonPrevisualizar.className = "ui-btn popup-extra-previsualizar";
+    botonPrevisualizar.textContent = "⊙";
+    botonPrevisualizar.title = "Previsualizar";
+    botonPrevisualizar.dataset.activo =
+      idPreviewAbierto === idPreviewExtra(contexto) ? "true" : "false";
+    botonPrevisualizar.addEventListener("click", () => {
+      previsualizarCoordenada(contexto, coordenada, botonPrevisualizar);
     });
 
-    filaSeleccionar.append(botonProbar);
+    filaSeleccionar.append(botonPrevisualizar);
   }
 
   // Eliminar (✕ ghost, pegado al borde derecho vía margin-left:auto
@@ -573,6 +624,7 @@ export function abrirPopupExtraTeclaMouse(
       coordenada.aplicacion = "";
 
       cerrarVentanaCapturaCoordenada();
+      cerrarPreviewCoordenadaExtra();
       reconstruirFila(contexto.id);
       alModificar();
       redibujar();
@@ -611,5 +663,5 @@ export function abrirPopupExtraTeclaMouse(
     ),
   );
 
-  mostrarPopup(popup, evento.clientX, evento.clientY);
+  mostrarPopup(popup, evento.clientX, evento.clientY, cerrarPreviewCoordenadaExtra);
 }

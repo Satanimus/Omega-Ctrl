@@ -1436,33 +1436,6 @@ pub fn guardar_posicion_preview_coordenada(id: String, x: f64, y: f64) -> Result
     Ok(())
 }
 
-// ======================================================
-// ▶️ PROBAR COORDENADA — Etapa F
-// ------------------------------------------------------
-// Mueve el cursor real al punto calculado, mismo camino que
-// Runtime (back_coordenada::calcular_destino_valores() +
-// mover_cursor()).
-// ======================================================
-
-#[tauri::command]
-pub fn probar_coordenada(
-    ubicacion: String,
-    modo_ventana: String,
-    punto_referencia: String,
-    x: f64,
-    y: f64,
-) {
-    let (destino_x, destino_y) = back_coordenada::calcular_destino_valores(
-        &ubicacion,
-        &modo_ventana,
-        &punto_referencia,
-        x,
-        y,
-    );
-
-    back_coordenada::mover_cursor(destino_x, destino_y, &|| false);
-}
-
 #[tauri::command]
 pub fn obtener_cursor_captura() -> (i32, i32) {
     back_coordenada::obtener_cursor()

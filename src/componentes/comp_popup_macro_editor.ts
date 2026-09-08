@@ -3669,10 +3669,10 @@ function crearDetalleCoordenada(
   // ----------------------------------
   // COORDENADA — mismo flujo que la sección "Coordenada" del
   // popup Extra de Tecla/Mouse (comp_popup_coordenada.ts):
-  // Seleccionar/Cambiar (abre el gestor de coordenadas) + ▶
-  // Probar (solo Absoluta) + ✕ eliminar + box resumen. "En
-  // relación a"/"Medido en"/"Medido desde" ya no se eligen acá
-  // a mano — son responsabilidad exclusiva del gestor.
+  // Seleccionar/Cambiar (abre el gestor de coordenadas) + ✕
+  // eliminar + box resumen. "En relación a"/"Medido en"/"Medido
+  // desde" ya no se eligen acá a mano — son responsabilidad
+  // exclusiva del gestor.
   // ----------------------------------
 
   const tieneCoordenada = paso.coordX !== null && paso.coordY !== null;
@@ -3695,24 +3695,6 @@ function crearDetalleCoordenada(
   });
 
   filaSeleccionar.append(botonSeleccionar);
-
-  if (tieneCoordenada && paso.coordUbicacion === "absoluta") {
-    const botonProbar = document.createElement("button");
-    botonProbar.className = "ui-btn popup-extra-probar";
-    botonProbar.textContent = "▶ Probar";
-    botonProbar.title = "Mover mouse a coordenada";
-    botonProbar.addEventListener("click", () => {
-      invoke("probar_coordenada", {
-        ubicacion: paso.coordUbicacion,
-        modoVentana: paso.coordModoVentana,
-        puntoReferencia: paso.coordPuntoReferencia,
-        x: paso.coordX,
-        y: paso.coordY,
-      }).catch(() => {});
-    });
-
-    filaSeleccionar.append(botonProbar);
-  }
 
   if (tieneCoordenada) {
     const botonEliminar = document.createElement("button");
