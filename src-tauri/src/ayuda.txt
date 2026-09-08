@@ -180,9 +180,9 @@ PD: puedes agregar emojis 😎
 
 Prende o apaga esta fila (o, si es un separador, todo su tramo de filas) sin borrarla.
 
-Con 🔴 la fila queda inactiva: no dispara nada aunque el perfil esté activo.
+Con 🔴 [red:Off] la fila queda inactiva: no dispara nada aunque el perfil esté activo.
 
-Si ves [red:⚠️] en vez del ícono, la fila está apagada automáticamente por un conflicto con otra fila o por un aviso de la última compilación — el motivo puntual se explica en la barra de estado, abajo de la ventana.
+Si ves ⚠️ [red:Alerta] en vez del ícono, la fila está apagada automáticamente por un conflicto con otra fila o por un aviso de la última compilación — el motivo puntual se explica en la barra de estado, abajo de la ventana.
 
 ## popup-macro-accion
 🧩 **Acción — Macro**
@@ -198,13 +198,13 @@ Cada Macro se guarda en un archivo independiente en tu disco.
 ## menu-express-editor
 ⚡ **Acción — Menú Express**
 
-El nombre de arriba es el título del menú.
+El nombre es un título mostrado en el menú.
 
 `Botones Seleccionado`
-Filas ya agregadas a este menú, cada una con un nombre personalizado editable — quitalas con su botón de eliminar.
+Filas ya agregadas a este menú, cada una con un nombre personalizado editable — quitalas con su botón de eliminar [red:`x`].
 
 `Botones Disponibles`
-Resto de las filas del perfil, listas para agregarse con un click.
+Resto de las filas del perfil, listas para agregarse con un click en [cyan:`+`].
 
 ## portapapeles-editor
 📋 **Acción — Portapapeles**
@@ -234,13 +234,11 @@ Genera la Acción en un lugar específico de la pantalla o ventana activa.
 `📌 Seleccionar`
 Abre la ventana del `Gestor de Coordenadas`.
 
+`⊙ Previsualizar`
+Genera un indicador visual en la coordenada. 
+
 `Finalizar en:`
-Indica dónde queda el mouse luego de realizar la acción. Si se queda allá o regresa donde estaba. 
-
---------------
-
-**📌 Ventana Gestor de Coordenadas**
-Abre una ventana para marcar el punto en pantalla.
+Indica dónde queda el mouse luego de realizar la acción. Si se queda allá o regresa donde estaba.
 
 ## ventana-coordenadas
 **📌 Gestor de Coordenadas guardadas**
@@ -251,9 +249,13 @@ Administra las coordenadas que vas guardando para usarlas en tus filas.
 
 `📌 Fijar ventana`: Mantiene esta ventana siempre visible, por encima del resto.
 
+**Tabla**
+
 `✓`: Click en el número de fila envía los datos de la coordenada para usarla donde la solicitaste.
 
-` ⁝ `: Botón de opciones. Permite mover y seleccionar como en ventana principal.
+` ⁝ `: Botón de opciones. Expande para mostrar opciones de fila. Permite mover y seleccionar como en ventana principal.
+
+`⊙ Previsualizar`: Genera un indicador visual en la coordenada. 
 
 `Grupo`: Para que puedas filtrar y organizar tus coordenadas.
 
@@ -265,46 +267,62 @@ Administra las coordenadas que vas guardando para usarlas en tus filas.
 -[green:Ventana]: La coordenada está en relación a la ventana activa (útil si la ventana cambia de tamaño o posición).
 
 `X,Y`: Guarda la coordenada. 
+[cyan:`Generar marcador ⊙`]: Abre ventana `Modo Captura`. Presiona `F1` para guardar la coordenada del puntero según `Tipo` seleccionado.
+
 
 ## popup-extra-multimedia
 🎵 **Extra — Multimedia**
 
-Ajustes propios de la acción multimedia elegida (volumen, reproducción, etc.), según el tipo de control multimedia que tenga esta fila.
+`Global`: La acción multimedia funciona de manera predeterminada según Windows.
+
+`En App`: Si se selecciona una acción de `Volumen`, permite aplicarlo exclusivamente al programa seleccionado en la columna `App` de esta fila. 
 
 ## popup-extra-menu-express
 ⚡ **Extra — Menú Express**
 
-Configura cómo se ve y se comporta el Menú Express que abre esta fila: forma del menú y demás ajustes visuales/funcionales propios de ese menú.
+Configura cómo se ve y se comporta el Menú Express que abre esta fila.
 
+[cyan:Comportamiento]
+`Toggle`: El disparador crea y oculta el menú. 
+`Efímero`: El menú se oculta al clickear un botón.
 
+[cyan:Ubicación]
+`Persistente`: Posición fija.
+`Cursor`: El menú se crea donde esté el mouse.
 
 ## popup-extra-portapapeles
 📋 **Extra — Portapapeles**
 
-Ajustes de cómo se pega el contenido guardado en el portapapeles de esta fila: modo de pegado, formato, etc.
+Ajustes de la ventana de `Portapapeles`.
 
+[cyan:Comportamiento]
+`Toggle`: El disparador crea y oculta el menú. 
+`Efímero`: El menú se oculta al clickear un botón.
 
+[cyan:Ubicación]
+`Persistente`: Posición fija.
+`Cursor`: El menú se crea donde esté el mouse.
+
+[cyan:Límite de elementos]
+Cantidad máxima de elementos copiados no fijados. Luego de pasar de este número se borra el más antiguo de ellos.
 
 ## popup-extra-abrir
 📂 **Extra — Abrir Archivo/App**
 
-`Iniciar`
-Cómo arranca la ventana: normal, minimizada o maximizada.
-
-`Instancias`
-`Múltiple` permite abrir varias copias a la vez. `Única` hace que un click adicional solo enfoque la ya abierta.
+`Iniciar` e `Instancias`
+Nota: El funcionamiento de estas opciones está limitado por el programa que se ejecuta y cómo lo gestiona Windows.
 
 `Abrir con`
 Programa alternativo para abrir el archivo, en vez del asociado por Windows — solo aparece cuando la ruta no es un `.exe`.
 
 `Argumento`
-Línea de comandos, en vez de `Abrir con`, cuando la ruta sí es un ejecutable.
+Línea de comandos aplicable a ejecutables `.exe`.
 
 
 ## popup-extra-macro
 🧩 **Extra — Macro**
 
-`Comportamiento` define cómo se dispara la secuencia al presionar el Trigger:
+[cyan:Comportamiento] define cómo se dispara la secuencia al presionar el Trigger:
 
 `Una ejecución`
 Corre la macro entera una vez por cada pulsación.
@@ -315,28 +333,29 @@ La inicia con una pulsación y la corta con la siguiente.
 `Tecla mantenida`
 La repite en bucle mientras el Trigger sigue presionado.
 
+[cyan:Indicador de ejecución]
+Indica si debe mostrar una ventana pequeña que señala el número de paso actual y el total de pasos al ejecutar una macro. 
 
-## macro-editor-barra-titulo
-🧩 **Editor de Macro — Barra de título**
+## macro-editor-barra-titulo, macro-editor-panel-funciones
+🧩 **Editor de Macro**
 
-Muestra el nombre de la macro.
+**Grabar Macro**
+Permite crear rápidamente pasos de la macro grabando lo que hace el usuario.
+Presione `F2` para iniciar y detener el grabador. Todas las acciones realizadas con teclado y mouse aparecerán como pasos en la tabla. 
 
-`[...]`
-Renombra sin salir del editor.
+`Tiempos de espera`: Permite fijar o limitar el tiempo de las filas `Espera` creadas.
 
-`Cancelar`
-Cierra el editor sin aplicar los cambios hechos en esta sesión.
+**Importar Macro**
+Agrega los pasos de una Macro ya creada al final de la actual.
 
-Arrastrando esta barra se mueve toda la ventana del editor por la pantalla.
-
-## macro-editor-panel-funciones
-🧩 **Editor de Macro — Funciones**
-
+**Funciones**
 Lista los tipos de paso disponibles:
 
 `Tecla/Mouse` · `Espera` · `Bucle` · `Coordenada` · `Pegar` · `Abrir` · `Multimedia`
 
 Click en alguno agrega un paso nuevo de ese tipo al final de la secuencia.
+
+
 
 ## macro-editor-lista-pasos
 🧩 **Editor de Macro — Pasos**
@@ -345,10 +364,7 @@ Cada fila es un paso de la secuencia, en el orden en que se van a ejecutar.
 
 Se pueden reordenar arrastrando.
 Se pueden expandir para editar su detalle.
-El ancho de sus columnas se ajusta arrastrando el encabezado.
 
-## macro-editor-pie-botones
-🧩 **Editor de Macro — Guardar**
-
-`Guardar` (o `Guardar como`)
-Confirma la secuencia de pasos y la deja lista para usarse en esta fila.
+**Bucle** Permite volver a un paso anterior. 
+Se debe asignar un `Marcador para bucle` a una fila anterior (esta fila debe mostrar la misma letra del Bucle).
+Y se debe seleccionar cuántas veces se debe repetir el bucle. Luego de esa cantidad se continuará con el paso siguiente de manera normal. 

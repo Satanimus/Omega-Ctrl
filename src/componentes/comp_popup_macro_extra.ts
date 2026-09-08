@@ -142,7 +142,15 @@ export function abrirPopupExtraMacro(
 
     popup.append(crearFilaPopup("Indicador de ejecución", contenedorIndicador));
 
-    mostrarPopup(popup, evento.clientX, evento.clientY);
+    mostrarPopup(popup, evento.clientX, evento.clientY, () => {
+      if (ubicacionActiva) {
+        ubicacionActiva = false;
+
+        invoke("cerrar_ventana_indicador_macro").catch((error) => {
+          console.error("❌ No se pudo cerrar la ventana de ubicación:", error);
+        });
+      }
+    });
   };
 
   dibujar();
