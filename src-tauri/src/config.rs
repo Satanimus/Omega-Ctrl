@@ -204,7 +204,7 @@ use crate::eventos::InputId;
 // 📦 APP
 // ======================================================
 
-pub const NOMBRE_APP: &str = "RemapH";
+pub const NOMBRE_APP: &str = "OmegaCtrl";
 
 // ======================================================
 // ⏱️ TIEMPO DOBLE

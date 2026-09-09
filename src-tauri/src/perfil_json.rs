@@ -46,7 +46,7 @@
 // ------------------------------------------------------
 // 3. ¿Quién llama este archivo?
 // Recibe información desde:
-// - UI RemapH.
+// - UI OmegaCtrl.
 // Es utilizado por:
 // - Sistema de guardado. - Sistema de carga.- Compilador hacia perfil_cache.
 // ------------------------------------------------------
@@ -415,7 +415,7 @@ impl Default for MenuExpressExtraJson {
 // RemapeoJson::id de la fila (no hay id propio acá) — mismo criterio
 // que MenuExpress. A diferencia de MenuExpress, la fila NO es dueña
 // de ningún contenido propio: es solo un VISUALIZADOR de un pool de
-// elementos rotatorios compartido por todo RemapH (ver
+// elementos rotatorios compartido por todo OmegaCtrl (ver
 // back_portapapeles.rs, etapas E/F). Los fijados sí son exclusivos
 // de cada fila (prefijo {id}_ en el nombre de archivo), pero no
 // viajan acá — viven directamente en la carpeta del pool.

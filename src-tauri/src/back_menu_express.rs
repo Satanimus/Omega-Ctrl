@@ -811,7 +811,7 @@ fn crear_ventana(app: AppHandle, id: String, paquete: MenuExpressPaquete) {
             &label_interno,
             WebviewUrl::App(format!("menu_express.html?id={id_interno}").into()),
         )
-        .title("RemapH — Menú")
+        .title("OmegaCtrl — Menú")
         .inner_size(ancho, alto)
         .resizable(false)
         .decorations(false)

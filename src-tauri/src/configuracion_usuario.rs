@@ -386,7 +386,7 @@ fn escribir_mapa_completo(mapa: &HashMap<String, String>) -> Result<(), String> 
     let mut contenido = String::from(
         "# Configuracion_Usuario.txt — overrides de la Ventana de Configuración.\n\
          # Se reescribe por completo cada vez que se guarda un cambio: no editar\n\
-         # a mano mientras RemapH está abierto.\n\
+         # a mano mientras OmegaCtrl está abierto.\n\
          #\n\
          # Formato: clave=valor (una línea por override).\n\
          # Sin prefijo   → variable de config.rs (ver configuracion.tsv).\n\
@@ -958,7 +958,7 @@ pub fn restablecer_claves(claves: &[&str]) -> Result<(), String> {
 // ------------------------------------------------------
 // Se llama una sola vez, desde setup() en lib.rs. Nunca
 // hace panic: un override roto o una clave desconocida no
-// puede impedir que RemapH arranque, solo se loguea y se
+// puede impedir que OmegaCtrl arranque, solo se loguea y se
 // sigue con el resto.
 // ======================================================
 
@@ -1438,7 +1438,7 @@ pub fn restablecer_claves_css(app: &tauri::AppHandle, claves: &[String]) -> Resu
 // Formato idéntico a Configuracion_Usuario.txt ("clave=valor",
 // comentarios con #) pero SOLO con las variables CSS y SIN el
 // prefijo "css." — un archivo de tema es portable entre
-// instalaciones de RemapH, no debe depender del formato interno
+// instalaciones de OmegaCtrl, no debe depender del formato interno
 // del archivo de usuario.
 // ======================================================
 
@@ -1464,7 +1464,7 @@ fn contenido_tema(usar_overrides: bool) -> Result<String, String> {
     let catalogo = cargar_catalogo_css();
 
     let mut contenido = String::from(
-        "# Tema de Apariencia — RemapH.\n\
+        "# Tema de Apariencia — OmegaCtrl.\n\
          # Generado desde la Ventana de Configuración (pestaña Apariencia).\n\
          # Formato: variable=valor (una línea por variable CSS, sin el\n\
          # prefijo \"css.\" que usa Configuracion_Usuario.txt).\n\n",

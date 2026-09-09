@@ -1,7 +1,7 @@
 // ======================================================
 // 🎛️ core_Entrada
 // ------------------------------------------------------
-// Entrada en el idioma canónico de RemapH.
+// Entrada en el idioma canónico de OmegaCtrl.
 //
 // El código recibido aquí ya debe estar normalizado
 // al nombre físico usado por Interception.

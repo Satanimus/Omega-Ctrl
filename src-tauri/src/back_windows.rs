@@ -59,7 +59,7 @@
 //   que un driver de kernel.
 //
 // - Pueden no capturar eventos de procesos con más
-//   privilegios que RemapH si este no corre elevado.
+//   privilegios que OmegaCtrl si este no corre elevado.
 // ------------------------------------------------------
 // 5. Funciones del archivo
 // iniciar()
@@ -176,9 +176,9 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx, GetMessageW, GetSystemMetrics, PostThreadMessageW, SetWindowsHookExW,
     UnhookWindowsHookEx, KBDLLHOOKSTRUCT, MSG, MSLLHOOKSTRUCT, SM_CXVIRTUALSCREEN,
     SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN, WH_KEYBOARD_LL, WH_MOUSE_LL,
-    WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP,
-    WM_MOUSEMOVE, WM_MOUSEWHEEL, WM_QUIT, WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN,
-    WM_SYSKEYUP, WM_XBUTTONDOWN, WM_XBUTTONUP,
+    WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP, WM_MOUSEMOVE,
+    WM_MOUSEWHEEL, WM_QUIT, WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN, WM_SYSKEYUP,
+    WM_XBUTTONDOWN, WM_XBUTTONUP,
 };
 
 use crate::eventos::{InputId, InputState};
@@ -220,7 +220,7 @@ thread_local! {
 // de matching ahí dentro competía por ese presupuesto, causando
 // el lag general del sistema reportado con perfil activo
 // (arrastrar ventanas, rueda, etc. en cualquier app, no solo
-// en RemapH).
+// en OmegaCtrl).
 //
 // `procesar` es siempre una `fn` libre (entrada::procesar_evento
 // — ver lib.rs), no una closure con estado capturado, así que es
@@ -833,8 +833,7 @@ pub fn mover_cursor(x: i32, y: i32, debe_detenerse: &dyn Fn() -> bool) {
         let restante_x = x - actual_x;
         let restante_y = y - actual_y;
 
-        if restante_x.abs() <= TOLERANCIA_LLEGADA_PX && restante_y.abs() <= TOLERANCIA_LLEGADA_PX
-        {
+        if restante_x.abs() <= TOLERANCIA_LLEGADA_PX && restante_y.abs() <= TOLERANCIA_LLEGADA_PX {
             // Último ajuste fino: un movimiento absoluto directo al
             // destino exacto, sin interpolar (la distancia restante
             // ya es mínima, no hace falta trayecto intermedio).

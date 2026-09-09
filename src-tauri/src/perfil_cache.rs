@@ -340,7 +340,7 @@ pub enum AccionCache {
         // que AccionCache::MenuExpress::color: uso funcional real,
         // back_portapapeles.rs lo usa como color base de la barra
         // superior de la ventana (spec: "hereda el color de la fila
-        // en RemapH").
+        // en OmegaCtrl").
         color: String,
     },
 }

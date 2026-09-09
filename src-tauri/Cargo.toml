@@ -1,12 +1,12 @@
 [package]
-name = "remaph"
+name = "omegactrl"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
 
 [lib]
-name = "remaph_lib"
+name = "omegactrl_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

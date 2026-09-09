@@ -780,7 +780,7 @@ pub async fn abrir_ventana_captura_coordenada(
         VENTANA_CAPTURA_COORDENADA,
         WebviewUrl::App("captura.html".into()),
     )
-    .title("RemapH — Captura")
+    .title("OmegaCtrl — Captura")
     .inner_size(320.0, 120.0)
     .resizable(false)
     .decorations(false)
@@ -909,7 +909,7 @@ pub async fn abrir_ventana_preview_coordenada(
         label,
         WebviewUrl::App(format!("captura.html?id={id}&numero={numero}").into()),
     )
-    .title("RemapH — Captura")
+    .title("OmegaCtrl — Captura")
     .inner_size(56.0, 56.0)
     .position(posicion_x, posicion_y)
     .resizable(false)
@@ -1038,7 +1038,7 @@ pub async fn abrir_ventana_origen_cursor(
         LABEL_VENTANA_ORIGEN_CURSOR,
         WebviewUrl::App("captura.html?modo=origen_cursor".into()),
     )
-    .title("RemapH — Captura")
+    .title("OmegaCtrl — Captura")
     .inner_size(56.0, 56.0)
     .position(posicion_x, posicion_y)
     .resizable(false)
@@ -1227,7 +1227,7 @@ pub(crate) fn abrir_ventana_indicador_macro_interno(
         LABEL_VENTANA_INDICADOR_MACRO,
         WebviewUrl::App(url.into()),
     )
-    .title("RemapH — Indicador Macro")
+    .title("OmegaCtrl — Indicador Macro")
     .inner_size(ANCHO_INDICADOR_MACRO_LOGICO, ALTO_INDICADOR_MACRO_LOGICO)
     .position(posicion_x, posicion_y)
     .resizable(false)
@@ -1574,7 +1574,7 @@ pub async fn abrir_ventana_coordenadas(
         VENTANA_COORDENADAS,
         WebviewUrl::App("coordenadas.html".into()),
     )
-    .title("RemapH — Gestor de Coordenadas guardadas")
+    .title("OmegaCtrl — Gestor de Coordenadas guardadas")
     .inner_size(720.0, 480.0)
     .resizable(true)
     .focused(true)
@@ -1958,7 +1958,7 @@ pub async fn abrir_ventana_configuracion(app: tauri::AppHandle) -> Result<(), St
         VENTANA_CONFIGURACION,
         WebviewUrl::App("configuracion.html".into()),
     )
-    .title("RemapH — Configuración")
+    .title("OmegaCtrl — Configuración")
     .inner_size(720.0, 560.0)
     .min_inner_size(560.0, 420.0)
     .resizable(true)
@@ -2318,7 +2318,7 @@ pub async fn configuracion_guardar_tema(nombre_sugerido: String) -> Result<bool,
 // ------------------------------------------------------
 // Botón "Abrir carpeta de usuario" en la barra de pestañas
 // de la Ventana de Configuración — abre
-// %APPDATA%/RemapH/Usuario/ (Perfiles/Portapapeles/Themes)
+// %APPDATA%/OmegaCtrl/Usuario/ (Perfiles/Portapapeles/Themes)
 // en el Explorador de Windows.
 // ======================================================
 
@@ -2387,7 +2387,10 @@ pub async fn configuracion_tema_renombrar(
 }
 
 #[tauri::command]
-pub async fn configuracion_tema_eliminar(app: tauri::AppHandle, nombre: String) -> Result<(), String> {
+pub async fn configuracion_tema_eliminar(
+    app: tauri::AppHandle,
+    nombre: String,
+) -> Result<(), String> {
     configuracion_usuario::eliminar_tema(&app, &nombre)
 }
 
@@ -2410,7 +2413,7 @@ pub async fn configuracion_apariencia_iniciar_sesion() -> Result<TemaListadoUI, 
 pub async fn configuracion_cargar_tema() -> Result<Option<ConfiguracionResultadoGuardadoUI>, String>
 {
     let Some(ruta) = rfd::FileDialog::new()
-        .add_filter("Tema RemapH", &["theme"])
+        .add_filter("Tema OmegaCtrl", &["theme"])
         .pick_file()
     else {
         return Ok(None);

@@ -571,7 +571,7 @@ static LISTENER_CORRIENDO: AtomicBool = AtomicBool::new(false);
 static CLASE_REGISTRADA: AtomicBool = AtomicBool::new(false);
 static HWND_ACTUAL: Mutex<Option<isize>> = Mutex::new(None);
 
-const NOMBRE_CLASE: &str = "RemapHPortapapelesListener";
+const NOMBRE_CLASE: &str = "OmegaCtrlPortapapelesListener";
 
 /// Handle (como isize crudo) de la ventana oculta del listener de
 /// Portapapeles, si está corriendo.

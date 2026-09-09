@@ -41,7 +41,7 @@
 //     disco (para provocar la activación real de la ventana) y recién
 //     después espera y pega. Con TEXTO: salta directo la activación
 //     (no hace falta) y va directo al delay + pegado. En ambos casos
-//     pega con el MISMO camino que usa el resto de RemapH:
+//     pega con el MISMO camino que usa el resto de OmegaCtrl:
 //     crate::runtime::emitir_ctrl_v(). Ya no arma ni lanza un segundo
 //     script .jsx de pegado — un relanzamiento menos de Photoshop por
 //     click.
@@ -189,7 +189,7 @@ fn ejecutar_pegado_photoshop(
 fn ruta_script_vacio() -> Option<PathBuf> {
     RUTA_SCRIPT_VACIO
         .get_or_init(|| {
-            let ruta = std::env::temp_dir().join("remaph_photoshop_activar.jsx");
+            let ruta = std::env::temp_dir().join("omegactrl_photoshop_activar.jsx");
 
             match fs::write(&ruta, SCRIPT_VACIO) {
                 Ok(()) => Some(ruta),

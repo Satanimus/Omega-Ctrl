@@ -3,7 +3,7 @@
 // ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 // Punto único de despacho entre los dos backends de
-// entrada/salida que puede tener RemapH: back_interception
+// entrada/salida que puede tener OmegaCtrl: back_interception
 // (driver Interception) y back_windows (hooks WinAPI, Modo
 // Portable — ver REGLAS_MODO_PORTABLE.txt).
 //

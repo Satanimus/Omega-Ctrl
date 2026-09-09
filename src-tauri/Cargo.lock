@@ -2463,6 +2463,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "omegactrl"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "base64 0.22.1",
+ "interception",
+ "png 0.18.1",
+ "raw-window-handle",
+ "rfd",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "uuid",
+ "windows-sys 0.61.2",
+ "winmix",
+ "winreg 0.56.0",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2927,27 +2948,6 @@ name = "regex-syntax"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
-
-[[package]]
-name = "remaph"
-version = "0.1.0"
-dependencies = [
- "arboard",
- "base64 0.22.1",
- "interception",
- "png 0.18.1",
- "raw-window-handle",
- "rfd",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-opener",
- "uuid",
- "windows-sys 0.61.2",
- "winmix",
- "winreg 0.56.0",
-]
 
 [[package]]
 name = "reqwest"

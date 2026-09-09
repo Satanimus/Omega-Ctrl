@@ -114,7 +114,7 @@ impl MacroArchivoJson {
 // un serde_json::Value ya serializado, sin tocar esta struct.
 //
 // Los campos que ahora pueden faltar en un archivo *leído* de disco
-// (uno ya trimeado por una versión anterior de RemapH, o uno viejo
+// (uno ya trimeado por una versión anterior de OmegaCtrl, o uno viejo
 // donde no aplica) llevan #[serde(default)] (o
 // #[serde(default = "...")] para tecla_accion, que no tiene Default
 // propio) para no fallar el Deserialize si no están.

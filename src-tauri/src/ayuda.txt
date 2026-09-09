@@ -1,5 +1,5 @@
 ## boton_panel_ayuda
-**¡Bienvenido a RemapH!**
+**¡Bienvenido a OmegaCtrl!**
 
 Ahora podrás transformar cualquier tecla o click en lo que necesites: cosas simples como en otro atajo o comando multimedia, un muy útil menu radial universal y hasta macros complejas de automatización. 
 

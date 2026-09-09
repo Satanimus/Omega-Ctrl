@@ -6,7 +6,7 @@
 // 1. ¿Qué hace este archivo?
 //
 // Mantiene el diccionario único de todos
-// los pulsadores compatibles con RemapH.
+// los pulsadores compatibles con OmegaCtrl.
 //
 // Traduce entre:
 //

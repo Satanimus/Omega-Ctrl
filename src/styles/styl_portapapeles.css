@@ -7,7 +7,7 @@
    solo las variables centralizadas en styl_variables.css,
    incluidas las --tag-<color> de la paleta de filas: la barra
    superior se tiñe con el color de la fila (spec: "hereda el
-   color de la fila en RemapH").
+   color de la fila en OmegaCtrl").
 
    Layout: siempre lista vertical (Portapapeles nunca es Radial,
    a diferencia de MenuExpress) — header con nombre + [x], lista

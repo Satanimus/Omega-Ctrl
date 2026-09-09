@@ -8,7 +8,7 @@
 //
 // A diferencia de MenuExpress, la fila NO es dueña de ningún
 // contenido propio: es solo un VISUALIZADOR de un pool de
-// elementos rotatorios compartido por todo RemapH (ver
+// elementos rotatorios compartido por todo OmegaCtrl (ver
 // back_portapapeles.rs). portapapelesAccion.nombre es simplemente
 // el título de su ventana — no hay lista de botones que armar acá.
 //

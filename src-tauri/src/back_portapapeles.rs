@@ -7,7 +7,7 @@
 //
 // Dueño de la carpeta física del pool compartido de Portapapeles:
 //
-// %APPDATA%/RemapH/Usuario/Portapapeles/
+// %APPDATA%/OmegaCtrl/Usuario/Portapapeles/
 //   ├── abc123-...-def_MiLink.txt        (fijado)
 //   ├── Imagen_13.45.55.png              (rotativo)
 //   └── la ciudad es.txt                 (rotativo)
@@ -215,7 +215,7 @@
 // 6. Funciones del archivo
 //
 // carpeta()
-//     Resuelve (y crea si no existe) %APPDATA%/RemapH/Usuario/Portapapeles/.
+//     Resuelve (y crea si no existe) %APPDATA%/OmegaCtrl/Usuario/Portapapeles/.
 // listar_rotativos()
 //     Todos los rotativos del pool, más reciente primero.
 // listar_fijados()
@@ -1373,7 +1373,7 @@ pub fn pegar(valor: &str, bloquear_hasta_pegar: bool) -> Result<(), String> {
 
     back_portapapeles_captura::escribir_portapapeles(&contenido)?;
 
-    // Se usa el motor real de emisión de RemapH (back_interception,
+    // Se usa el motor real de emisión de OmegaCtrl (back_interception,
     // nivel driver) en vez de simular_ctrl_v() (SendInput/WinAPI,
     // función dejada más abajo sin usar por ahora, no borrada). Se
     // confirmó que un atajo de Menú Express con el mismo Ctrl+V
@@ -1438,10 +1438,10 @@ pub fn pegar(valor: &str, bloquear_hasta_pegar: bool) -> Result<(), String> {
         // Ctrl+V y leer el portapapeles antes de retornar. Sin esto,
         // pasos "Pegar" consecutivos de una Macro seguían fallando
         // (pegaba "233566" en vez de "123456") incluso con el Ctrl+V
-        // ya emitido de este lado: RemapH solo controla cuándo TERMINA
+        // ya emitido de este lado: OmegaCtrl solo controla cuándo TERMINA
         // de emitir la tecla, no cuándo la app objetivo la procesa —
         // eso pasa en el message-loop de esa ventana, en su propio
-        // hilo, de forma asíncrona a que RemapH suelte la tecla. El
+        // hilo, de forma asíncrona a que OmegaCtrl suelte la tecla. El
         // paso siguiente ya estaba sobreescribiendo el portapapeles
         // con el próximo texto antes de que la app llegara a leerlo.
         // Mismo timer que la espera ANTES de emitir
@@ -1630,7 +1630,7 @@ fn dimensiones_png(ruta: &Path) -> Option<(u32, u32)> {
 // code real— no lograba que Paint (UWP) reaccionara al
 // Ctrl+V. La causa real: este es el único lugar del proyecto
 // que emitía teclas vía SendInput/WinAPI en vez del motor
-// real de RemapH (back_interception, nivel driver) — ver
+// real de OmegaCtrl (back_interception, nivel driver) — ver
 // runtime.rs sección 5.G, "Backend de salida: emitir_evento()
 // usa back_interception exclusivamente. Ya no existe el modo
 // dual con back_windows". pegar() ahora llama
@@ -2544,7 +2544,7 @@ fn crear_ventana(app: AppHandle, id: String, paquete: PortapapelesPaquete) {
             &label_interno,
             WebviewUrl::App(format!("portapapeles.html?id={id_interno}").into()),
         )
-        .title("RemapH — Portapapeles")
+        .title("OmegaCtrl — Portapapeles")
         .inner_size(ancho, alto)
         // Redimensionable en ambos ejes. Solo se fija un mínimo (para
         // que no se pueda achicar hasta volverla inusable) — sin
@@ -2743,7 +2743,7 @@ mod tests {
 
     #[test]
     fn escribe_y_lee_nombre_meta() {
-        let carpeta = std::env::temp_dir().join("remaph_test_ads");
+        let carpeta = std::env::temp_dir().join("omegactrl_test_ads");
         fs::create_dir_all(&carpeta).unwrap();
         let ruta = carpeta.join("elemento.txt");
         fs::write(&ruta, "hola").unwrap();
@@ -2756,7 +2756,7 @@ mod tests {
 
     #[test]
     fn nombre_meta_sin_stream_cae_a_sin_titulo() {
-        let carpeta = std::env::temp_dir().join("remaph_test_ads_vacio");
+        let carpeta = std::env::temp_dir().join("omegactrl_test_ads_vacio");
         fs::create_dir_all(&carpeta).unwrap();
         let ruta = carpeta.join("elemento.txt");
         fs::write(&ruta, "hola").unwrap();
@@ -2768,7 +2768,7 @@ mod tests {
 
     #[test]
     fn nombre_por_defecto_se_recorta_a_50_caracteres() {
-        let base = std::env::temp_dir().join("remaph_test_appdata_recorte");
+        let base = std::env::temp_dir().join("omegactrl_test_appdata_recorte");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
@@ -2797,7 +2797,7 @@ mod tests {
 
     #[test]
     fn elemento_desde_ruta_detecta_fijado() {
-        let carpeta = std::env::temp_dir().join("remaph_test_fijado");
+        let carpeta = std::env::temp_dir().join("omegactrl_test_fijado");
         fs::create_dir_all(&carpeta).unwrap();
 
         // El nombre físico ya no es legible — puede tener guión
@@ -2820,7 +2820,7 @@ mod tests {
 
     #[test]
     fn elemento_desde_ruta_detecta_rotativo() {
-        let carpeta = std::env::temp_dir().join("remaph_test_rotativo");
+        let carpeta = std::env::temp_dir().join("omegactrl_test_rotativo");
         fs::create_dir_all(&carpeta).unwrap();
 
         let ruta = carpeta.join("173abc_0001.txt");
@@ -2838,7 +2838,7 @@ mod tests {
 
     #[test]
     fn flujo_guardar_listar_fijar_desfijar_renombrar_eliminar() {
-        let base = std::env::temp_dir().join("remaph_test_appdata");
+        let base = std::env::temp_dir().join("omegactrl_test_appdata");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
@@ -2932,7 +2932,7 @@ mod tests {
 
     #[test]
     fn en_cambio_del_sistema_no_escribe_sin_activos() {
-        let base = std::env::temp_dir().join("remaph_test_en_cambio_sin_activos");
+        let base = std::env::temp_dir().join("omegactrl_test_en_cambio_sin_activos");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
@@ -2953,7 +2953,7 @@ mod tests {
 
     #[test]
     fn en_cambio_del_sistema_guarda_y_aplica_limite_con_activos() {
-        let base = std::env::temp_dir().join("remaph_test_en_cambio_con_activos");
+        let base = std::env::temp_dir().join("omegactrl_test_en_cambio_con_activos");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
@@ -3009,7 +3009,7 @@ mod tests {
 
     #[test]
     fn mismo_contenido_detecta_texto_igual_y_distinto() {
-        let base = std::env::temp_dir().join("remaph_test_mismo_contenido_texto");
+        let base = std::env::temp_dir().join("omegactrl_test_mismo_contenido_texto");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
@@ -3035,7 +3035,7 @@ mod tests {
 
     #[test]
     fn mismo_contenido_detecta_imagen_igual_y_distinta() {
-        let base = std::env::temp_dir().join("remaph_test_mismo_contenido_imagen");
+        let base = std::env::temp_dir().join("omegactrl_test_mismo_contenido_imagen");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
@@ -3077,7 +3077,7 @@ mod tests {
 
     #[test]
     fn construir_datos_modo_simple_normal_sin_activos() {
-        let base = std::env::temp_dir().join("remaph_test_construir_simple");
+        let base = std::env::temp_dir().join("omegactrl_test_construir_simple");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
@@ -3104,7 +3104,7 @@ mod tests {
 
     #[test]
     fn construir_datos_modo_registro_lista_todos_los_rotativos() {
-        let base = std::env::temp_dir().join("remaph_test_construir_registro");
+        let base = std::env::temp_dir().join("omegactrl_test_construir_registro");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
@@ -3137,7 +3137,7 @@ mod tests {
 
     #[test]
     fn construir_datos_modo_simple_con_otro_id_activo_no_duplica() {
-        let base = std::env::temp_dir().join("remaph_test_construir_otro_activo");
+        let base = std::env::temp_dir().join("omegactrl_test_construir_otro_activo");
         fs::create_dir_all(&base).unwrap();
         std::env::set_var("APPDATA", &base);
 
