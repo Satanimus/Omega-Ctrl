@@ -1574,7 +1574,7 @@ pub async fn abrir_ventana_coordenadas(
         VENTANA_COORDENADAS,
         WebviewUrl::App("coordenadas.html".into()),
     )
-    .title("OmegaCtrl — Gestor de Coordenadas guardadas")
+    .title("Omega Ctrl — Gestor de Coordenadas")
     .inner_size(720.0, 480.0)
     .resizable(true)
     .focused(true)
@@ -1958,7 +1958,7 @@ pub async fn abrir_ventana_configuracion(app: tauri::AppHandle) -> Result<(), St
         VENTANA_CONFIGURACION,
         WebviewUrl::App("configuracion.html".into()),
     )
-    .title("OmegaCtrl — Configuración")
+    .title("Omega Ctrl — Configuración")
     .inner_size(720.0, 560.0)
     .min_inner_size(560.0, 420.0)
     .resizable(true)
