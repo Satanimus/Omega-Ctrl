@@ -223,6 +223,14 @@
 
   --status-height: 26px;
 
+  /* Barra superior de la familia de ventanas indicadoras
+      (Modo Captura, Indicador de Macro y cualquier aviso
+      emergente futuro que la comparta) — unos px más alta
+      que su botón Cancelar (--indicador-boton-alto). */
+  --indicador-header-alto: 24px;
+
+  --indicador-boton-alto: 20px;
+
   /* ==========================
        Columnas
        ========================== */

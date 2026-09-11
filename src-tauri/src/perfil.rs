@@ -155,6 +155,20 @@ pub fn desactivar_perfil() {
 }
 
 // ======================================================
+// 🚚 DETENER SI ESTABA ACTIVO (post-migración carpeta Usuario)
+// ------------------------------------------------------
+// Usado antes de migrar la carpeta de Usuario a otra ruta
+// (Regla 12): si el perfil estaba activo, se detiene; si
+// no lo estaba, no hace nada.
+// ======================================================
+
+pub fn detener_si_activo() {
+    if obtener_estado_cache() {
+        desactivar_perfil();
+    }
+}
+
+// ======================================================
 // 📂 OBTENER PERFIL ACTUAL
 // ------------------------------------------------------
 // Devuelve también las advertencias de esta compilación automática

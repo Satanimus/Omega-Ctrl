@@ -708,11 +708,7 @@ button.familia-highdark.familia-highdark:hover {
 
     white-space: nowrap;
 
-    height: 28px;
-
     margin: 0;
-
-    padding: 0 var(--gap12);
 
     background: transparent;
 
@@ -731,6 +727,41 @@ button.familia-highdark.familia-highdark:hover {
     transition:
         border-color .12s ease,
         color .12s ease;
+}
+
+.btn-agregar-fila,
+.btn-agregar-separador,
+.btn-ayuda {
+
+    height: 28px;
+
+    padding: 0 var(--gap12);
+}
+
+/* Logo — el botón queda exactamente del tamaño de la imagen (sin
+   padding interno), mismo alto que .cambios-pendientes (36px, ver
+   más abajo). El aire va afuera, como margin: la mitad de
+   var(--gap12) a la izquierda (más apegado al borde de la toolbar)
+   y esa misma mitad a la derecha (para no quedar pegado al botón
+   "+ Fila", que ya no aporta gap porque .toolbar-left tiene gap:0). */
+.btn-menu-lateral {
+
+    height: 36px;
+
+    padding: 0;
+
+    margin-left: calc(var(--gap12) / 2);
+
+    margin-right: calc(var(--gap12) / 2);
+}
+
+.btn-menu-lateral img {
+
+    height: 100%;
+
+    width: auto;
+
+    display: block;
 }
 
 .btn-menu-lateral:hover,

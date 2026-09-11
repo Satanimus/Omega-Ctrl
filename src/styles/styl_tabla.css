@@ -28,7 +28,15 @@
 
   box-sizing: border-box;
 
-  overflow: auto;
+  overflow-y: auto;
+
+  /* [FIX] Al angostar la ventana no debe aparecer una barra de
+       desplazamiento horizontal: las columnas que ya no entran se
+       recortan (el ajuste .viewport.recortado de más abajo ya
+       estaba pensado justo para ese caso, para que el fondo/color
+       llegue prolijo hasta el corte). Antes esto era overflow:auto
+       (ambos ejes), por eso el scroll horizontal sí se generaba. */
+  overflow-x: hidden;
 }
 
 /* ======================================================
@@ -467,6 +475,24 @@
   padding: 0 var(--gap8);
 
   white-space: nowrap;
+}
+
+/* [FIX] Span propio para el título (ver ui_tabla.ts) — separado
+   del .divisor-columna (absolute, mismo padre) para que su
+   scrollWidth refleje solo el texto, nunca al divisor. flex:1
+   para ocupar el espacio disponible de la celda (el divisor no
+   participa del flex, al estar fuera de flujo) y así clientWidth
+   sea el ancho real disponible para el texto. */
+.cabecera-celda-texto {
+  flex: 1 1 auto;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  text-align: center;
 }
 
 .celda {

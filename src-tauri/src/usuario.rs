@@ -77,15 +77,219 @@ use tauri::Manager;
 // ======================================================
 
 pub(crate) fn carpeta() -> Result<PathBuf, String> {
-    let appdata = std::env::var("APPDATA").map_err(|error| error.to_string())?;
+    if let Some(carpeta) = carpeta_junto_a_exe() {
+        return Ok(carpeta);
+    }
 
-    let carpeta = PathBuf::from(appdata)
-        .join(config::NOMBRE_APP)
-        .join("Usuario");
+    let destino = match leer_override() {
+        Some(destino) => destino,
+        None => carpeta_default()?,
+    };
+
+    let carpeta = destino.join("Usuario");
 
     fs::create_dir_all(&carpeta).map_err(|error| error.to_string())?;
 
     Ok(carpeta)
+}
+
+// Destino padre por defecto (%APPDATA%\NOMBRE_APP), sin el "Usuario"
+// final — mismo criterio que carpeta_instalacion() y un override
+// "Otra". Expuesta para que el comando de Configuración pueda
+// mostrar/usar esta ruta como una de las 3 opciones del selector.
+pub(crate) fn carpeta_default() -> Result<PathBuf, String> {
+    let appdata = std::env::var("APPDATA").map_err(|error| error.to_string())?;
+
+    Ok(PathBuf::from(appdata).join(config::NOMBRE_APP))
+}
+
+// Si ya existe una carpeta "Usuario" al lado del .exe actual, es
+// portable y manda por sobre cualquier otra fuente (Regla 1/2).
+fn carpeta_junto_a_exe() -> Option<PathBuf> {
+    let exe = std::env::current_exe().ok()?;
+    let carpeta = exe.parent()?.join("Usuario");
+
+    carpeta.is_dir().then_some(carpeta)
+}
+
+// Marcador fijo en AppData (independiente de la carpeta Usuario que
+// resuelve), donde Configuración guarda la carpeta destino elegida
+// por el usuario (Regla 4) — el padre de "Usuario", no "Usuario"
+// mismo (mismo criterio que Default e Instalación). Contiene la
+// ruta absoluta en texto plano.
+fn ruta_override() -> Option<PathBuf> {
+    let appdata = std::env::var("APPDATA").ok()?;
+
+    Some(
+        PathBuf::from(appdata)
+            .join(config::NOMBRE_APP)
+            .join("ubicacion.txt"),
+    )
+}
+
+pub(crate) fn leer_override() -> Option<PathBuf> {
+    let contenido = fs::read_to_string(ruta_override()?).ok()?;
+    let contenido = contenido.trim();
+
+    (!contenido.is_empty()).then(|| PathBuf::from(contenido))
+}
+
+// ======================================================
+// ⚙️ OVERRIDE DE CARPETA DE USUARIO (Configuración)
+// ------------------------------------------------------
+// guardar_override()/quitar_override() son los únicos
+// puntos de escritura de ubicacion.txt (Regla 3/4). No
+// migran nada — eso es responsabilidad de la Etapa C,
+// que llama a estas funciones recién después de migrar.
+// ======================================================
+
+pub(crate) fn guardar_override(destino: &Path) -> Result<(), String> {
+    let ruta = ruta_override().ok_or("No se pudo resolver %APPDATA%")?;
+
+    if let Some(padre) = ruta.parent() {
+        fs::create_dir_all(padre).map_err(|error| error.to_string())?;
+    }
+
+    fs::write(&ruta, destino.to_string_lossy().as_bytes()).map_err(|error| error.to_string())
+}
+
+pub(crate) fn quitar_override() -> Result<(), String> {
+    let Some(ruta) = ruta_override() else {
+        return Ok(());
+    };
+
+    match fs::remove_file(&ruta) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+// Carpeta del .exe, para la opción "Carpeta de instalación OmegaCtrl"
+// del selector — destino padre, igual que Default y un override
+// "Otra" (Regla 6): "Usuario" se crea/migra debajo de esta carpeta.
+pub(crate) fn carpeta_instalacion() -> Result<PathBuf, String> {
+    let exe = std::env::current_exe().map_err(|error| error.to_string())?;
+
+    exe.parent()
+        .map(Path::to_path_buf)
+        .ok_or_else(|| "No se pudo resolver la carpeta del ejecutable".to_string())
+}
+
+// Confirma que se puede crear/escribir/borrar en la carpeta (Regla 9).
+pub(crate) fn validar_carpeta_escribible(carpeta: &Path) -> Result<(), String> {
+    fs::create_dir_all(carpeta).map_err(|error| error.to_string())?;
+
+    let archivo_prueba = carpeta.join(".omegactrl_test");
+
+    fs::write(&archivo_prueba, b"").map_err(|error| error.to_string())?;
+
+    fs::remove_file(&archivo_prueba).map_err(|error| error.to_string())
+}
+
+// Detecta si la carpeta cae dentro de una carpeta de sistema típica
+// (Program Files, Program Files (x86), Windows) para mostrar el
+// aviso de modo administrador (Regla 8).
+pub(crate) fn es_carpeta_sistema(carpeta: &Path) -> bool {
+    let claves = ["ProgramFiles", "ProgramFiles(x86)", "ProgramW6432", "windir"];
+
+    let objetivo = carpeta.to_string_lossy().to_lowercase();
+
+    claves.iter().any(|clave| {
+        std::env::var(clave)
+            .map(|ruta| objetivo.starts_with(&ruta.to_lowercase()))
+            .unwrap_or(false)
+    })
+}
+
+// ======================================================
+// 🚚 MIGRACIÓN DE CARPETA USUARIO (Regla 10/11)
+// ------------------------------------------------------
+// Puro backend: no decide qué hacer ante un conflicto ni
+// ante la carpeta antigua, solo ejecuta lo que la Etapa E
+// (comandos) le indique tras la respuesta del usuario en
+// los popups de la Etapa H.
+// ======================================================
+
+// ¿El destino ya tiene una carpeta "Usuario" con contenido? (Regla 11)
+pub(crate) fn destino_usuario_no_vacio(destino: &Path) -> bool {
+    let carpeta = destino.join("Usuario");
+
+    fs::read_dir(&carpeta)
+        .map(|mut entradas| entradas.next().is_some())
+        .unwrap_or(false)
+}
+
+pub(crate) fn renombrar_usuario_existente(destino: &Path) -> Result<(), String> {
+    let actual = destino.join("Usuario");
+    let respaldo = destino.join("usuario_old");
+
+    if respaldo.exists() {
+        fs::remove_dir_all(&respaldo).map_err(|error| error.to_string())?;
+    }
+
+    fs::rename(&actual, &respaldo).map_err(|error| error.to_string())
+}
+
+pub(crate) fn eliminar_usuario_existente(destino: &Path) -> Result<(), String> {
+    let actual = destino.join("Usuario");
+
+    fs::remove_dir_all(&actual).map_err(|error| error.to_string())
+}
+
+// Copia la carpeta Usuario actual (según carpeta(), antes de guardar
+// el override) a destino/Usuario. Debe llamarse ANTES de
+// guardar_override(), o el origen y el destino coincidirían.
+pub(crate) fn migrar_usuario(destino: &Path) -> Result<(), String> {
+    let origen = carpeta()?;
+    let destino_usuario = destino.join("Usuario");
+
+    copiar_directorio_recursivo(&origen, &destino_usuario)
+}
+
+// Borra una carpeta Usuario ya migrada (Regla 10, opción "Eliminar"
+// sobre la ruta antigua). Recibe la ruta ya resuelta de antemano
+// (capturada antes de guardar_override) — carpeta() a esta altura
+// ya apunta al destino nuevo.
+pub(crate) fn eliminar_carpeta(carpeta: &Path) -> Result<(), String> {
+    fs::remove_dir_all(carpeta).map_err(|error| error.to_string())
+}
+
+// "Mantener" sobre la carpeta antigua cuando esta era la portable
+// junto al exe: no puede seguir llamándose "Usuario" o la Regla 1
+// la vuelve a tomar en el próximo arranque e ignora el override
+// recién guardado. Se renombra a "Usuario_old" junto al exe.
+pub(crate) fn renombrar_a_usuario_old(carpeta: &Path) -> Result<(), String> {
+    let destino = carpeta
+        .parent()
+        .ok_or("No se pudo resolver la carpeta contenedora")?
+        .join("Usuario_old");
+
+    if destino.exists() {
+        fs::remove_dir_all(&destino).map_err(|error| error.to_string())?;
+    }
+
+    fs::rename(carpeta, destino).map_err(|error| error.to_string())
+}
+
+fn copiar_directorio_recursivo(origen: &Path, destino: &Path) -> Result<(), String> {
+    fs::create_dir_all(destino).map_err(|error| error.to_string())?;
+
+    for entrada in fs::read_dir(origen).map_err(|error| error.to_string())? {
+        let entrada = entrada.map_err(|error| error.to_string())?;
+        let ruta_origen = entrada.path();
+        let ruta_destino = destino.join(entrada.file_name());
+
+        let tipo = entrada.file_type().map_err(|error| error.to_string())?;
+
+        if tipo.is_dir() {
+            copiar_directorio_recursivo(&ruta_origen, &ruta_destino)?;
+        } else {
+            fs::copy(&ruta_origen, &ruta_destino).map_err(|error| error.to_string())?;
+        }
+    }
+
+    Ok(())
 }
 
 // ======================================================

@@ -30,6 +30,7 @@ import { invoke } from "@tauri-apps/api/core";
 import {
   crearContenedorPopup,
   mostrarPopup,
+  ocultarPopup,
 } from "../componentes/comp_popup_contenedor";
 
 import {
@@ -1148,6 +1149,299 @@ const pestanaGeneral = crearPestanaEditable({
     "Además, puedes ajustar los tiempos para reconocimiento de " +
     "combinación de teclas disparadoras y teclas emuladas a la salida.",
 });
+
+// ======================================================
+// 📁 CARPETA DE USUARIO (fila independiente, pestaña General)
+// ------------------------------------------------------
+// No participa del flujo de "cambios pendientes"/Aplicar de
+// crearPestanaEditable — el cambio se aplica al momento a través
+// del popup del selector (Etapa G), no queda pendiente de Guardar.
+// Acá solo la fila con el botón que refleja el estado actual.
+// ======================================================
+
+interface EstadoCarpetaUsuario {
+  tipo: "default" | "instalacion" | "otra";
+  ruta: string;
+}
+
+const ETIQUETAS_TIPO_CARPETA_USUARIO: Record<"default" | "instalacion", string> = {
+  default: "%AppData%",
+  instalacion: "OmegaCtrl",
+};
+
+const filaCarpetaUsuario = document.createElement("div");
+filaCarpetaUsuario.className = "configuracion-fila-combinada";
+
+const etiquetaCarpetaUsuario = document.createElement("span");
+etiquetaCarpetaUsuario.className = "configuracion-escala-etiqueta";
+etiquetaCarpetaUsuario.textContent = "Ruta para carpeta de usuario:";
+
+const botonSelectorCarpetaUsuario = document.createElement("button");
+botonSelectorCarpetaUsuario.type = "button";
+botonSelectorCarpetaUsuario.className = "ui-btn configuracion-carpeta-usuario-boton";
+botonSelectorCarpetaUsuario.textContent = "Seleccionar Carpeta";
+
+filaCarpetaUsuario.append(etiquetaCarpetaUsuario, botonSelectorCarpetaUsuario);
+panelGeneral.prepend(filaCarpetaUsuario);
+
+function aplicarEstadoCarpetaUsuario(estado: EstadoCarpetaUsuario): void {
+  if (estado.tipo === "otra") {
+    const nombre =
+      estado.ruta.split(/[\\/]/).filter(Boolean).pop() ?? estado.ruta;
+
+    botonSelectorCarpetaUsuario.textContent = nombre;
+  } else {
+    botonSelectorCarpetaUsuario.textContent = ETIQUETAS_TIPO_CARPETA_USUARIO[estado.tipo];
+  }
+
+  botonSelectorCarpetaUsuario.title = estado.ruta;
+}
+
+async function cargarEstadoCarpetaUsuario(): Promise<void> {
+  const estado = await invoke<EstadoCarpetaUsuario>(
+    "obtener_estado_carpeta_usuario",
+  );
+
+  aplicarEstadoCarpetaUsuario(estado);
+}
+
+botonSelectorCarpetaUsuario.addEventListener("click", (evento) => {
+  abrirPopupSelectorCarpetaUsuario(evento);
+});
+
+cargarEstadoCarpetaUsuario();
+
+// ======================================================
+// 🗂️ POPUP SELECTOR — 3 opciones (Default/Instalación/Otra)
+// ------------------------------------------------------
+// Etapa H se encarga de lo que pasa después de elegir destino
+// (verificar, avisos de sistema/conflicto, confirmar, carpeta
+// antigua) — procesarDestinoCarpetaUsuario() es el punto de
+// entrada que esa etapa completa.
+// ======================================================
+
+function crearOpcionPopupCarpetaUsuario(
+  texto: string,
+  alElegir: () => void | Promise<void>,
+): HTMLButtonElement {
+  const boton = document.createElement("button");
+  boton.className = "ui-btn";
+  boton.textContent = texto;
+
+  boton.addEventListener("click", async () => {
+    ocultarPopup();
+    await alElegir();
+  });
+
+  return boton;
+}
+
+// ======================================================
+// ⚠️ POPUPS DE FLUJO (Etapa H)
+// ------------------------------------------------------
+// Mismo patrón que comp_popup_confirmar.ts/_modo.ts
+// (.popup-confirmar + mostrarPopup posicionado en el click),
+// pero locales acá porque cada paso tiene su propio set de
+// botones (1, 2 o 3), a diferencia del Sí/No genérico.
+// ======================================================
+
+interface OpcionPopupFlujo {
+  texto: string;
+  valor: string;
+}
+
+function mostrarPopupFlujo(
+  mensaje: string,
+  opciones: OpcionPopupFlujo[],
+  evento: MouseEvent,
+): Promise<string | null> {
+  return new Promise((resolver) => {
+    let resuelto = false;
+
+    const resolverUnaVez = (valor: string | null) => {
+      if (resuelto) {
+        return;
+      }
+
+      resuelto = true;
+      resolver(valor);
+    };
+
+    const contenedor = document.createElement("div");
+    contenedor.className = "popup-confirmar";
+
+    const texto = document.createElement("p");
+    texto.className = "popup-confirmar-mensaje";
+    texto.textContent = mensaje;
+
+    const botones = document.createElement("div");
+    botones.className = "popup-confirmar-botones";
+
+    for (const opcion of opciones) {
+      const boton = crearBoton({ texto: opcion.texto });
+
+      boton.addEventListener("click", () => {
+        resolverUnaVez(opcion.valor);
+        ocultarPopup();
+      });
+
+      botones.append(boton);
+    }
+
+    contenedor.append(texto, botones);
+
+    mostrarPopup(contenedor, evento.clientX, evento.clientY, () =>
+      resolverUnaVez(null),
+    );
+  });
+}
+
+interface VerificacionCarpetaUsuario {
+  es_sistema: boolean;
+  tiene_usuario_existente: boolean;
+}
+
+interface ResultadoCambioCarpetaUsuario {
+  ruta_antigua: string | null;
+  requiere_renombrar_si_mantiene: boolean;
+}
+
+async function procesarDestinoCarpetaUsuario(
+  destino: string,
+  esDefault: boolean,
+  evento: MouseEvent,
+): Promise<void> {
+  let verificacion: VerificacionCarpetaUsuario;
+
+  try {
+    verificacion = await invoke<VerificacionCarpetaUsuario>(
+      "verificar_carpeta_usuario",
+      { ruta: destino },
+    );
+  } catch (error) {
+    window.alert(`No se pudo usar esa carpeta: ${String(error)}`);
+    return;
+  }
+
+  if (verificacion.es_sistema) {
+    await mostrarPopupFlujo(
+      "Esa carpeta está dentro de una carpeta de sistema (Program Files, " +
+        "Program Files (x86) o Windows). Debe ejecutar el programa en modo " +
+        "administrador para poder escribir los perfiles ahí, o elegir otra carpeta.",
+      [{ texto: "Entendido", valor: "ok" }],
+      evento,
+    );
+  }
+
+  if (verificacion.tiene_usuario_existente) {
+    const accion = await mostrarPopupFlujo(
+      "Ya existe una carpeta de usuario en el destino ¿qué desea hacer con ella?",
+      [
+        { texto: "Renombrarla a usuario_old", valor: "renombrar" },
+        { texto: "Eliminarla", valor: "eliminar" },
+        { texto: "Cancelar", valor: "cancelar" },
+      ],
+      evento,
+    );
+
+    if (accion === null || accion === "cancelar") {
+      return;
+    }
+
+    try {
+      await invoke("resolver_carpeta_usuario_existente", {
+        ruta: destino,
+        accion,
+      });
+    } catch (error) {
+      window.alert(`No se pudo resolver la carpeta existente: ${String(error)}`);
+      return;
+    }
+  }
+
+  let resultado: ResultadoCambioCarpetaUsuario;
+
+  try {
+    resultado = await invoke<ResultadoCambioCarpetaUsuario>(
+      "confirmar_cambio_carpeta_usuario",
+      { ruta: destino, esDefault },
+    );
+  } catch (error) {
+    window.alert(`No se pudo cambiar la carpeta de usuario: ${String(error)}`);
+    return;
+  }
+
+  if (resultado.ruta_antigua !== null) {
+    const rutaAntigua = resultado.ruta_antigua;
+
+    const decision = await mostrarPopupFlujo(
+      "Migración de datos de usuario a nueva ruta exitosa. ¿Qué desea hacer " +
+        "con los archivos en la ruta antigua?",
+      [
+        { texto: "Eliminar", valor: "eliminar" },
+        { texto: "Mantener", valor: "mantener" },
+      ],
+      evento,
+    );
+
+    try {
+      if (decision === "eliminar") {
+        await invoke("eliminar_carpeta_usuario_antigua", {
+          ruta: rutaAntigua,
+        });
+      } else if (
+        decision === "mantener" &&
+        resultado.requiere_renombrar_si_mantiene
+      ) {
+        await invoke("renombrar_carpeta_usuario_antigua", {
+          ruta: rutaAntigua,
+        });
+      }
+    } catch (error) {
+      window.alert(`No se pudo procesar la carpeta antigua: ${String(error)}`);
+    }
+  }
+
+  await cargarEstadoCarpetaUsuario();
+}
+
+function abrirPopupSelectorCarpetaUsuario(evento: MouseEvent): void {
+  const lista = document.createElement("div");
+  lista.className = "popup-lista";
+
+  lista.append(
+    crearOpcionPopupCarpetaUsuario("Default: %AppData%", async () => {
+      const destino = await invoke<string>(
+        "obtener_ruta_default_carpeta_usuario",
+      );
+
+      await procesarDestinoCarpetaUsuario(destino, true, evento);
+    }),
+
+    crearOpcionPopupCarpetaUsuario(
+      "Carpeta de instalación OmegaCtrl",
+      async () => {
+        const destino = await invoke<string>(
+          "obtener_ruta_instalacion_carpeta_usuario",
+        );
+
+        await procesarDestinoCarpetaUsuario(destino, false, evento);
+      },
+    ),
+
+    crearOpcionPopupCarpetaUsuario("Otra", async () => {
+      const destino = await invoke<string | null>("seleccionar_carpeta");
+
+      if (destino === null) {
+        return;
+      }
+
+      await procesarDestinoCarpetaUsuario(destino, false, evento);
+    }),
+  );
+
+  mostrarPopup(lista, evento.clientX, evento.clientY);
+}
 
 // ======================================================
 // ⌨️ PESTAÑA TECLAS (Etapa 5)

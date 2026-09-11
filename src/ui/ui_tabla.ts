@@ -222,7 +222,22 @@ export function crearTabla(alModificar: () => void): HTMLElement {
     if (col.id === "opciones") {
       celdaOpcionesCabecera = celda;
     } else {
-      celda.textContent = col.titulo;
+      // [FIX] El título va en su propio span (no directo como
+      // textContent de celda) — celda también contiene el
+      // .divisor-columna (posicionado absolute, ver
+      // ui_redimension_columnas.ts), que al ser descendiente
+      // siempre suma a su scrollWidth así el texto entre o no
+      // entre. Midiendo ese scrollWidth contra clientWidth (ver
+      // util_texto_boton.ts) el título quedaba SIEMPRE marcado
+      // como desbordado. Midiendo solo este span (que no incluye
+      // al divisor) el chequeo vuelve a reflejar el texto real.
+      const textoTitulo = document.createElement("span");
+
+      textoTitulo.className = "cabecera-celda-texto";
+
+      textoTitulo.textContent = col.titulo;
+
+      celda.append(textoTitulo);
 
       celda.title = col.titulo;
     }

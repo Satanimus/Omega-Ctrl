@@ -58,8 +58,8 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  min-height: 26px;
-  padding: 6px 8px;
+  height: var(--indicador-header-alto);
+  padding: 0 8px;
   background: color-mix(
     in srgb,
     var(--indicador-macro-encabezado-color) var(--indicador-macro-encabezado-opacidad),
@@ -81,11 +81,14 @@ body {
 }
 
 .indicador-macro-cancelar {
+  display: flex;
+  align-items: center;
+  height: var(--indicador-boton-alto);
   background: transparent;
   border: 1px solid var(--border-light);
   color: var(--text);
   border-radius: 4px;
-  padding: 2px 8px;
+  padding: 0 8px;
   font-size: var(--fs11);
   cursor: pointer;
 }

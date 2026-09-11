@@ -185,6 +185,15 @@
   padding: 0 var(--gap12);
 }
 
+/* Botón "Seleccionar Carpeta" (fila Carpeta de Usuario, General) —
+   mismo criterio de recorte que .configuracion-tema-nombre. */
+.configuracion-carpeta-usuario-boton {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ======================================================
    TABLA
    ====================================================== */

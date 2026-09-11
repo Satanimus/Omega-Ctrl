@@ -190,6 +190,154 @@ pub fn obtener_nombre_perfil_actual() -> Result<String, String> {
 }
 
 // ======================================================
+// 📁 COMANDOS CARPETA DE USUARIO (Configuración)
+// ------------------------------------------------------
+// seleccionar_carpeta() (ya existente, arriba) se reusa acá para
+// la opción "Otra" del selector.
+// ======================================================
+
+#[derive(Serialize)]
+pub struct EstadoCarpetaUsuarioJson {
+    pub tipo: String,
+
+    pub ruta: String,
+}
+
+#[derive(Serialize)]
+pub struct VerificacionCarpetaUsuarioJson {
+    pub es_sistema: bool,
+
+    pub tiene_usuario_existente: bool,
+}
+
+fn mismo_destino(a: &std::path::Path, b: &std::path::Path) -> bool {
+    let normalizar = |ruta: &std::path::Path| {
+        ruta.to_string_lossy()
+            .trim_end_matches(['\\', '/'])
+            .to_lowercase()
+    };
+
+    normalizar(a) == normalizar(b)
+}
+
+#[tauri::command]
+pub fn obtener_estado_carpeta_usuario() -> Result<EstadoCarpetaUsuarioJson, String> {
+    let Some(destino) = usuario::leer_override() else {
+        return Ok(EstadoCarpetaUsuarioJson {
+            tipo: "default".to_string(),
+            ruta: usuario::carpeta_default()?.to_string_lossy().to_string(),
+        });
+    };
+
+    let tipo = match usuario::carpeta_instalacion() {
+        Ok(instalacion) if mismo_destino(&instalacion, &destino) => "instalacion",
+        _ => "otra",
+    };
+
+    Ok(EstadoCarpetaUsuarioJson {
+        tipo: tipo.to_string(),
+        ruta: destino.to_string_lossy().to_string(),
+    })
+}
+
+#[tauri::command]
+pub fn obtener_ruta_default_carpeta_usuario() -> Result<String, String> {
+    Ok(usuario::carpeta_default()?.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub fn obtener_ruta_instalacion_carpeta_usuario() -> Result<String, String> {
+    Ok(usuario::carpeta_instalacion()?.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub fn verificar_carpeta_usuario(ruta: String) -> Result<VerificacionCarpetaUsuarioJson, String> {
+    let destino = std::path::PathBuf::from(&ruta);
+
+    usuario::validar_carpeta_escribible(&destino)?;
+
+    Ok(VerificacionCarpetaUsuarioJson {
+        es_sistema: usuario::es_carpeta_sistema(&destino),
+        tiene_usuario_existente: usuario::destino_usuario_no_vacio(&destino),
+    })
+}
+
+#[tauri::command]
+pub fn resolver_carpeta_usuario_existente(ruta: String, accion: String) -> Result<(), String> {
+    let destino = std::path::PathBuf::from(&ruta);
+
+    match accion.as_str() {
+        "renombrar" => usuario::renombrar_usuario_existente(&destino),
+        "eliminar" => usuario::eliminar_usuario_existente(&destino),
+        _ => Err(format!("Acción inválida: {accion}")),
+    }
+}
+
+#[derive(Serialize)]
+pub struct ResultadoCambioCarpetaUsuarioJson {
+    pub ruta_antigua: Option<String>,
+
+    pub requiere_renombrar_si_mantiene: bool,
+}
+
+// Migra la carpeta de Usuario a destino y deja el override guardado
+// (o lo quita, si es_default). ruta_antigua es None si el destino ya
+// era la carpeta actual (nada que migrar ni preguntar).
+// requiere_renombrar_si_mantiene: true si la ruta antigua era la
+// portable junto al exe — en ese caso, "Mantener" debe en realidad
+// renombrarla a "Usuario_old" (ver renombrar_carpeta_usuario_antigua),
+// o la Regla 1 la vuelve a tomar en el próximo arranque.
+#[tauri::command]
+pub fn confirmar_cambio_carpeta_usuario(
+    ruta: String,
+    es_default: bool,
+) -> Result<ResultadoCambioCarpetaUsuarioJson, String> {
+    let destino = std::path::PathBuf::from(&ruta);
+    let origen = usuario::carpeta()?;
+
+    let migro = if mismo_destino(&origen, &destino.join("Usuario")) {
+        false
+    } else {
+        perfil::detener_si_activo();
+        usuario::migrar_usuario(&destino)?;
+        true
+    };
+
+    if es_default {
+        usuario::quitar_override()?;
+    } else {
+        usuario::guardar_override(&destino)?;
+    }
+
+    if !migro {
+        return Ok(ResultadoCambioCarpetaUsuarioJson {
+            ruta_antigua: None,
+            requiere_renombrar_si_mantiene: false,
+        });
+    }
+
+    let era_portable = std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|padre| padre.join("Usuario")))
+        .is_some_and(|ruta_portable| mismo_destino(&origen, &ruta_portable));
+
+    Ok(ResultadoCambioCarpetaUsuarioJson {
+        ruta_antigua: Some(origen.to_string_lossy().to_string()),
+        requiere_renombrar_si_mantiene: era_portable,
+    })
+}
+
+#[tauri::command]
+pub fn eliminar_carpeta_usuario_antigua(ruta: String) -> Result<(), String> {
+    usuario::eliminar_carpeta(&std::path::PathBuf::from(ruta))
+}
+
+#[tauri::command]
+pub fn renombrar_carpeta_usuario_antigua(ruta: String) -> Result<(), String> {
+    usuario::renombrar_a_usuario_old(&std::path::PathBuf::from(ruta))
+}
+
+// ======================================================
 // 🌐 COMANDOS TRADUCTOR (pulsadores.tsv)
 // ------------------------------------------------------
 // Puente entre columnas del diccionario para la UI (ver

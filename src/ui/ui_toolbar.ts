@@ -18,6 +18,8 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
+import logoUrl from "../assets/logo.svg";
+
 import { alternarPanelLateral } from "../componentes/comp_panel_lateral";
 
 import { alternarPanelAyuda } from "../componentes/comp_panel_ayuda";
@@ -162,7 +164,7 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
                 title="Menú"
                 data-ayuda-id="btn-menu-lateral"
             >
-                <span>☰</span>
+                <img src="${logoUrl}" alt="Menú" />
             </button>
 
             <button
