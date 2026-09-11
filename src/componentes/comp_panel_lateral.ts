@@ -151,13 +151,7 @@ async function recargarContenidoPanel(): Promise<void> {
   cuerpoPanel.replaceChildren(
     crearSubtitulo("Perfiles"),
 
-    crearListaPerfiles(
-      perfiles,
-      nombreActual,
-      estaEditado,
-      alGuardarActual,
-      alCambiarPerfilActual,
-    ),
+    crearListaPerfiles(perfiles, nombreActual),
 
     crearSeparador(),
 
@@ -178,15 +172,65 @@ async function recargarContenidoPanel(): Promise<void> {
 }
 
 // ======================================================
+// 🔄 CAMBIAR PERFIL (reutilizable)
+// ------------------------------------------------------
+// Misma lógica para el click en la lista del panel lateral y para
+// el listener del evento "bandeja-seleccionar-perfil" (main.ts):
+// mismo chequeo de ediciones sin guardar + mismo popup de
+// confirmación si corresponde + mismo invoke a seleccionar_perfil +
+// mismo refresco de UI. `evento` solo se usa para posicionar el
+// popup de confirmación (si hace falta mostrarlo).
+// ======================================================
+
+export async function cambiarPerfilDesde(
+  nombre: string,
+  evento: MouseEvent,
+): Promise<void> {
+  if (
+    !obtenerEstadoActualFn ||
+    !alGuardarActual ||
+    !alCambiarPerfilActual
+  ) {
+    return;
+  }
+
+  const { nombreActual, estaEditado } = obtenerEstadoActualFn();
+
+  if (nombre === nombreActual) {
+    return;
+  }
+
+  if (estaEditado) {
+    const guardar = await confirmarPopup(
+      "¿Guardar cambios del perfil actual?",
+      evento,
+    );
+
+    if (guardar) {
+      await alGuardarActual();
+    }
+  }
+
+  try {
+    const resultado = await invoke<ResultadoPerfil>("seleccionar_perfil", {
+      nombre,
+    });
+
+    await alCambiarPerfilActual(resultado);
+
+    await recargarContenidoPanel();
+  } catch (error) {
+    console.error("❌ No se pudo seleccionar el perfil:", error);
+  }
+}
+
+// ======================================================
 // LISTA DE PERFILES
 // ======================================================
 
 function crearListaPerfiles(
   perfiles: string[],
   nombreActual: string,
-  estaEditado: boolean,
-  alGuardar: () => Promise<void>,
-  alCambiarPerfil: (resultado: ResultadoPerfil) => void | Promise<void>,
 ): HTMLElement {
   const lista = document.createElement("div");
 
@@ -222,40 +266,7 @@ function crearListaPerfiles(
     // ==================================================
 
     boton.addEventListener("click", async (evento) => {
-      // ==================================================
-      // PERFIL ACTUAL
-      // ==================================================
-
-      if (esActual) {
-        return;
-      }
-
-      // ==================================================
-      // CAMBIAR PERFIL
-      // ==================================================
-
-      if (estaEditado) {
-        const guardar = await confirmarPopup(
-          "¿Guardar cambios del perfil actual?",
-          evento,
-        );
-
-        if (guardar) {
-          await alGuardar();
-        }
-      }
-
-      try {
-        const resultado = await invoke<ResultadoPerfil>("seleccionar_perfil", {
-          nombre,
-        });
-
-        await alCambiarPerfil(resultado);
-
-        await recargarContenidoPanel();
-      } catch (error) {
-        console.error("❌ No se pudo seleccionar el perfil:", error);
-      }
+      await cambiarPerfilDesde(nombre, evento);
     });
 
     lista.append(boton);

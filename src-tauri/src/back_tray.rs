@@ -19,7 +19,7 @@ use crate::{cache, config, perfil, pulsadores};
 use std::sync::OnceLock;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 // ======================================================
 // 🌐 APPHANDLE GLOBAL
@@ -232,23 +232,27 @@ fn manejar_evento_icono(tray: &tauri::tray::TrayIcon, evento: TrayIconEvent) {
         ..
     } = evento
     {
-        restaurar_ventana_principal(tray.app_handle());
+        mostrar_ventana_y_resincronizar(tray.app_handle());
     }
 }
 
-/// Cambia al perfil `nombre` (Regla 11): si ya es el actual, no hace
-/// nada (Regla 10). Si es distinto, desactiva el actual y activa el
-/// seleccionado vía perfil::seleccionar_perfil (toca el mtime en
-/// disco para que pase a ser "el actual" y compila/activa de una).
-/// Un error no se propaga a la UI — el color rojo del próximo
-/// reconstruir_menu ya refleja que no quedó activo.
-fn ejecutar_seleccionar_perfil_tray(nombre: &str) {
-    if perfil::obtener_nombre_actual().ok().as_deref() == Some(nombre) {
-        return;
-    }
+/// Pide al frontend que cambie de perfil (Regla 2/3): la ventana
+/// principal se muestra primero (Regla del pedido: "si hay un
+/// mensaje que responder, se abre la ventana y lo muestra"), y el
+/// cambio real —con el mismo popup de confirmación por ediciones sin
+/// guardar que ya usa la barra lateral— lo resuelve el frontend, no
+/// este backend. El menú de bandeja se reconstruye recién cuando el
+/// frontend termina (seleccionar_perfil ya llama
+/// back_tray::refrescar_si_existe, ver comandos.rs), no en este
+/// click. Usa solo_mostrar_ventana (no mostrar_ventana_y_resincronizar):
+/// el propio evento "bandeja-seleccionar-perfil" ya dispara la
+/// recarga completa en main.ts — emitir además "bandeja-ventana-
+/// restaurada" duplicaría esa recarga en cascada.
+fn pedir_cambio_perfil_al_frontend(app: &AppHandle, nombre: &str) {
+    solo_mostrar_ventana(app);
 
-    if let Err(error) = perfil::seleccionar_perfil(nombre.to_string()) {
-        eprintln!("⚠️ Bandeja: no se pudo cambiar al perfil '{nombre}': {error}");
+    if let Err(error) = app.emit("bandeja-seleccionar-perfil", nombre) {
+        eprintln!("⚠️ Bandeja: no se pudo notificar el cambio de perfil al frontend: {error}");
     }
 }
 
@@ -256,7 +260,7 @@ fn manejar_evento_menu(app: &AppHandle, evento: tauri::menu::MenuEvent) {
     let id = evento.id().as_ref();
 
     match id {
-        "abrir" => restaurar_ventana_principal(app),
+        "abrir" => mostrar_ventana_y_resincronizar(app),
 
         "toggle_perfil" => {
             ejecutar_toggle_perfil_tray();
@@ -267,17 +271,32 @@ fn manejar_evento_menu(app: &AppHandle, evento: tauri::menu::MenuEvent) {
 
         _ => {
             if let Some(nombre) = id.strip_prefix("perfil::") {
-                ejecutar_seleccionar_perfil_tray(nombre);
-                refrescar_menu(app);
+                pedir_cambio_perfil_al_frontend(app, nombre);
             }
         }
     }
 }
 
-fn restaurar_ventana_principal(app: &AppHandle) {
+/// Solo muestra/enfoca la ventana principal, sin avisar al frontend.
+/// Uso interno de pedir_cambio_perfil_al_frontend, que ya dispara su
+/// propio evento de recarga ("bandeja-seleccionar-perfil").
+fn solo_mostrar_ventana(app: &AppHandle) {
     if let Some(ventana) = app.get_webview_window("main") {
         let _ = ventana.show();
         let _ = ventana.unminimize();
         let _ = ventana.set_focus();
+    }
+}
+
+/// Muestra/restaura la ventana principal y avisa al frontend para
+/// que resincronice perfil actual, tabla y estado activo/inactivo
+/// por si cambiaron mientras estaba minimizada (Regla 6) — sin
+/// agregar ningún polling nuevo. Usar solo cuando NO hay, además, un
+/// cambio de perfil de por medio (ver pedir_cambio_perfil_al_frontend).
+fn mostrar_ventana_y_resincronizar(app: &AppHandle) {
+    solo_mostrar_ventana(app);
+
+    if let Err(error) = app.emit("bandeja-ventana-restaurada", ()) {
+        eprintln!("⚠️ Bandeja: no se pudo notificar la restauración de ventana: {error}");
     }
 }

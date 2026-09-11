@@ -6,6 +6,8 @@ import "./styles.css";
 
 import { invoke } from "@tauri-apps/api/core";
 
+import { listen } from "@tauri-apps/api/event";
+
 import { aplicarOverridesApariencia } from "./core/core_apariencia";
 
 import { crearApp } from "./ui/ui_app";
@@ -30,6 +32,8 @@ import { actualizarSnapshotAtajoReservado } from "./core/core_conflictos";
 import { esSeparador } from "./core/core_separadores";
 
 import type { FilaPerfil } from "./core/core_perfil";
+
+import { cambiarPerfilDesde } from "./componentes/comp_panel_lateral";
 
 // Se dispara apenas se ejecuta el módulo, en paralelo con el resto
 // del arranque (ver core_apariencia.ts) — no hace falta esperarlo
@@ -113,3 +117,45 @@ window.addEventListener(
     });
   },
 );
+
+// ======================================================
+// 🗄️ EVENTOS DESDE LA BANDEJA DE SISTEMA
+// ------------------------------------------------------
+// Ninguno de los dos hace polling: el backend emite (emit) solo
+// cuando algo realmente ocurrió en la bandeja (back_tray.rs), y acá
+// se escucha (listen) una única vez al arrancar.
+// ======================================================
+
+// Click en un perfil de la lista del menú de bandeja: mismo camino
+// que el click en la lista del panel lateral (mismo chequeo de
+// ediciones sin guardar, mismo popup de confirmación si corresponde,
+// mismo refresco de tabla/estado/nombre). El backend ya restauró la
+// ventana antes de emitir este evento — acá no hace falta pedirlo de
+// nuevo. El MouseEvent es sintético (no hubo click real): solo se
+// usa para posicionar el popup de confirmación si llega a mostrarse,
+// así que se ubica en el centro de la ventana.
+listen<string>("bandeja-seleccionar-perfil", (evento) => {
+  const eventoSintetico = new MouseEvent("click", {
+    clientX: window.innerWidth / 2,
+    clientY: window.innerHeight / 2,
+  });
+
+  cambiarPerfilDesde(evento.payload, eventoSintetico).catch((error) => {
+    console.error(
+      "❌ No se pudo cambiar de perfil desde la bandeja de sistema:",
+      error,
+    );
+  });
+});
+
+// Ventana restaurada desde la bandeja (abrir sin cambiar de perfil):
+// se vuelve a cargar el estado real completo (perfil actual, tabla,
+// activo/inactivo) por si cambió algo mientras estaba minimizada.
+listen("bandeja-ventana-restaurada", () => {
+  iniciarApp().catch((error) => {
+    console.error(
+      "❌ No se pudo resincronizar el estado tras restaurar la ventana:",
+      error,
+    );
+  });
+});

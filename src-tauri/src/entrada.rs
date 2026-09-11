@@ -198,7 +198,6 @@ use crate::eventos::{InputEvent, InputId, InputState};
 use crate::grabacion_macro;
 use crate::motor;
 use crate::perfil;
-use crate::usuario;
 use std::cell::RefCell;
 use std::sync::Mutex;
 use std::time::Duration;
@@ -370,30 +369,12 @@ fn ejecutar_toggle_perfil() {
     // activar_perfil() compila pero la cache queda vacía igual, y la
     // notificación debe reflejar "inactivo" real, no "activo" por
     // haber pasado por la rama de activación.
-    notificar_toggle_perfil(!cache::esta_vacia());
+    back_notificacion::notificar_estado_perfil(!cache::esta_vacia());
 
     // Mantiene el menú de bandeja al día cuando el toggle se dispara
     // por el atajo global, no por el propio menú (Regla 13: reflejar
     // el estado real, sin importar el origen del cambio).
     back_tray::refrescar_si_existe();
-}
-
-fn notificar_toggle_perfil(activado: bool) {
-    if !config::mostrar_notificaciones() {
-        return;
-    }
-
-    let nombre_perfil = match usuario::nombre_actual() {
-        Ok(nombre) => nombre,
-        Err(error) => {
-            eprintln!("⚠️ No se pudo determinar el nombre del perfil para la notificación: {error}");
-            return;
-        }
-    };
-
-    if let Err(error) = back_notificacion::abrir_notificacion_real(nombre_perfil, activado) {
-        eprintln!("⚠️ No se pudo abrir la notificación de perfil: {error}");
-    }
 }
 
 pub fn procesar_evento(evento: InputEvent) {

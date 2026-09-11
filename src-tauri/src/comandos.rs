@@ -133,6 +133,7 @@ use crate::back_coordenada;
 use crate::back_notificacion;
 use crate::back_tray;
 use crate::banco_coordenadas;
+use crate::cache;
 use crate::captura_coordenada;
 use crate::compilador::ResultadoCompilacion;
 use crate::config;
@@ -388,6 +389,18 @@ pub fn crear_perfil_nuevo() -> Result<ResultadoPerfil, String> {
 #[tauri::command]
 pub fn seleccionar_perfil(nombre: String) -> Result<ResultadoPerfil, String> {
     let resultado = perfil::seleccionar_perfil(nombre);
+
+    // El estado mostrado se lee DESPUÉS de intentar seleccionar (no
+    // se asume que "seleccionar" implica quedar activo — mismo
+    // criterio que el fix de entrada.rs: si el perfil elegido tiene
+    // todas las filas en off, la notificación debe decir "inactivo"
+    // real). Se notifica siempre que el comando se ejecuta con
+    // éxito, sin importar si el origen es la barra lateral o el
+    // listener del evento "bandeja-seleccionar-perfil" en main.ts —
+    // el pedido del usuario es que ambos caminos avisen igual.
+    if resultado.is_ok() {
+        back_notificacion::notificar_estado_perfil(!cache::esta_vacia());
+    }
 
     // Mismo motivo que activar_perfil/desactivar_perfil: el cambio
     // de perfil desde la ventana también debe reflejarse en el menú

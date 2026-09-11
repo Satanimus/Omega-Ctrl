@@ -189,3 +189,32 @@ pub(crate) fn cerrar_ventana_notificacion(app: &AppHandle) {
         let _ = ventana.close();
     }
 }
+
+// ======================================================
+// 🔔 NOTIFICAR ESTADO ACTUAL DEL PERFIL (helper compartido)
+// ------------------------------------------------------
+// Respeta config::mostrar_notificaciones() y resuelve el nombre del
+// perfil actual (crate::usuario::nombre_actual()) antes de abrir la
+// notificación real — mismo criterio ya usado por
+// entrada.rs::notificar_toggle_perfil, ahora reutilizable también
+// desde comandos.rs (cambio de perfil disparado desde la bandeja de
+// sistema o desde la barra lateral de la ventana principal).
+// ======================================================
+
+pub(crate) fn notificar_estado_perfil(activado: bool) {
+    if !crate::config::mostrar_notificaciones() {
+        return;
+    }
+
+    let nombre_perfil = match crate::usuario::nombre_actual() {
+        Ok(nombre) => nombre,
+        Err(error) => {
+            eprintln!("⚠️ No se pudo determinar el nombre del perfil para la notificación: {error}");
+            return;
+        }
+    };
+
+    if let Err(error) = abrir_notificacion_real(nombre_perfil, activado) {
+        eprintln!("⚠️ No se pudo abrir la notificación de perfil: {error}");
+    }
+}
