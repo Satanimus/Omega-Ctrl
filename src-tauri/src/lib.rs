@@ -21,6 +21,7 @@ mod back_portapapeles;
 mod back_portapapeles_captura;
 mod back_registro;
 mod back_teclas;
+mod back_tray;
 mod back_windows;
 mod banco_coordenadas;
 mod cache;
@@ -99,6 +100,10 @@ pub fn run() {
             // global (entrada.rs/perfil.rs), que tampoco es un
             // comando Tauri.
             back_notificacion::inicializar(app.handle().clone());
+
+            // Ícono de bandeja de sistema y su menú contextual — mismo
+            // ícono ya embebido para las ventanas (icons/icon.ico).
+            back_tray::inicializar(app.handle());
 
             // Aplica sobre config.rs los overrides guardados en
             // Configuracion_Usuario.txt (pestaña General de la

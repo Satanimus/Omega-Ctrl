@@ -190,6 +190,7 @@
 // ======================================================
 
 use crate::back_notificacion;
+use crate::back_tray;
 use crate::cache;
 use crate::captura_coordenada;
 use crate::config;
@@ -359,13 +360,22 @@ fn ejecutar_toggle_perfil() {
             eprintln!("⚠️ Atajo toggle: no se pudo activar el perfil: {error}");
             return;
         }
-
-        notificar_toggle_perfil(true);
     } else {
         perfil::desactivar_perfil();
-
-        notificar_toggle_perfil(false);
     }
+
+    // [FIX] El estado mostrado en la notificación se lee de
+    // cache::esta_vacia() DESPUÉS de ejecutar la acción, no se asume
+    // a partir de la rama tomada: si todas las filas están en off,
+    // activar_perfil() compila pero la cache queda vacía igual, y la
+    // notificación debe reflejar "inactivo" real, no "activo" por
+    // haber pasado por la rama de activación.
+    notificar_toggle_perfil(!cache::esta_vacia());
+
+    // Mantiene el menú de bandeja al día cuando el toggle se dispara
+    // por el atajo global, no por el propio menú (Regla 13: reflejar
+    // el estado real, sin importar el origen del cambio).
+    back_tray::refrescar_si_existe();
 }
 
 fn notificar_toggle_perfil(activado: bool) {

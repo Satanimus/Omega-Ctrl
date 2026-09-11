@@ -131,6 +131,7 @@ use crate::ayuda;
 use crate::back_app;
 use crate::back_coordenada;
 use crate::back_notificacion;
+use crate::back_tray;
 use crate::banco_coordenadas;
 use crate::captura_coordenada;
 use crate::compilador::ResultadoCompilacion;
@@ -167,12 +168,21 @@ use windows_sys::Win32::UI::Input::KeyboardAndMouse::*;
 
 #[tauri::command]
 pub fn activar_perfil() -> Result<ResultadoCompilacion, String> {
-    perfil::activar_perfil()
+    let resultado = perfil::activar_perfil();
+
+    // Mantiene el menú de bandeja al día cuando la activación se
+    // dispara desde el botón de la ventana principal, no desde el
+    // propio menú (Regla 13).
+    back_tray::refrescar_si_existe();
+
+    resultado
 }
 
 #[tauri::command]
 pub fn desactivar_perfil() {
     perfil::desactivar_perfil();
+
+    back_tray::refrescar_si_existe();
 }
 
 #[tauri::command]
@@ -377,7 +387,14 @@ pub fn crear_perfil_nuevo() -> Result<ResultadoPerfil, String> {
 
 #[tauri::command]
 pub fn seleccionar_perfil(nombre: String) -> Result<ResultadoPerfil, String> {
-    perfil::seleccionar_perfil(nombre)
+    let resultado = perfil::seleccionar_perfil(nombre);
+
+    // Mismo motivo que activar_perfil/desactivar_perfil: el cambio
+    // de perfil desde la ventana también debe reflejarse en el menú
+    // de bandeja (Regla 13).
+    back_tray::refrescar_si_existe();
+
+    resultado
 }
 
 #[tauri::command]
