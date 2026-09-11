@@ -130,6 +130,7 @@
 use crate::ayuda;
 use crate::back_app;
 use crate::back_coordenada;
+use crate::back_notificacion;
 use crate::banco_coordenadas;
 use crate::captura_coordenada;
 use crate::compilador::ResultadoCompilacion;
@@ -1423,6 +1424,43 @@ pub fn obtener_posicion_indicador_macro() -> Option<(f64, f64)> {
         .flatten()
 }
 
+// ======================================================
+// 🔔 VENTANA NOTIFICACIÓN (Activación/Desactivación de perfil)
+// ------------------------------------------------------
+// Comandos para el modo "ubicar" (fila de Configuración →
+// General) y para poblar esa misma fila al abrir la ventana.
+// El disparo real (modo "real") no pasa por un comando Tauri —
+// se llama directo desde entrada.rs (ver back_notificacion.rs).
+// ======================================================
+
+/// Async por el mismo motivo que abrir_ventana_indicador_macro_
+/// ubicacion: WebviewWindowBuilder::build() hace deadlock en
+/// Windows si se lo llama desde un comando síncrono.
+#[tauri::command]
+pub async fn abrir_notificacion_ubicacion(app: tauri::AppHandle) -> Result<(), String> {
+    back_notificacion::abrir_notificacion_ubicacion(&app)
+}
+
+#[tauri::command]
+pub fn cerrar_ventana_notificacion(app: tauri::AppHandle) {
+    back_notificacion::cerrar_ventana_notificacion(&app);
+}
+
+#[tauri::command]
+pub fn guardar_posicion_notificacion(x: f64, y: f64) -> Result<(), String> {
+    crate::configuracion_usuario::guardar_posicion_notificacion(x, y)
+}
+
+#[tauri::command]
+pub fn obtener_mostrar_notificaciones() -> bool {
+    config::mostrar_notificaciones()
+}
+
+#[tauri::command]
+pub fn obtener_duracion_notificacion_ms() -> u64 {
+    config::duracion_notificacion_ms()
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProgresoIndicadorMacroUI {
@@ -2172,6 +2210,11 @@ fn tipo_configuracion_a_texto(tipo: &configuracion_usuario::TipoValor) -> String
         configuracion_usuario::TipoValor::NumeroPar => "numero_par".to_string(),
         configuracion_usuario::TipoValor::Texto => "texto".to_string(),
         configuracion_usuario::TipoValor::Trigger => "trigger".to_string(),
+        // Nunca aparece en cargar_catalogo() (mostrar_notificaciones es la
+        // única clave Booleano y vive fuera del catálogo visual, ver
+        // CLAVES_FUERA_DE_CATALOGO en configuracion_usuario.rs) — el brazo
+        // solo está para que el match siga siendo exhaustivo.
+        configuracion_usuario::TipoValor::Booleano => "booleano".to_string(),
     }
 }
 

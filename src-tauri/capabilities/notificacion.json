@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "notificacion",
+  "description": "Capability for the Notificacion overlay window (modo ubicar; manual drag via setPosition/outerPosition, see activarArrastre en vent_notificacion_main.ts)",
+  "windows": ["notificacion"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-position",
+    "core:window:allow-outer-position",
+    "core:window:allow-set-size"
+  ]
+}

@@ -31,6 +31,10 @@ export default defineConfig(async () => ({
   // Indicador_Macro, modos Grabación y Play
   // (WebviewUrl::App("indicador_macro.html?modo=...") —
   // ver comandos.rs, abrir_ventana_indicador_macro). Mismo motivo.
+  // Octava página independiente: la ventana overlay de
+  // Notificación de Activación/Desactivación de perfil
+  // (WebviewUrl::App("notificacion.html?modo=...") — ver
+  // comandos.rs/back_notificacion.rs). Mismo motivo.
   build: {
     rollupOptions: {
       input: {
@@ -50,6 +54,9 @@ export default defineConfig(async () => ({
         ),
         indicadorMacro: fileURLToPath(
           new URL("./indicador_macro.html", import.meta.url),
+        ),
+        notificacion: fileURLToPath(
+          new URL("./notificacion.html", import.meta.url),
         ),
       },
     },

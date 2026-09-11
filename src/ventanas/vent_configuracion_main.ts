@@ -44,6 +44,7 @@ import { triggerAHTML, triggerATexto } from "../core/core_trigger";
 import { aplicarOverridesApariencia } from "../core/core_apariencia";
 import { crearPestanaApariencia } from "./vent_configuracion_apariencia";
 import { crearBoton } from "../componentes/comp_boton";
+import { crearInterruptor } from "../componentes/comp_popup_grupo";
 
 import "../styles/styl_variables.css";
 import "../styles/styl_general.css";
@@ -1099,7 +1100,7 @@ const CLAVES_TAMANOS_EN_APARIENCIA: readonly string[] = [
 // de configuracion.tsv (ver cargar_catalogo() en
 // configuracion_usuario.rs) — el orden de salida del backend define
 // el orden de las secciones, no hay sort propio acá.
-const pestanaGeneral = crearPestanaEditable({
+const pestanaGeneralTabla = crearPestanaEditable({
   panel: panelGeneral,
 
   encabezados: ["Nombre", "Valor por defecto", "Valor personalizado"],
@@ -1210,6 +1211,235 @@ botonSelectorCarpetaUsuario.addEventListener("click", (evento) => {
 });
 
 cargarEstadoCarpetaUsuario();
+
+// ======================================================
+// 🔔 NOTIFICACIONES (fila combinada, pestaña General)
+// ------------------------------------------------------
+// A diferencia de Carpeta de Usuario, el toggle y la Duración SÍ
+// participan del flujo de cambios pendientes/Aplicar (Regla 13) —
+// se combinan con pestanaGeneralTabla más abajo para formar la
+// pestanaGeneral final. Solo el botón Ubicación/Guardar se aplica
+// al instante (Regla 14, mismo criterio que el botón Ubicación del
+// popup Extra de Macro, ver comp_popup_macro_extra.ts).
+// ======================================================
+
+let mostrarNotificacionesActual = false;
+let mostrarNotificacionesEditado = false;
+
+let duracionActual = 0;
+let duracionEditado = 0;
+
+const filaNotificaciones = document.createElement("div");
+filaNotificaciones.className = "configuracion-fila-combinada";
+
+const grupoIzquierdoNotificaciones = document.createElement("div");
+grupoIzquierdoNotificaciones.className = "configuracion-escala-fila";
+
+const interruptorNotificaciones = crearInterruptor(
+  "Mostrar Notificaciones",
+  mostrarNotificacionesEditado,
+  () => {
+    mostrarNotificacionesEditado = !mostrarNotificacionesEditado;
+    actualizarInterruptorNotificaciones();
+  },
+);
+
+function actualizarInterruptorNotificaciones(): void {
+  interruptorNotificaciones.dataset.activo = mostrarNotificacionesEditado
+    ? "true"
+    : "false";
+}
+
+const etiquetaDuracionNotificaciones = document.createElement("span");
+etiquetaDuracionNotificaciones.className = "configuracion-escala-etiqueta";
+etiquetaDuracionNotificaciones.textContent = "Duración:";
+
+const botonDuracionNotificaciones = crearBoton({
+  texto: "",
+  titulo: "Duración de la notificación (ms)",
+  clase: "configuracion-duracion-notificacion",
+});
+
+function actualizarBotonDuracionNotificaciones(): void {
+  botonDuracionNotificaciones.textContent = `${duracionEditado}ms`;
+}
+
+actualizarBotonDuracionNotificaciones();
+
+// Popup de edición numérica (mismo patrón que crearCampoValorGeneral
+// para fila.tipo === "numero": actualiza en vivo con cada "input",
+// sin botón Confirmar propio — mostrarPopup ya cierra al click afuera).
+botonDuracionNotificaciones.addEventListener("click", (evento) => {
+  const input = crearInputNumero(String(duracionEditado));
+  input.min = "1";
+
+  input.addEventListener("input", () => {
+    const valor = Number.parseInt(input.value, 10);
+
+    if (!Number.isFinite(valor) || valor <= 0) {
+      return;
+    }
+
+    duracionEditado = valor;
+    actualizarBotonDuracionNotificaciones();
+  });
+
+  const popup = document.createElement("div");
+  popup.className = "popup-editar-apariencia";
+  popup.append(input);
+
+  mostrarPopup(popup, evento.clientX, evento.clientY);
+});
+
+grupoIzquierdoNotificaciones.append(
+  interruptorNotificaciones,
+  etiquetaDuracionNotificaciones,
+  botonDuracionNotificaciones,
+);
+
+// Botón "Ubicación"/"Guardar" — se aplica al instante (no participa
+// de cambios pendientes), mismo comportamiento que su homónimo en
+// comp_popup_macro_extra.ts pero contra las ventanas de notificación.
+let ubicacionNotificacionActiva = false;
+
+const botonUbicacionNotificacion = crearBoton({ texto: "Ubicación" });
+
+function actualizarBotonUbicacionNotificacion(): void {
+  botonUbicacionNotificacion.textContent = ubicacionNotificacionActiva
+    ? "Guardar"
+    : "Ubicación";
+}
+
+botonUbicacionNotificacion.addEventListener("click", async () => {
+  ubicacionNotificacionActiva = !ubicacionNotificacionActiva;
+  actualizarBotonUbicacionNotificacion();
+
+  try {
+    if (ubicacionNotificacionActiva) {
+      await invoke("abrir_notificacion_ubicacion");
+    } else {
+      await invoke("cerrar_ventana_notificacion");
+    }
+  } catch (error) {
+    ubicacionNotificacionActiva = !ubicacionNotificacionActiva;
+    actualizarBotonUbicacionNotificacion();
+
+    window.alert(
+      `No se pudo alternar la ventana de notificación: ${String(error)}`,
+    );
+  }
+});
+
+filaNotificaciones.append(
+  grupoIzquierdoNotificaciones,
+  botonUbicacionNotificacion,
+);
+filaCarpetaUsuario.insertAdjacentElement("afterend", filaNotificaciones);
+
+async function cargarFilaNotificaciones(): Promise<void> {
+  const [mostrar, duracion] = await Promise.all([
+    invoke<boolean>("obtener_mostrar_notificaciones"),
+    invoke<number>("obtener_duracion_notificacion_ms"),
+  ]);
+
+  mostrarNotificacionesActual = mostrar;
+  mostrarNotificacionesEditado = mostrar;
+
+  duracionActual = duracion;
+  duracionEditado = duracion;
+
+  actualizarInterruptorNotificaciones();
+  actualizarBotonDuracionNotificaciones();
+}
+
+function hayEdicionPendienteFilaNotificaciones(): boolean {
+  return (
+    mostrarNotificacionesEditado !== mostrarNotificacionesActual ||
+    duracionEditado !== duracionActual
+  );
+}
+
+function validarYRecolectarFilaNotificaciones(): CambioConfiguracion[] {
+  const cambios: CambioConfiguracion[] = [];
+
+  if (mostrarNotificacionesEditado !== mostrarNotificacionesActual) {
+    cambios.push({
+      clave: "mostrar_notificaciones",
+      valor: String(mostrarNotificacionesEditado),
+    });
+  }
+
+  if (duracionEditado !== duracionActual) {
+    cambios.push({
+      clave: "duracion_notificacion_ms",
+      valor: String(duracionEditado),
+    });
+  }
+
+  return cambios;
+}
+
+function restablecerFilaNotificaciones(): void {
+  mostrarNotificacionesEditado = mostrarNotificacionesActual;
+  duracionEditado = duracionActual;
+
+  actualizarInterruptorNotificaciones();
+  actualizarBotonDuracionNotificaciones();
+}
+
+function sincronizarFilaNotificacionesTrasGuardado(): void {
+  mostrarNotificacionesActual = mostrarNotificacionesEditado;
+  duracionActual = duracionEditado;
+}
+
+// ======================================================
+// ⚙️ PESTAÑA GENERAL (final, F10)
+// ------------------------------------------------------
+// Combina pestanaGeneralTabla con la fila de Notificaciones (única
+// fila fuera de la tabla que sí participa de cambios pendientes/
+// Aplicar, a diferencia de Carpeta de Usuario).
+// ======================================================
+
+const pestanaGeneral: Pestana = {
+  cargar: async () => {
+    await pestanaGeneralTabla.cargar();
+    await cargarFilaNotificaciones();
+  },
+
+  hayEdicionesPendientes: () =>
+    pestanaGeneralTabla.hayEdicionesPendientes() ||
+    hayEdicionPendienteFilaNotificaciones(),
+
+  validarYRecolectar: () => {
+    const resultado = pestanaGeneralTabla.validarYRecolectar();
+
+    return {
+      cambios: [
+        ...resultado.cambios,
+        ...validarYRecolectarFilaNotificaciones(),
+      ],
+      erroresLocales: resultado.erroresLocales,
+    };
+  },
+
+  aplicarGuardado: (cambios) => pestanaGeneralTabla.aplicarGuardado(cambios),
+
+  marcarErroresGuardado: (errores) =>
+    pestanaGeneralTabla.marcarErroresGuardado(errores),
+
+  limpiarEstadoTrasGuardado: async () => {
+    await pestanaGeneralTabla.limpiarEstadoTrasGuardado();
+    sincronizarFilaNotificacionesTrasGuardado();
+  },
+
+  restablecerPestana: async () => {
+    await pestanaGeneralTabla.restablecerPestana();
+    restablecerFilaNotificaciones();
+  },
+
+  textoConfirmacionRestablecer:
+    pestanaGeneralTabla.textoConfirmacionRestablecer,
+};
 
 // ======================================================
 // 🗂️ POPUP SELECTOR — 3 opciones (Default/Instalación/Otra)

@@ -185,6 +185,15 @@
   padding: 0 var(--gap12);
 }
 
+/* Botón "Duración" (fila Notificaciones, General) — sin el
+   min-width genérico de .ui-btn (28px): como flex item de
+   .configuracion-escala-fila se achicaba por debajo del texto
+   ("2000ms") y el overflow:hidden lo recortaba. */
+.configuracion-duracion-notificacion {
+  min-width: 64px;
+  flex-shrink: 0;
+}
+
 /* Botón "Seleccionar Carpeta" (fila Carpeta de Usuario, General) —
    mismo criterio de recorte que .configuracion-tema-nombre. */
 .configuracion-carpeta-usuario-boton {

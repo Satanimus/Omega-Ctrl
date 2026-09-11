@@ -181,6 +181,7 @@ pub enum TipoValor {
     NumeroPar,
     Texto,
     Trigger,
+    Booleano,
 }
 
 #[derive(Clone, Debug)]
@@ -563,6 +564,45 @@ pub fn leer_posicion_indicador_macro() -> Result<Option<(f64, f64)>, String> {
     })
 }
 
+// ======================================================
+// 📍 POSICIÓN VENTANA NOTIFICACIÓN
+// ------------------------------------------------------
+// Misma mecánica que la posición de Indicador_Macro, en clave
+// propia — la notificación de Activación/Desactivación de
+// perfil es una ventana separada, con su propia posición
+// guardada al arrastrarla en modo "ubicar" (ver
+// back_notificacion.rs).
+// ======================================================
+
+const CLAVE_NOTIFICACION_X: &str = "notificacion.x";
+const CLAVE_NOTIFICACION_Y: &str = "notificacion.y";
+
+pub fn guardar_posicion_notificacion(x: f64, y: f64) -> Result<(), String> {
+    let mut mapa = leer_mapa_completo()?;
+
+    mapa.insert(CLAVE_NOTIFICACION_X.to_string(), x.to_string());
+    mapa.insert(CLAVE_NOTIFICACION_Y.to_string(), y.to_string());
+
+    escribir_mapa_completo(&mapa)
+}
+
+pub fn leer_posicion_notificacion() -> Result<Option<(f64, f64)>, String> {
+    let mapa = leer_mapa_completo()?;
+
+    let x = mapa
+        .get(CLAVE_NOTIFICACION_X)
+        .and_then(|valor| valor.trim().parse::<f64>().ok());
+
+    let y = mapa
+        .get(CLAVE_NOTIFICACION_Y)
+        .and_then(|valor| valor.trim().parse::<f64>().ok());
+
+    Ok(match (x, y) {
+        (Some(x), Some(y)) => Some((x, y)),
+        _ => None,
+    })
+}
+
 pub fn primer_inicio() -> bool {
     match ruta_archivo() {
         Ok(ruta) => !ruta.exists(),
@@ -665,6 +705,13 @@ fn parsear_numero(valor: &str) -> Result<u64, String> {
         .map_err(|_| format!("Valor no numérico: \"{}\"", valor))
 }
 
+fn parsear_booleano(valor: &str) -> Result<bool, String> {
+    valor
+        .trim()
+        .parse::<bool>()
+        .map_err(|_| format!("Valor no booleano: \"{}\"", valor))
+}
+
 fn parsear_numero_par(valor: &str) -> Result<(u64, u64), String> {
     let partes: Vec<&str> = valor.split(',').collect();
 
@@ -752,6 +799,14 @@ pub fn aplicar_valor(clave: &str, valor: &str) -> Result<(), String> {
             config::establecer_pausa_minima_entre_pasos_macro(parsear_numero(valor)?)
         }
 
+        "mostrar_notificaciones" => {
+            config::establecer_mostrar_notificaciones(parsear_booleano(valor)?)
+        }
+
+        "duracion_notificacion_ms" => {
+            config::establecer_duracion_notificacion_ms(parsear_numero(valor)?)
+        }
+
         "delta_volumen" => config::establecer_delta_volumen(parsear_numero(valor)?),
 
         "menu_boton_pequeno" => {
@@ -837,8 +892,39 @@ fn validar_segun_tipo(tipo: &TipoValor, valor: &str) -> Result<(), String> {
         }
 
         TipoValor::Trigger => parsear_trigger(valor).map(|_| ()),
+
+        TipoValor::Booleano => parsear_booleano(valor).map(|_| ()),
     }
 }
+
+// ======================================================
+// 📦 CLAVES FUERA DEL CATÁLOGO VISUAL (General)
+// ------------------------------------------------------
+// mostrar_notificaciones/duracion_notificacion_ms (Regla 13) no son
+// una fila más de configuracion.tsv — si lo fueran, aparecerían
+// también como fila genérica en la tabla de Configuración → General,
+// duplicando la fila combinada propia (Etapa F). Pero SÍ deben pasar
+// por el mismo flujo de validación/aplicación/persistencia que
+// guardar_lote() usa para el resto de las claves (aplicar_valor ya
+// las conoce), así que guardar_lote() las valida acá aparte, sin
+// tocar cargar_catalogo()/configuracion_listar_general().
+// ======================================================
+
+struct EntradaFueraDeCatalogo {
+    clave: &'static str,
+    tipo: TipoValor,
+}
+
+const CLAVES_FUERA_DE_CATALOGO: &[EntradaFueraDeCatalogo] = &[
+    EntradaFueraDeCatalogo {
+        clave: "mostrar_notificaciones",
+        tipo: TipoValor::Booleano,
+    },
+    EntradaFueraDeCatalogo {
+        clave: "duracion_notificacion_ms",
+        tipo: TipoValor::Numero,
+    },
+];
 
 // ======================================================
 // 📦 GUARDAR LOTE (varios cambios, todo o nada)
@@ -862,16 +948,27 @@ pub fn guardar_lote(cambios: &[(String, String)]) -> Result<(), Vec<(String, Str
 
     for (clave, valor) in cambios {
         match catalogo.iter().find(|entrada| &entrada.clave == clave) {
-            None => errores.push((
-                clave.clone(),
-                format!("Clave de configuración desconocida: \"{}\"", clave),
-            )),
-
             Some(entrada) => {
                 if let Err(mensaje) = validar_segun_tipo(&entrada.tipo, valor) {
                     errores.push((clave.clone(), mensaje));
                 }
             }
+
+            None => match CLAVES_FUERA_DE_CATALOGO
+                .iter()
+                .find(|entrada| entrada.clave == clave)
+            {
+                Some(entrada) => {
+                    if let Err(mensaje) = validar_segun_tipo(&entrada.tipo, valor) {
+                        errores.push((clave.clone(), mensaje));
+                    }
+                }
+
+                None => errores.push((
+                    clave.clone(),
+                    format!("Clave de configuración desconocida: \"{}\"", clave),
+                )),
+            },
         }
     }
 

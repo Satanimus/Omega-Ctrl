@@ -91,7 +91,10 @@
 //     Compila perfil completo y reemplaza Cache.
 //     Ademas ejecuta orden revisar_app() para conocer si Apps del filtro están activas
 // compilar_perfil()
-//     Convierte todas las filas activas.
+//     Convierte todas las filas activas — antes de convertir,
+//     descarta las que estén en alerta (001/002/003, ver
+//     calcular_filas_en_alerta()), tratándolas como si su estado
+//     fuera Off aunque el JSON diga "ON".
 //
 // compilar_remapeo()
 //     Convierte una fila completa.
@@ -181,9 +184,11 @@ use crate::perfil_cache::{
     TamanoBotonPortapapeles, TamanoMenu, TriggerCache, UbicacionMenu,
 };
 
-use crate::perfil_json::{PerfilJson, AppJson, CoordenadaJson, ItemFilaJson, RemapeoJson};
+use crate::perfil_json::{PerfilJson, AppJson, CoordenadaJson, ItemFilaJson, RemapeoJson, TriggerJson};
 
 use serde::Serialize;
+
+use std::collections::HashSet;
 
 use std::path::Path;
 
@@ -264,20 +269,210 @@ pub fn compilar(perfil: &PerfilJson) -> ResultadoCompilacion {
 pub fn compilar_perfil(perfil: &PerfilJson) -> (Vec<RemapeoCache>, Vec<AdvertenciaCompilacion>) {
     let mut advertencias = Vec::new();
 
-    let remapeos = perfil
+    let filas: Vec<&RemapeoJson> = perfil
         .filas
         .iter()
         .filter_map(|item| match item {
             ItemFilaJson::Fila(remapeo) => Some(remapeo),
             ItemFilaJson::Separador(_) => None,
         })
+        .collect();
+
+    let filas_en_alerta = calcular_filas_en_alerta(&filas, &mut advertencias);
+
+    let remapeos = filas
+        .iter()
         .enumerate()
         .filter_map(|(indice, remapeo)| {
-            compilar_remapeo(indice + 1, remapeo, perfil, &mut advertencias)
+            let numero_fila = indice + 1;
+
+            if filas_en_alerta.contains(&numero_fila) {
+                return None;
+            }
+
+            compilar_remapeo(numero_fila, remapeo, perfil, &mut advertencias)
         })
         .collect();
 
     (remapeos, advertencias)
+}
+
+// ======================================================
+// ⚠️ FILAS EN ALERTA (001/002/003)
+// ------------------------------------------------------
+// Mismo criterio que core_conflictos.ts (frontend, cálculo en
+// vivo para la alerta ⚠️/número en rojo de la tabla) — replicado
+// acá porque el compilador es quien decide qué entra a la cache:
+// una fila en alerta (001/002/003) NUNCA debe llegar a Runtime
+// aunque su `estado` guardado siga en "ON" (para todos los
+// efectos, fila en alerta == fila en Off). Se descarta igual que
+// convertir_abrir/convertir_macro (dato inválido, no solo
+// faltante) — con su propia AdvertenciaCompilacion, así la UI la
+// muestra en el statusbar (ver comentario del índice de funciones
+// arriba: "cualquier chequeo futuro con el mismo criterio puede
+// sumar advertencias acá").
+// ======================================================
+
+fn triggers_iguales(remapeo_a: &RemapeoJson, remapeo_b: &RemapeoJson) -> bool {
+    let (Some(gatillo_a), Some(gatillo_b)) = (&remapeo_a.trigger.gatillo, &remapeo_b.trigger.gatillo)
+    else {
+        return false;
+    };
+
+    remapeo_a.trigger.condicion == remapeo_b.trigger.condicion
+        && remapeo_a.trigger.modificadores == remapeo_b.trigger.modificadores
+        && gatillo_a == gatillo_b
+}
+
+fn apps_conflictivas(app_a: &AppJson, app_b: &AppJson) -> bool {
+    match (&app_a.programa, &app_b.programa) {
+        (None, None) => true,
+        (None, Some(_)) => app_b.segundo_plano,
+        (Some(_), None) => app_a.segundo_plano,
+        (Some(nombre_a), Some(nombre_b)) => nombre_a.to_lowercase() == nombre_b.to_lowercase(),
+    }
+}
+
+fn es_gatillo_rueda(trigger: &TriggerJson) -> bool {
+    matches!(
+        trigger.gatillo.as_ref().map(|input| input.control.as_str()),
+        Some("WheelUp") | Some("WheelDown")
+    )
+}
+
+fn rueda_repeticion_anula_mantenido(remapeo_a: &RemapeoJson, remapeo_b: &RemapeoJson) -> bool {
+    if remapeo_a.tipo != "tecla_mouse" || remapeo_b.tipo != "tecla_mouse" {
+        return false;
+    }
+
+    if !es_gatillo_rueda(&remapeo_a.trigger) || !es_gatillo_rueda(&remapeo_b.trigger) {
+        return false;
+    }
+
+    if remapeo_a.trigger.gatillo.as_ref().map(|gatillo| &gatillo.control)
+        != remapeo_b.trigger.gatillo.as_ref().map(|gatillo| &gatillo.control)
+    {
+        return false;
+    }
+
+    let repeticion = if remapeo_a.extra == "repeticion_rueda" {
+        Some(remapeo_a)
+    } else if remapeo_b.extra == "repeticion_rueda" {
+        Some(remapeo_b)
+    } else {
+        None
+    };
+
+    let mantenido = if remapeo_a.trigger.condicion == CondicionTrigger::Mantenido {
+        Some(remapeo_a)
+    } else if remapeo_b.trigger.condicion == CondicionTrigger::Mantenido {
+        Some(remapeo_b)
+    } else {
+        None
+    };
+
+    match (repeticion, mantenido) {
+        (Some(repeticion), Some(mantenido)) if !std::ptr::eq(repeticion, mantenido) => {
+            repeticion.trigger.modificadores == mantenido.trigger.modificadores
+        }
+        _ => false,
+    }
+}
+
+// Trigger y/o Acción de la fila coinciden con un atajo reservado
+// de Configuración (tecla_toggle_perfil / tecla_guardar_coordenada,
+// ver config.rs) — mismo chequeo que perfil_ui::coincide_con_atajo_
+// reservado ya expuesto a comandos.rs para el frontend (conflicto
+// 003), reusado acá directo sin pasar por IPC.
+fn columnas_en_atajo_reservado(remapeo: &RemapeoJson) -> Vec<&'static str> {
+    let mut columnas = Vec::new();
+
+    let coincide = |trigger: &TriggerJson| {
+        trigger.gatillo.as_ref().is_some_and(|gatillo| {
+            let modificadores: Vec<InputId> =
+                trigger.modificadores.iter().map(convertir_input).collect();
+
+            crate::perfil_ui::coincide_con_atajo_reservado(&modificadores, &convertir_input(gatillo))
+        })
+    };
+
+    if coincide(&remapeo.trigger) {
+        columnas.push("Trigger");
+    }
+
+    if let Some(accion_trigger) = &remapeo.accion_trigger {
+        if coincide(accion_trigger) {
+            columnas.push("Acción");
+        }
+    }
+
+    columnas
+}
+
+fn calcular_filas_en_alerta(
+    filas: &[&RemapeoJson],
+    advertencias: &mut Vec<AdvertenciaCompilacion>,
+) -> HashSet<usize> {
+    let mut en_alerta = HashSet::new();
+
+    for indice_a in 0..filas.len() {
+        for indice_b in (indice_a + 1)..filas.len() {
+            let remapeo_a = filas[indice_a];
+            let remapeo_b = filas[indice_b];
+
+            let numero_a = indice_a + 1;
+            let numero_b = indice_b + 1;
+
+            if triggers_iguales(remapeo_a, remapeo_b) && apps_conflictivas(&remapeo_a.app, &remapeo_b.app) {
+                en_alerta.insert(numero_a);
+                en_alerta.insert(numero_b);
+
+                advertencias.push(AdvertenciaCompilacion {
+                    fila: numero_a,
+                    mensaje: format!("Trigger idéntico a la fila {numero_b} (Apps incompatibles)."),
+                });
+
+                advertencias.push(AdvertenciaCompilacion {
+                    fila: numero_b,
+                    mensaje: format!("Trigger idéntico a la fila {numero_a} (Apps incompatibles)."),
+                });
+            }
+
+            if rueda_repeticion_anula_mantenido(remapeo_a, remapeo_b) {
+                en_alerta.insert(numero_a);
+                en_alerta.insert(numero_b);
+
+                advertencias.push(AdvertenciaCompilacion {
+                    fila: numero_a,
+                    mensaje: format!(
+                        "Rueda con Repetición/Mantenida en conflicto con la fila {numero_b}."
+                    ),
+                });
+
+                advertencias.push(AdvertenciaCompilacion {
+                    fila: numero_b,
+                    mensaje: format!(
+                        "Rueda con Repetición/Mantenida en conflicto con la fila {numero_a}."
+                    ),
+                });
+            }
+        }
+    }
+
+    for (indice, remapeo) in filas.iter().enumerate() {
+        let numero_fila = indice + 1;
+
+        for columna in columnas_en_atajo_reservado(remapeo) {
+            en_alerta.insert(numero_fila);
+
+            advertencias.push(AdvertenciaCompilacion {
+                fila: numero_fila,
+                mensaje: format!("{columna} coincide con un atajo reservado de Configuración."),
+            });
+        }
+    }
+
+    en_alerta
 }
 
 // ======================================================

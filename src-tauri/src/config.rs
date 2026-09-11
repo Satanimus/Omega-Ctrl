@@ -196,7 +196,7 @@
 // Todos los módulos
 // ======================================================
 
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 use crate::eventos::InputId;
 
@@ -582,6 +582,34 @@ pub fn pausa_minima_entre_pasos_macro() -> u64 {
 
 pub fn establecer_pausa_minima_entre_pasos_macro(valor: u64) {
     PAUSA_MINIMA_ENTRE_PASOS_MACRO.store(valor, Ordering::Relaxed);
+}
+
+// ======================================================
+// 🔔 NOTIFICACIÓN Activación/Desactivación de perfil
+// ------------------------------------------------------
+// Fila combinada de Configuración → General (fuera de la
+// tabla, pero participa del flujo de cambios pendientes/
+// Aplicar cambios, ver configuracion_usuario.rs::aplicar_valor).
+// ======================================================
+
+static MOSTRAR_NOTIFICACIONES: AtomicBool = AtomicBool::new(true);
+
+pub fn mostrar_notificaciones() -> bool {
+    MOSTRAR_NOTIFICACIONES.load(Ordering::Relaxed)
+}
+
+pub fn establecer_mostrar_notificaciones(valor: bool) {
+    MOSTRAR_NOTIFICACIONES.store(valor, Ordering::Relaxed);
+}
+
+static DURACION_NOTIFICACION_MS: AtomicU64 = AtomicU64::new(2000);
+
+pub fn duracion_notificacion_ms() -> u64 {
+    DURACION_NOTIFICACION_MS.load(Ordering::Relaxed)
+}
+
+pub fn establecer_duracion_notificacion_ms(valor: u64) {
+    DURACION_NOTIFICACION_MS.store(valor, Ordering::Relaxed);
 }
 
 // ======================================================

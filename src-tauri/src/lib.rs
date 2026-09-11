@@ -14,6 +14,7 @@ mod back_coordenada;
 mod back_interception;
 mod back_menu_express;
 mod back_mouse;
+mod back_notificacion;
 mod back_multimedia;
 mod back_pegado_personalizado;
 mod back_portapapeles;
@@ -91,6 +92,13 @@ pub fn run() {
             // (modo play) desde el hilo de ejecución de la macro, que
             // tampoco es un comando Tauri.
             runt_macro::inicializar(app.handle().clone());
+
+            // Mismo motivo/momento — back_notificacion.rs necesita el
+            // AppHandle para abrir la ventana de notificación de
+            // Activación/Desactivación de perfil desde el atajo
+            // global (entrada.rs/perfil.rs), que tampoco es un
+            // comando Tauri.
+            back_notificacion::inicializar(app.handle().clone());
 
             // Aplica sobre config.rs los overrides guardados en
             // Configuracion_Usuario.txt (pestaña General de la
@@ -195,6 +203,11 @@ pub fn run() {
             comandos::guardar_posicion_indicador_macro,
             comandos::obtener_posicion_indicador_macro,
             comandos::obtener_progreso_indicador_macro,
+            comandos::abrir_notificacion_ubicacion,
+            comandos::cerrar_ventana_notificacion,
+            comandos::guardar_posicion_notificacion,
+            comandos::obtener_mostrar_notificaciones,
+            comandos::obtener_duracion_notificacion_ms,
             comandos::armar_grabacion_macro,
             comandos::obtener_estado_grabacion_macro,
             comandos::detener_grabacion_macro,

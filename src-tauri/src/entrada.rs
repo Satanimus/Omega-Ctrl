@@ -189,6 +189,7 @@
 // retener() | pasar() | consumir(vivas)
 // ======================================================
 
+use crate::back_notificacion;
 use crate::cache;
 use crate::captura_coordenada;
 use crate::config;
@@ -196,6 +197,7 @@ use crate::eventos::{InputEvent, InputId, InputState};
 use crate::grabacion_macro;
 use crate::motor;
 use crate::perfil;
+use crate::usuario;
 use std::cell::RefCell;
 use std::sync::Mutex;
 use std::time::Duration;
@@ -343,13 +345,44 @@ fn detectar_toggle(evento: &InputEvent) -> bool {
 /// corresponda. Errores de activar_perfil() (ej. perfil corrupto)
 /// solo se loguean por consola: entrada.rs no tiene forma de
 /// mostrarlos en la UI.
+///
+/// Notificación de Activación/Desactivación (si
+/// config::mostrar_notificaciones() está activo): se dispara acá,
+/// no dentro de perfil.rs, porque activar_perfil()/desactivar_perfil()
+/// también los llaman comandos.rs (botón manual de la UI) y
+/// motor.rs — solo el atajo de teclado debe abrir la notificación.
+/// Un error al abrir la ventana (back_notificacion::abrir_notificacion_real)
+/// solo se loguea, igual que el resto de esta función.
 fn ejecutar_toggle_perfil() {
     if cache::esta_vacia() {
         if let Err(error) = perfil::activar_perfil() {
             eprintln!("⚠️ Atajo toggle: no se pudo activar el perfil: {error}");
+            return;
         }
+
+        notificar_toggle_perfil(true);
     } else {
         perfil::desactivar_perfil();
+
+        notificar_toggle_perfil(false);
+    }
+}
+
+fn notificar_toggle_perfil(activado: bool) {
+    if !config::mostrar_notificaciones() {
+        return;
+    }
+
+    let nombre_perfil = match usuario::nombre_actual() {
+        Ok(nombre) => nombre,
+        Err(error) => {
+            eprintln!("⚠️ No se pudo determinar el nombre del perfil para la notificación: {error}");
+            return;
+        }
+    };
+
+    if let Err(error) = back_notificacion::abrir_notificacion_real(nombre_perfil, activado) {
+        eprintln!("⚠️ No se pudo abrir la notificación de perfil: {error}");
     }
 }
 
