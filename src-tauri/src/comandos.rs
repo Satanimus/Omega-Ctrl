@@ -158,6 +158,7 @@ use base64::engine::general_purpose::STANDARD as BASE64;
 use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 
@@ -386,20 +387,40 @@ pub fn crear_perfil_nuevo() -> Result<ResultadoPerfil, String> {
     perfil::crear_perfil_nuevo()
 }
 
+// Bug fix: un doble click de bandeja (Windows dispara a veces el
+// evento de menú duplicado para un mismo click) o un click de
+// bandeja superpuesto con uno del panel lateral podía disparar dos
+// seleccionar_perfil() casi simultáneos: ambos vuelven a arrancar
+// runtime::detener_todo()/cache::borrar_cache() y compilan sobre el
+// perfil que cada uno cargó, así que el que termina último "gana" y
+// el usuario puede terminar viendo activado un perfil distinto del
+// que pidió, o el propio recompilado quedando en un estado a medio
+// pisar del otro. CAMBIANDO_PERFIL descarta el segundo intento en
+// vez de dejarlos correr en paralelo.
+static CAMBIANDO_PERFIL: AtomicBool = AtomicBool::new(false);
+
+// [Etapa B] `notificar`: true solo cuando el origen es la bandeja de
+// sistema (ver comp_panel_lateral::cambiarPerfilDesde) — la barra
+// lateral NO debe disparar la notificación de cambio de perfil, ya
+// que el propio panel abierto ya es la confirmación visual.
 #[tauri::command]
-pub fn seleccionar_perfil(nombre: String) -> Result<ResultadoPerfil, String> {
+pub fn seleccionar_perfil(nombre: String, notificar: bool) -> Result<ResultadoPerfil, String> {
+    if CAMBIANDO_PERFIL.swap(true, Ordering::SeqCst) {
+        return Err("Ya hay un cambio de perfil en curso".into());
+    }
+
     let resultado = perfil::seleccionar_perfil(nombre);
 
     // El estado mostrado se lee DESPUÉS de intentar seleccionar (no
     // se asume que "seleccionar" implica quedar activo — mismo
     // criterio que el fix de entrada.rs: si el perfil elegido tiene
     // todas las filas en off, la notificación debe decir "inactivo"
-    // real). Se notifica siempre que el comando se ejecuta con
-    // éxito, sin importar si el origen es la barra lateral o el
-    // listener del evento "bandeja-seleccionar-perfil" en main.ts —
-    // el pedido del usuario es que ambos caminos avisen igual.
-    if resultado.is_ok() {
-        back_notificacion::notificar_estado_perfil(!cache::esta_vacia());
+    // real).
+    if resultado.is_ok() && notificar {
+        // [Etapa A] Versión directa: este comando ya corre en el hilo
+        // principal, no debe pasar por run_on_main_thread (ver
+        // back_notificacion::notificar_estado_perfil_directo).
+        back_notificacion::notificar_estado_perfil_directo(!cache::esta_vacia());
     }
 
     // Mismo motivo que activar_perfil/desactivar_perfil: el cambio
@@ -407,7 +428,20 @@ pub fn seleccionar_perfil(nombre: String) -> Result<ResultadoPerfil, String> {
     // de bandeja (Regla 13).
     back_tray::refrescar_si_existe();
 
+    CAMBIANDO_PERFIL.store(false, Ordering::SeqCst);
+
     resultado
+}
+
+// [Etapa C] Solo se invoca desde el frontend cuando el cambio de
+// perfil pedido desde la bandeja encuentra ediciones sin guardar y va
+// a mostrar el popup de confirmación — ver
+// comp_panel_lateral::cambiarPerfilDesde. No dispara ningún refresco
+// de estado por sí sola (la ventana, al abrirse, ya muestra lo que el
+// frontend tiene montado en ese momento).
+#[tauri::command]
+pub fn mostrar_ventana_principal(app: tauri::AppHandle) {
+    back_tray::solo_mostrar_ventana(&app);
 }
 
 #[tauri::command]

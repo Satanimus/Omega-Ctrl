@@ -202,6 +202,24 @@ pub(crate) fn cerrar_ventana_notificacion(app: &AppHandle) {
 // ======================================================
 
 pub(crate) fn notificar_estado_perfil(activado: bool) {
+    notificar_estado_perfil_interno(activado, true);
+}
+
+// [Etapa A] Variante para llamar desde un comando Tauri síncrono
+// (ej. comandos::seleccionar_perfil), que ya corre en el hilo
+// principal: NO debe encolar con run_on_main_thread (encolar una
+// tarea en el hilo principal desde el propio hilo principal, dentro
+// de un command síncrono que aún no terminó de ejecutarse, es lo que
+// producía el deadlock/cuelgue — la tarea encolada no se procesaba
+// hasta que el bucle de eventos volvía a girar, y una ráfaga de
+// comandos sucesivos nunca le daba lugar). Acá se llama directo a
+// abrir_ventana_notificacion_interno, igual que ya hace
+// abrir_notificacion_ubicacion.
+pub(crate) fn notificar_estado_perfil_directo(activado: bool) {
+    notificar_estado_perfil_interno(activado, false);
+}
+
+fn notificar_estado_perfil_interno(activado: bool, encolar_en_hilo_principal: bool) {
     if !crate::config::mostrar_notificaciones() {
         return;
     }
@@ -214,7 +232,25 @@ pub(crate) fn notificar_estado_perfil(activado: bool) {
         }
     };
 
-    if let Err(error) = abrir_notificacion_real(nombre_perfil, activado) {
+    if encolar_en_hilo_principal {
+        if let Err(error) = abrir_notificacion_real(nombre_perfil, activado) {
+            eprintln!("⚠️ No se pudo abrir la notificación de perfil: {error}");
+        }
+        return;
+    }
+
+    let Some(app) = app_handle() else {
+        eprintln!("⚠️ AppHandle no inicializado, no se pudo abrir la notificación de perfil");
+        return;
+    };
+
+    let url = format!(
+        "notificacion.html?modo=real&perfil={}&activado={}",
+        codificar_query(&nombre_perfil),
+        activado
+    );
+
+    if let Err(error) = abrir_ventana_notificacion_interno(app, url) {
         eprintln!("⚠️ No se pudo abrir la notificación de perfil: {error}");
     }
 }

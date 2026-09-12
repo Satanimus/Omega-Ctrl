@@ -180,11 +180,18 @@ async function recargarContenidoPanel(): Promise<void> {
 // confirmación si corresponde + mismo invoke a seleccionar_perfil +
 // mismo refresco de UI. `evento` solo se usa para posicionar el
 // popup de confirmación (si hace falta mostrarlo).
+//
+// [Etapa B/C] `origen` distingue panel lateral (siempre visible, sin
+// notificación) de bandeja de sistema (notifica el cambio, y solo
+// ahí se fuerza mostrar la ventana — y únicamente si hay ediciones
+// sin guardar y va a aparecer el popup de confirmación; si no hay
+// nada que confirmar, el cambio se resuelve sin robar foco).
 // ======================================================
 
 export async function cambiarPerfilDesde(
   nombre: string,
   evento: MouseEvent,
+  origen: "panel" | "bandeja" = "panel",
 ): Promise<void> {
   if (
     !obtenerEstadoActualFn ||
@@ -201,6 +208,14 @@ export async function cambiarPerfilDesde(
   }
 
   if (estaEditado) {
+    if (origen === "bandeja") {
+      try {
+        await invoke("mostrar_ventana_principal");
+      } catch (error) {
+        console.error("❌ No se pudo mostrar la ventana principal:", error);
+      }
+    }
+
     const guardar = await confirmarPopup(
       "¿Guardar cambios del perfil actual?",
       evento,
@@ -214,6 +229,7 @@ export async function cambiarPerfilDesde(
   try {
     const resultado = await invoke<ResultadoPerfil>("seleccionar_perfil", {
       nombre,
+      notificar: origen === "bandeja",
     });
 
     await alCambiarPerfilActual(resultado);

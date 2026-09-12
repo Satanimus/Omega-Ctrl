@@ -129,18 +129,20 @@ window.addEventListener(
 // Click en un perfil de la lista del menú de bandeja: mismo camino
 // que el click en la lista del panel lateral (mismo chequeo de
 // ediciones sin guardar, mismo popup de confirmación si corresponde,
-// mismo refresco de tabla/estado/nombre). El backend ya restauró la
-// ventana antes de emitir este evento — acá no hace falta pedirlo de
-// nuevo. El MouseEvent es sintético (no hubo click real): solo se
-// usa para posicionar el popup de confirmación si llega a mostrarse,
-// así que se ubica en el centro de la ventana.
+// mismo refresco de tabla/estado/nombre). [Etapa C] El backend NO
+// muestra la ventana en este click (ver
+// back_tray::pedir_cambio_perfil_al_frontend); solo se mostrará si
+// cambiarPerfilDesde encuentra ediciones sin guardar y va a abrir el
+// popup de confirmación. El MouseEvent es sintético (no hubo click
+// real): solo se usa para posicionar el popup de confirmación si
+// llega a mostrarse, así que se ubica en el centro de la ventana.
 listen<string>("bandeja-seleccionar-perfil", (evento) => {
   const eventoSintetico = new MouseEvent("click", {
     clientX: window.innerWidth / 2,
     clientY: window.innerHeight / 2,
   });
 
-  cambiarPerfilDesde(evento.payload, eventoSintetico).catch((error) => {
+  cambiarPerfilDesde(evento.payload, eventoSintetico, "bandeja").catch((error) => {
     console.error(
       "❌ No se pudo cambiar de perfil desde la bandeja de sistema:",
       error,

@@ -112,21 +112,35 @@ pub fn run() {
             // ninguna ventana — se hace apenas arranca.
             configuracion_usuario::cargar_al_iniciar(app.handle());
 
-            // Al cerrarse la ventana principal ("main"), fuerza el
-            // cierre de cualquier ventana secundaria que siga abierta
-            // (captura, previews, grabación de macro, coordenadas,
-            // menú express, portapapeles, etc.) — evita que el
-            // proceso quede vivo en segundo plano sostenido por una
-            // ventana huérfana.
+            // Bug fix: cerrar la ventana principal (botón X) no debe
+            // salir del programa — el menú de bandeja ya distingue
+            // "Abrir Omega Ctrl" (restaurar) de "Salir" (salir de
+            // verdad), lo que solo tiene sentido si cerrar la
+            // ventana la oculta y deja el proceso vivo en la
+            // bandeja. Antes no había ningún prevent_default() acá:
+            // cerrar la ventana disparaba ExitRequested y el
+            // proceso terminaba de verdad, dejando el ícono de
+            // bandeja húerfano (ya sin proceso detrás que le
+            // responda a los clicks — el bug reportado de "el ícono
+            // se queda pegado sin responder"). api.prevent_close()
+            // + hide() corrige eso: la ventana solo se oculta, el
+            // proceso (y el ícono de bandeja) sigue vivo y
+            // respondiendo.
             if let Some(ventana_principal) = app.get_webview_window("main") {
                 let handle = app.handle().clone();
 
                 ventana_principal.on_window_event(move |evento| {
-                    if let tauri::WindowEvent::CloseRequested { .. } = evento {
+                    if let tauri::WindowEvent::CloseRequested { api, .. } = evento {
+                        api.prevent_close();
+
                         for ventana in handle.webview_windows().values() {
                             if ventana.label() != "main" {
                                 let _ = ventana.close();
                             }
+                        }
+
+                        if let Some(ventana) = handle.get_webview_window("main") {
+                            let _ = ventana.hide();
                         }
                     }
                 });
@@ -161,6 +175,7 @@ pub fn run() {
             comandos::eliminar_perfil_actual,
             comandos::crear_perfil_nuevo,
             comandos::seleccionar_perfil,
+            comandos::mostrar_ventana_principal,
             comandos::macro_listar,
             comandos::macro_nueva,
             comandos::macro_abrir,

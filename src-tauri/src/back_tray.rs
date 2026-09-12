@@ -17,7 +17,8 @@
 
 use crate::{cache, config, perfil, pulsadores};
 use std::sync::OnceLock;
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::image::Image;
+use tauri::menu::{IconMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager};
 
@@ -94,7 +95,7 @@ fn reconstruir_menu(app: &AppHandle) -> Menu<tauri::Wry> {
     let nombres_perfiles = perfil::obtener_perfiles().unwrap_or_default();
     let nombre_actual = perfil::obtener_nombre_actual().ok();
 
-    let items_perfiles: Vec<MenuItem<tauri::Wry>> = nombres_perfiles
+    let items_perfiles: Vec<IconMenuItem<tauri::Wry>> = nombres_perfiles
         .iter()
         .map(|nombre| {
             let es_actual = nombre_actual.as_deref() == Some(nombre.as_str());
@@ -199,30 +200,67 @@ fn ejecutar_toggle_perfil_tray() {
 // 🟢🔴 LISTA DE PERFILES (ítems dinámicos del menú)
 // ------------------------------------------------------
 // Cada perfil lleva un id "perfil::<nombre>" para distinguirlo en
-// manejar_evento_menu. El marcador de color va antepuesto al texto
-// (Tauri no soporta ícono nativo por ítem de forma simple en un Menu
-// estándar): círculo verde si es el actual y quedó realmente activo,
-// rojo si es el actual pero la cache sigue vacía, o un espacio en
-// blanco de igual ancho si no es el actual — así el nombre queda
-// alineado en toda la lista (Regla: "toda la lista de perfiles
-// aparece desplazada para que los nombres queden alineados").
+// manejar_evento_menu.
+//
+// Bug fix: el marcador de color antes iba como emoji (🟢/🔴)
+// antepuesto al texto. Los menús nativos de Windows (HMENU/GDI)
+// dibujan el texto del ítem con la fuente clásica de menú, que no
+// soporta glifos de emoji a color — el resultado es el glifo
+// "tofu" (recuadro blanco achurado) que reportó el usuario, no el
+// círculo de color. Se reemplaza por un IconMenuItem con un bitmap
+// RGBA generado en memoria (ver icono_punto_estado) — un ícono real
+// SÍ lo dibuja Windows correctamente, a diferencia del glifo emoji.
+// Si no es el perfil actual, el ítem no lleva ícono (None).
 // ======================================================
 
-const MARCADOR_VACIO: &str = "\u{2003}"; // espacio de igual ancho visual que 🟢/🔴
+const TAMANO_ICONO_ESTADO: u32 = 12;
+const COLOR_VERDE: [u8; 3] = [0x2e, 0xc4, 0x5c];
+const COLOR_ROJO: [u8; 3] = [0xe0, 0x3b, 0x3b];
 
-fn crear_item_perfil(app: &AppHandle, nombre: &str, es_actual: bool) -> MenuItem<tauri::Wry> {
-    let marcador = if !es_actual {
-        MARCADOR_VACIO
+/// Genera un círculo relleno (antialiasing simple por cobertura de
+/// borde) del color pedido, como bitmap RGBA cuadrado, para usarlo
+/// como ícono de un IconMenuItem.
+fn icono_punto_estado(color: [u8; 3]) -> Image<'static> {
+    let n = TAMANO_ICONO_ESTADO;
+    let mut buffer = vec![0u8; (n * n * 4) as usize];
+
+    let centro = (n as f32 - 1.0) / 2.0;
+    let radio = n as f32 / 2.0;
+
+    for y in 0..n {
+        for x in 0..n {
+            let dx = x as f32 - centro;
+            let dy = y as f32 - centro;
+            let distancia = (dx * dx + dy * dy).sqrt();
+
+            // Cobertura suave en el borde (1px) para no dejar el
+            // círculo completamente dentado a este tamaño tan chico.
+            let cobertura = (radio - distancia + 0.5).clamp(0.0, 1.0);
+
+            let indice = ((y * n + x) * 4) as usize;
+
+            buffer[indice] = color[0];
+            buffer[indice + 1] = color[1];
+            buffer[indice + 2] = color[2];
+            buffer[indice + 3] = (cobertura * 255.0) as u8;
+        }
+    }
+
+    Image::new_owned(buffer, n, n)
+}
+
+fn crear_item_perfil(app: &AppHandle, nombre: &str, es_actual: bool) -> IconMenuItem<tauri::Wry> {
+    let icono = if !es_actual {
+        None
     } else if cache::esta_vacia() {
-        "🔴"
+        Some(icono_punto_estado(COLOR_ROJO))
     } else {
-        "🟢"
+        Some(icono_punto_estado(COLOR_VERDE))
     };
 
     let id = format!("perfil::{nombre}");
-    let texto = format!("{marcador} {nombre}");
 
-    MenuItem::with_id(app, id, texto, true, None::<&str>)
+    IconMenuItem::with_id(app, id, nombre, true, icono, None::<&str>)
         .expect("No se pudo crear el ítem de perfil del menú de bandeja")
 }
 
@@ -236,21 +274,19 @@ fn manejar_evento_icono(tray: &tauri::tray::TrayIcon, evento: TrayIconEvent) {
     }
 }
 
-/// Pide al frontend que cambie de perfil (Regla 2/3): la ventana
-/// principal se muestra primero (Regla del pedido: "si hay un
-/// mensaje que responder, se abre la ventana y lo muestra"), y el
-/// cambio real —con el mismo popup de confirmación por ediciones sin
-/// guardar que ya usa la barra lateral— lo resuelve el frontend, no
-/// este backend. El menú de bandeja se reconstruye recién cuando el
-/// frontend termina (seleccionar_perfil ya llama
-/// back_tray::refrescar_si_existe, ver comandos.rs), no en este
-/// click. Usa solo_mostrar_ventana (no mostrar_ventana_y_resincronizar):
-/// el propio evento "bandeja-seleccionar-perfil" ya dispara la
-/// recarga completa en main.ts — emitir además "bandeja-ventana-
-/// restaurada" duplicaría esa recarga en cascada.
+/// Pide al frontend que cambie de perfil. [Etapa C] Ya NO fuerza
+/// mostrar la ventana en cada click: la ventana solo debe aparecer
+/// si el frontend encuentra ediciones sin guardar y necesita mostrar
+/// el popup de confirmación (el propio frontend llama al comando
+/// mostrar_ventana_principal en ese caso puntual, ver
+/// comp_panel_lateral::cambiarPerfilDesde). Si no hay nada que
+/// confirmar, el cambio se resuelve en segundo plano (la webview
+/// sigue corriendo aunque la ventana esté oculta/minimizada) y recién
+/// se ve reflejado cuando el usuario la abra. El menú de bandeja se
+/// reconstruye recién cuando el frontend termina (seleccionar_perfil
+/// ya llama back_tray::refrescar_si_existe, ver comandos.rs), no en
+/// este click.
 fn pedir_cambio_perfil_al_frontend(app: &AppHandle, nombre: &str) {
-    solo_mostrar_ventana(app);
-
     if let Err(error) = app.emit("bandeja-seleccionar-perfil", nombre) {
         eprintln!("⚠️ Bandeja: no se pudo notificar el cambio de perfil al frontend: {error}");
     }
@@ -278,9 +314,11 @@ fn manejar_evento_menu(app: &AppHandle, evento: tauri::menu::MenuEvent) {
 }
 
 /// Solo muestra/enfoca la ventana principal, sin avisar al frontend.
-/// Uso interno de pedir_cambio_perfil_al_frontend, que ya dispara su
-/// propio evento de recarga ("bandeja-seleccionar-perfil").
-fn solo_mostrar_ventana(app: &AppHandle) {
+/// [Etapa C] Ahora también se usa desde comandos::mostrar_ventana_principal,
+/// llamado por el frontend cuando el cambio de perfil (origen bandeja)
+/// encuentra ediciones sin guardar y va a mostrar el popup de
+/// confirmación — recién ahí se justifica robar foco/mostrar ventana.
+pub(crate) fn solo_mostrar_ventana(app: &AppHandle) {
     if let Some(ventana) = app.get_webview_window("main") {
         let _ = ventana.show();
         let _ = ventana.unminimize();
