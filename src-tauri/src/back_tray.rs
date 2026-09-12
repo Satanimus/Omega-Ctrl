@@ -34,7 +34,7 @@ use tauri::{AppHandle, Emitter, Manager};
 
 static APP: OnceLock<AppHandle> = OnceLock::new();
 
-pub fn inicializar(app: &AppHandle) {
+pub fn inicializar(app: &AppHandle, visible: bool) {
     let _ = APP.set(app.clone());
 
     let icono = app
@@ -53,7 +53,21 @@ pub fn inicializar(app: &AppHandle) {
         .build(app)
         .expect("No se pudo crear el ícono de bandeja de sistema");
 
+    let _ = tray.set_visible(visible);
+
     app.manage(tray);
+}
+
+/// Muestra u oculta el ícono de bandeja ya creado, según "Mostrar en
+/// bandeja de sistema" (Configuración → General). El TrayIcon se crea
+/// siempre en inicializar() (oculto o visible); esto solo alterna su
+/// visibilidad en caliente, sin crear ni destruir nada. No hace nada
+/// si Tauri todavía no terminó de inicializar.
+pub fn establecer_visible(visible: bool) {
+    if let Some(app) = APP.get() {
+        let tray = app.state::<TrayIcon>();
+        let _ = tray.set_visible(visible);
+    }
 }
 
 // ======================================================

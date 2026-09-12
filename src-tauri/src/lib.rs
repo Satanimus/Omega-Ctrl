@@ -108,16 +108,15 @@ pub fn run() {
 
             // Ícono de bandeja de sistema y su menú contextual — mismo
             // ícono ya embebido para las ventanas (icons/icon.ico).
-            // Solo se crea si "Mostrar en bandeja de sistema"
-            // (Configuración → General) está activo (default false:
-            // sin cache la primera vez, no se crea).
+            // Se crea siempre (oculto o visible según "Mostrar en
+            // bandeja de sistema", Configuración → General, default
+            // false) para poder alternar su visibilidad en caliente
+            // desde la ventana de configuración sin recrearlo.
             let mostrar_en_bandeja = configuracion_usuario::leer_mostrar_en_bandeja()
                 .unwrap_or(None)
                 .unwrap_or(false);
 
-            if mostrar_en_bandeja {
-                back_tray::inicializar(app.handle());
-            }
+            back_tray::inicializar(app.handle(), mostrar_en_bandeja);
 
             // Aplica sobre config.rs los overrides guardados en
             // Configuracion_Usuario.txt (pestaña General de la

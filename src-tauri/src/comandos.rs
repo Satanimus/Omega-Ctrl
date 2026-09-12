@@ -1611,8 +1611,20 @@ pub fn guardar_iniciar_minimizado(activo: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn guardar_mostrar_en_bandeja(activo: bool) -> Result<(), String> {
-    crate::configuracion_usuario::guardar_mostrar_en_bandeja(activo)
+pub fn guardar_mostrar_en_bandeja(app: tauri::AppHandle, activo: bool) -> Result<(), String> {
+    crate::configuracion_usuario::guardar_mostrar_en_bandeja(activo)?;
+
+    back_tray::establecer_visible(activo);
+
+    if !activo {
+        // Sin ícono de bandeja no hay ninguna otra vía para recuperar
+        // la ventana principal (Regla 8) — si estaba oculta/minimizada
+        // a bandeja, se restaura acá para no dejar el programa
+        // inaccesible.
+        back_tray::solo_mostrar_ventana(&app);
+    }
+
+    Ok(())
 }
 
 #[tauri::command]

@@ -1171,7 +1171,7 @@ const ETIQUETAS_TIPO_CARPETA_USUARIO: Record<"default" | "instalacion", string> 
 };
 
 const filaCarpetaUsuario = document.createElement("div");
-filaCarpetaUsuario.className = "configuracion-fila-combinada";
+filaCarpetaUsuario.className = "configuracion-fila-combinada configuracion-fila-sangria";
 
 const etiquetaCarpetaUsuario = document.createElement("span");
 etiquetaCarpetaUsuario.className = "configuracion-escala-etiqueta";
@@ -1179,7 +1179,8 @@ etiquetaCarpetaUsuario.textContent = "Ruta para carpeta de usuario:";
 
 const botonSelectorCarpetaUsuario = document.createElement("button");
 botonSelectorCarpetaUsuario.type = "button";
-botonSelectorCarpetaUsuario.className = "ui-btn configuracion-carpeta-usuario-boton";
+botonSelectorCarpetaUsuario.className =
+  "ui-btn configuracion-carpeta-usuario-boton configuracion-boton-ghost-izquierda";
 botonSelectorCarpetaUsuario.textContent = "Seleccionar Carpeta";
 
 filaCarpetaUsuario.append(etiquetaCarpetaUsuario, botonSelectorCarpetaUsuario);
@@ -1221,7 +1222,7 @@ let iniciarConWindowsActivo = false;
 let iniciarMinimizadoActivo = false;
 
 const filaIniciarConWindows = document.createElement("div");
-filaIniciarConWindows.className = "configuracion-escala-fila";
+filaIniciarConWindows.className = "configuracion-escala-fila configuracion-fila-sangria";
 
 const interruptorIniciarConWindows = crearInterruptor(
   "Iniciar con Windows",
@@ -1315,7 +1316,7 @@ subtituloInicio.insertAdjacentElement("afterend", filaIniciarConWindows);
 let perfilInicioSeleccionado = "ultimo";
 
 const filaIniciarConPerfil = document.createElement("div");
-filaIniciarConPerfil.className = "configuracion-fila-combinada";
+filaIniciarConPerfil.className = "configuracion-fila-combinada configuracion-fila-sangria";
 
 const etiquetaIniciarConPerfil = document.createElement("span");
 etiquetaIniciarConPerfil.className = "configuracion-escala-etiqueta";
@@ -1323,7 +1324,8 @@ etiquetaIniciarConPerfil.textContent = "Iniciar con perfil:";
 
 const botonIniciarConPerfil = document.createElement("button");
 botonIniciarConPerfil.type = "button";
-botonIniciarConPerfil.className = "ui-btn configuracion-carpeta-usuario-boton";
+botonIniciarConPerfil.className =
+  "ui-btn configuracion-carpeta-usuario-boton configuracion-boton-ghost-izquierda";
 
 function actualizarBotonIniciarConPerfil(): void {
   botonIniciarConPerfil.textContent =
@@ -1408,7 +1410,7 @@ let mostrarEnBandejaActivo = false;
 let minimizarABandejaActivo = false;
 
 const filaBandeja = document.createElement("div");
-filaBandeja.className = "configuracion-escala-fila";
+filaBandeja.className = "configuracion-escala-fila configuracion-fila-sangria";
 
 const interruptorMostrarEnBandeja = crearInterruptor(
   "Mostrar en bandeja de sistema",
@@ -1569,7 +1571,7 @@ let duracionActual = 0;
 let duracionEditado = 0;
 
 const filaNotificaciones = document.createElement("div");
-filaNotificaciones.className = "configuracion-fila-combinada";
+filaNotificaciones.className = "configuracion-fila-combinada configuracion-fila-sangria";
 
 const grupoIzquierdoNotificaciones = document.createElement("div");
 grupoIzquierdoNotificaciones.className = "configuracion-escala-fila";
@@ -1641,7 +1643,10 @@ grupoIzquierdoNotificaciones.append(
 // comp_popup_macro_extra.ts pero contra las ventanas de notificación.
 let ubicacionNotificacionActiva = false;
 
-const botonUbicacionNotificacion = crearBoton({ texto: "Ubicación" });
+const botonUbicacionNotificacion = crearBoton({
+  texto: "Ubicación",
+  clase: "configuracion-boton-ghost-izquierda",
+});
 
 function actualizarBotonUbicacionNotificacion(): void {
   botonUbicacionNotificacion.textContent = ubicacionNotificacionActiva

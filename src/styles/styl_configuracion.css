@@ -216,6 +216,49 @@
 }
 
 /* ======================================================
+   JERARQUÍA VISUAL — pestaña General
+   ------------------------------------------------------
+   Los 5 switches (Iniciar con Windows/Iniciar minimizado/Mostrar en
+   bandeja/Minimizar a bandeja/Notificaciones): fantasma en reposo
+   (sin fondo ni borde), borde solo al pasar el mouse — igual
+   criterio que los botones dentro de fila de la tabla.
+   ====================================================== */
+.configuracion-panel .popup-switch {
+  background: transparent;
+  border-color: transparent;
+}
+
+.configuracion-panel .popup-switch:hover {
+  background: color-mix(in srgb, var(--highlight) var(--botones-ghost-opacidad-hover), transparent);
+  border-color: var(--highlight);
+}
+
+/* Filas de botones/texto (no subtítulos) de la pestaña General:
+   sangría respecto al borde izquierdo del panel para que se lean
+   anidadas bajo su subtítulo ("Inicio"/"Programa"/etc.), en vez de
+   alineadas al mismo margen que los subtítulos. */
+.configuracion-fila-sangria {
+  margin-left: var(--gap16);
+}
+
+/* Botones "Seleccionar Carpeta" (Carpeta de Usuario), "Iniciar con
+   perfil" y "Ubicación" (Notificaciones): texto alineado a la
+   izquierda dentro del botón, y mismo criterio fantasma que los
+   switches de arriba — sin fondo ni borde en reposo, borde solo en
+   hover. */
+.configuracion-boton-ghost-izquierda {
+  justify-content: flex-start;
+  text-align: left;
+  background: transparent;
+  border-color: transparent;
+}
+
+.configuracion-boton-ghost-izquierda:hover {
+  background: color-mix(in srgb, var(--highlight) var(--botones-ghost-opacidad-hover), transparent);
+  border-color: var(--highlight);
+}
+
+/* ======================================================
    TABLA
    ====================================================== */
 
