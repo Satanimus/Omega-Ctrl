@@ -187,9 +187,20 @@ pub fn desactivar_perfil() {
     back_tray::refrescar_si_existe();
 }
 
+// Bug fix: al arrancar, back_tray::inicializar() arma el menú (setup())
+// ANTES de que el frontend llegue a este comando — que es quien recién
+// compila el perfil y llena la cache (perfil::obtener_perfil_actual()).
+// El menú nacía siempre con círculo rojo/"Activar Perfil" aunque el
+// perfil ya fuera a quedar activo, hasta el primer toggle manual desde
+// la bandeja (que sí refresca). Se refresca acá, una vez que la cache
+// ya refleja el estado real.
 #[tauri::command]
 pub fn obtener_perfil_actual() -> Result<ResultadoPerfilInicial, String> {
-    perfil::obtener_perfil_actual()
+    let resultado = perfil::obtener_perfil_actual();
+
+    back_tray::refrescar_si_existe();
+
+    resultado
 }
 
 #[tauri::command]
@@ -384,7 +395,11 @@ pub fn restaurar_perfil_actual() -> Result<ResultadoPerfil, String> {
 
 #[tauri::command]
 pub fn crear_perfil_nuevo() -> Result<ResultadoPerfil, String> {
-    perfil::crear_perfil_nuevo()
+    let resultado = perfil::crear_perfil_nuevo();
+
+    back_tray::refrescar_si_existe();
+
+    resultado
 }
 
 // Bug fix: un doble click de bandeja (Windows dispara a veces el
@@ -403,8 +418,21 @@ static CAMBIANDO_PERFIL: AtomicBool = AtomicBool::new(false);
 // sistema (ver comp_panel_lateral::cambiarPerfilDesde) — la barra
 // lateral NO debe disparar la notificación de cambio de perfil, ya
 // que el propio panel abierto ya es la confirmación visual.
+// ⚠️ Tiene que ser `async fn`: mismo motivo que
+// abrir_ventana_captura_coordenada — WebviewWindowBuilder::build()
+// (llamado indistintamente vía notificar_estado_perfil_directo) hace
+// DEADLOCK si se lo llama desde un comando síncrono en Windows. Bug
+// real encontrado: el cambio de perfil desde la bandeja de sistema
+// (único origen que pasa notificar=true) colgaba el hilo principal
+// apenas se activaban las notificaciones, dejando además de responder
+// cualquier otra ventana/comando de la app (todo lo demás depende del
+// mismo hilo). La corrección previa ("Etapa A", ver comentario viejo
+// de back_notificacion::notificar_estado_perfil_directo) asumía que
+// este comando síncrono ya corría en el hilo principal — premisa
+// falsa, la misma que documenta el comentario de
+// abrir_ventana_captura_coordenada.
 #[tauri::command]
-pub fn seleccionar_perfil(nombre: String, notificar: bool) -> Result<ResultadoPerfil, String> {
+pub async fn seleccionar_perfil(nombre: String, notificar: bool) -> Result<ResultadoPerfil, String> {
     if CAMBIANDO_PERFIL.swap(true, Ordering::SeqCst) {
         return Err("Ya hay un cambio de perfil en curso".into());
     }
@@ -417,9 +445,9 @@ pub fn seleccionar_perfil(nombre: String, notificar: bool) -> Result<ResultadoPe
     // todas las filas en off, la notificación debe decir "inactivo"
     // real).
     if resultado.is_ok() && notificar {
-        // [Etapa A] Versión directa: este comando ya corre en el hilo
-        // principal, no debe pasar por run_on_main_thread (ver
-        // back_notificacion::notificar_estado_perfil_directo).
+        // Ahora sí corre en contexto seguro para WebView2 (comando
+        // async, mismo motivo que arriba) — llamado directo, sin
+        // run_on_main_thread.
         back_notificacion::notificar_estado_perfil_directo(!cache::esta_vacia());
     }
 
@@ -446,12 +474,20 @@ pub fn mostrar_ventana_principal(app: tauri::AppHandle) {
 
 #[tauri::command]
 pub fn renombrar_perfil(nuevo_nombre: String) -> Result<ResultadoPerfil, String> {
-    perfil::renombrar_perfil(nuevo_nombre)
+    let resultado = perfil::renombrar_perfil(nuevo_nombre);
+
+    back_tray::refrescar_si_existe();
+
+    resultado
 }
 
 #[tauri::command]
 pub fn eliminar_perfil_actual() -> Result<ResultadoPerfil, String> {
-    perfil::eliminar_perfil_actual()
+    let resultado = perfil::eliminar_perfil_actual();
+
+    back_tray::refrescar_si_existe();
+
+    resultado
 }
 
 // ======================================================
@@ -561,7 +597,11 @@ pub fn guardar_perfil_como(
 ) -> Result<ResultadoPerfil, String> {
     let perfil = convertir_perfil(filas);
 
-    perfil::guardar_perfil_como(nombre, perfil)
+    let resultado = perfil::guardar_perfil_como(nombre, perfil);
+
+    back_tray::refrescar_si_existe();
+
+    resultado
 }
 
 #[tauri::command]
@@ -1515,6 +1555,76 @@ pub fn guardar_posicion_notificacion(x: f64, y: f64) -> Result<(), String> {
     crate::configuracion_usuario::guardar_posicion_notificacion(x, y)
 }
 
+// ======================================================
+// 🚀 INICIO / PROGRAMA (Configuración → General)
+// ------------------------------------------------------
+// Persistencia de las 4 opciones nuevas, sin efecto real todavía.
+// ======================================================
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EstadoInicioJson {
+    pub iniciar_con_windows: bool,
+    pub iniciar_minimizado: bool,
+    pub mostrar_en_bandeja: bool,
+    pub minimizar_a_bandeja: bool,
+    pub iniciar_con_perfil: String,
+}
+
+#[tauri::command]
+pub fn obtener_estado_inicio() -> Result<EstadoInicioJson, String> {
+    Ok(EstadoInicioJson {
+        iniciar_con_windows: crate::configuracion_usuario::leer_iniciar_con_windows()?
+            .unwrap_or(false),
+        iniciar_minimizado: crate::configuracion_usuario::leer_iniciar_minimizado()?
+            .unwrap_or(false),
+        mostrar_en_bandeja: crate::configuracion_usuario::leer_mostrar_en_bandeja()?
+            .unwrap_or(false),
+        minimizar_a_bandeja: crate::configuracion_usuario::leer_minimizar_a_bandeja()?
+            .unwrap_or(false),
+        iniciar_con_perfil: crate::configuracion_usuario::leer_iniciar_con_perfil()?
+            .unwrap_or_else(|| "ultimo".to_string()),
+    })
+}
+
+#[tauri::command]
+pub fn guardar_iniciar_con_windows(activo: bool) -> Result<(), String> {
+    crate::configuracion_usuario::guardar_iniciar_con_windows(activo)
+}
+
+#[tauri::command]
+pub fn establecer_autostart(app: tauri::AppHandle, activo: bool) -> Result<(), String> {
+    use tauri_plugin_autostart::ManagerExt;
+
+    let autostart = app.autolaunch();
+
+    if activo {
+        autostart.enable().map_err(|error| error.to_string())
+    } else {
+        autostart.disable().map_err(|error| error.to_string())
+    }
+}
+
+#[tauri::command]
+pub fn guardar_iniciar_minimizado(activo: bool) -> Result<(), String> {
+    crate::configuracion_usuario::guardar_iniciar_minimizado(activo)
+}
+
+#[tauri::command]
+pub fn guardar_mostrar_en_bandeja(activo: bool) -> Result<(), String> {
+    crate::configuracion_usuario::guardar_mostrar_en_bandeja(activo)
+}
+
+#[tauri::command]
+pub fn guardar_minimizar_a_bandeja(activo: bool) -> Result<(), String> {
+    crate::configuracion_usuario::guardar_minimizar_a_bandeja(activo)
+}
+
+#[tauri::command]
+pub fn guardar_iniciar_con_perfil(valor: String) -> Result<(), String> {
+    crate::configuracion_usuario::guardar_iniciar_con_perfil(&valor)
+}
+
 #[tauri::command]
 pub fn obtener_mostrar_notificaciones() -> bool {
     config::mostrar_notificaciones()
@@ -2193,6 +2303,10 @@ const VENTANA_CONFIGURACION: &str = "configuracion";
 
 #[tauri::command]
 pub async fn abrir_ventana_configuracion(app: tauri::AppHandle) -> Result<(), String> {
+    // Etapa G: revalida "Iniciar con perfil" cada vez que se abre
+    // Configuración (Regla 19).
+    let _ = crate::configuracion_usuario::validar_iniciar_con_perfil();
+
     // Mismo motivo que abrir_ventana_captura_coordenada(): tiene que
     // ser async o WebviewWindowBuilder::build() hace deadlock en
     // Windows si se llama desde un comando síncrono.

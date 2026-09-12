@@ -715,6 +715,19 @@
   color: var(--text-disabled);
 }
 
+/* Deshabilitado (no interactivo, ej. "Iniciar minimizado" cuando
+   "Iniciar con Windows" está en Off) — distinto de data-activo="false",
+   que solo indica el propio estado apagado. */
+.popup-switch[data-deshabilitado="true"] {
+  color: var(--text-disabled);
+  cursor: default;
+  pointer-events: none;
+}
+
+.popup-switch[data-deshabilitado="true"] .popup-switch-pista {
+  opacity: 0.5;
+}
+
 /* ======================================================
    Fila "Indicador de ejecución" del popup Extra de Macro:
    switch + botón "Ubicación"/"Guardar" en la misma línea

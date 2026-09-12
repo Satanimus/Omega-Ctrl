@@ -95,12 +95,17 @@ export function crearInterruptor(
   texto: string,
   activo: boolean,
   onClick: () => void,
+  deshabilitado = false,
 ): HTMLButtonElement {
   const boton = document.createElement("button");
 
   boton.className = "ui-btn popup-switch";
 
   boton.dataset.activo = activo ? "true" : "false";
+
+  boton.dataset.deshabilitado = deshabilitado ? "true" : "false";
+
+  boton.disabled = deshabilitado;
 
   const pista = document.createElement("span");
 

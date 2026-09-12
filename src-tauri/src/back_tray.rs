@@ -320,6 +320,9 @@ fn manejar_evento_menu(app: &AppHandle, evento: tauri::menu::MenuEvent) {
 /// confirmación — recién ahí se justifica robar foco/mostrar ventana.
 pub(crate) fn solo_mostrar_ventana(app: &AppHandle) {
     if let Some(ventana) = app.get_webview_window("main") {
+        // Revierte el set_skip_taskbar(true) aplicado al minimizar a
+        // bandeja (Etapa M) — si nunca se aplicó, no tiene efecto.
+        let _ = ventana.set_skip_taskbar(false);
         let _ = ventana.show();
         let _ = ventana.unminimize();
         let _ = ventana.set_focus();

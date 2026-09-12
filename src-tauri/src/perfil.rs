@@ -177,7 +177,13 @@ pub fn detener_si_activo() {
 // ======================================================
 
 pub fn obtener_perfil_actual() -> Result<ResultadoPerfilInicial, String> {
-    let ruta = usuario::perfil_actual()?;
+    let iniciar_con_perfil = crate::configuracion_usuario::leer_iniciar_con_perfil()?;
+
+    let ruta = match iniciar_con_perfil {
+        None => usuario::perfil_actual()?,
+        Some(nombre) if nombre == "ultimo" => usuario::perfil_actual()?,
+        Some(nombre) => usuario::ruta_perfil(&nombre)?,
+    };
 
     if !ruta.exists() {
         let perfil = PerfilJson::nuevo();
@@ -558,4 +564,23 @@ pub fn buscar_nombres_portapapeles(ids: &[String]) -> HashMap<String, String> {
     }
 
     resultado
+}
+
+// ======================================================
+// ✅ EXISTE Y CARGA (Etapa G)
+// ------------------------------------------------------
+// Usado por configuracion_usuario::validar_iniciar_con_perfil()
+// para comprobar que el perfil guardado en "Iniciar con perfil"
+// sigue siendo válido (existe y parsea sin error).
+// ======================================================
+pub fn perfil_existe_y_carga(nombre: &str) -> bool {
+    let Ok(ruta) = usuario::ruta_perfil(nombre) else {
+        return false;
+    };
+
+    if !ruta.exists() {
+        return false;
+    }
+
+    cargar_desde_disco(&ruta).is_ok()
 }

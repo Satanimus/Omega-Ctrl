@@ -1185,6 +1185,345 @@ botonSelectorCarpetaUsuario.textContent = "Seleccionar Carpeta";
 filaCarpetaUsuario.append(etiquetaCarpetaUsuario, botonSelectorCarpetaUsuario);
 panelGeneral.prepend(filaCarpetaUsuario);
 
+// ======================================================
+// 🚀 INICIO (subtítulo fijo, pestaña General)
+// ------------------------------------------------------
+// Encabezado de la sección "Inicio" (Iniciar con Windows/Iniciar
+// minimizado/Iniciar con perfil) — mismo criterio que Carpeta de
+// Usuario: fuera del flujo de cambios pendientes, va arriba de
+// todo (Regla 1/3).
+// ======================================================
+
+const subtituloInicio = document.createElement("span");
+subtituloInicio.className = "configuracion-subtitulo-fija";
+subtituloInicio.textContent = "Inicio";
+
+panelGeneral.prepend(subtituloInicio);
+
+interface EstadoInicioUI {
+  iniciarConWindows: boolean;
+  iniciarMinimizado: boolean;
+  mostrarEnBandeja: boolean;
+  minimizarABandeja: boolean;
+  iniciarConPerfil: string;
+}
+
+// ======================================================
+// 🪟 INICIAR CON WINDOWS / INICIAR MINIMIZADO (fila fija,
+// pestaña General)
+// ------------------------------------------------------
+// Persiste al instante (Regla 4), sin efecto real todavía — se
+// cablea a tauri-plugin-autostart en la Etapa E. "Iniciar
+// minimizado" depende de "Iniciar con Windows" (Reglas 6/7/8).
+// ======================================================
+
+let iniciarConWindowsActivo = false;
+let iniciarMinimizadoActivo = false;
+
+const filaIniciarConWindows = document.createElement("div");
+filaIniciarConWindows.className = "configuracion-escala-fila";
+
+const interruptorIniciarConWindows = crearInterruptor(
+  "Iniciar con Windows",
+  iniciarConWindowsActivo,
+  async () => {
+    const anteriorIniciarConWindows = iniciarConWindowsActivo;
+    const anteriorIniciarMinimizado = iniciarMinimizadoActivo;
+
+    iniciarConWindowsActivo = !iniciarConWindowsActivo;
+    interruptorIniciarConWindows.dataset.activo = iniciarConWindowsActivo
+      ? "true"
+      : "false";
+
+    if (!iniciarConWindowsActivo) {
+      // Regla 8: si se apaga mientras estaba en On, no se conserva.
+      iniciarMinimizadoActivo = false;
+      interruptorIniciarMinimizado.dataset.activo = "false";
+    }
+
+    // Regla 7: solo interactuable si "Iniciar con Windows" está On.
+    interruptorIniciarMinimizado.disabled = !iniciarConWindowsActivo;
+    interruptorIniciarMinimizado.dataset.deshabilitado = iniciarConWindowsActivo
+      ? "false"
+      : "true";
+
+    try {
+      await invoke("establecer_autostart", {
+        activo: iniciarConWindowsActivo,
+      });
+
+      invoke("guardar_iniciar_con_windows", {
+        activo: iniciarConWindowsActivo,
+      }).catch(() => {});
+
+      if (!iniciarConWindowsActivo) {
+        invoke("guardar_iniciar_minimizado", { activo: false }).catch(
+          () => {},
+        );
+      }
+    } catch (error) {
+      iniciarConWindowsActivo = anteriorIniciarConWindows;
+      iniciarMinimizadoActivo = anteriorIniciarMinimizado;
+
+      interruptorIniciarConWindows.dataset.activo = iniciarConWindowsActivo
+        ? "true"
+        : "false";
+      interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoActivo
+        ? "true"
+        : "false";
+      interruptorIniciarMinimizado.disabled = !iniciarConWindowsActivo;
+      interruptorIniciarMinimizado.dataset.deshabilitado =
+        iniciarConWindowsActivo ? "false" : "true";
+
+      window.alert(
+        `No se pudo cambiar "Iniciar con Windows": ${String(error)}`,
+      );
+    }
+  },
+);
+
+const interruptorIniciarMinimizado = crearInterruptor(
+  "Iniciar minimizado",
+  iniciarMinimizadoActivo,
+  () => {
+    iniciarMinimizadoActivo = !iniciarMinimizadoActivo;
+    interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoActivo
+      ? "true"
+      : "false";
+
+    invoke("guardar_iniciar_minimizado", {
+      activo: iniciarMinimizadoActivo,
+    }).catch(() => {});
+  },
+  !iniciarConWindowsActivo,
+);
+
+filaIniciarConWindows.append(
+  interruptorIniciarConWindows,
+  interruptorIniciarMinimizado,
+);
+
+subtituloInicio.insertAdjacentElement("afterend", filaIniciarConWindows);
+
+// ======================================================
+// 👤 INICIAR CON PERFIL (fila fija, pestaña General)
+// ------------------------------------------------------
+// Persiste al instante (Regla 4). "ultimo" es el valor especial
+// para "El último usado" (Regla 15).
+// ======================================================
+
+let perfilInicioSeleccionado = "ultimo";
+
+const filaIniciarConPerfil = document.createElement("div");
+filaIniciarConPerfil.className = "configuracion-fila-combinada";
+
+const etiquetaIniciarConPerfil = document.createElement("span");
+etiquetaIniciarConPerfil.className = "configuracion-escala-etiqueta";
+etiquetaIniciarConPerfil.textContent = "Iniciar con perfil:";
+
+const botonIniciarConPerfil = document.createElement("button");
+botonIniciarConPerfil.type = "button";
+botonIniciarConPerfil.className = "ui-btn configuracion-carpeta-usuario-boton";
+
+function actualizarBotonIniciarConPerfil(): void {
+  botonIniciarConPerfil.textContent =
+    perfilInicioSeleccionado === "ultimo"
+      ? "El último usado"
+      : perfilInicioSeleccionado;
+}
+
+actualizarBotonIniciarConPerfil();
+
+async function abrirPopupIniciarConPerfil(evento: MouseEvent): Promise<void> {
+  const lista = document.createElement("div");
+  lista.className = "popup-lista";
+
+  const botonUltimoUsado = document.createElement("button");
+  botonUltimoUsado.className = "ui-btn";
+  botonUltimoUsado.textContent = "El último usado";
+  botonUltimoUsado.addEventListener("click", () => {
+    perfilInicioSeleccionado = "ultimo";
+    actualizarBotonIniciarConPerfil();
+    invoke("guardar_iniciar_con_perfil", {
+      valor: perfilInicioSeleccionado,
+    }).catch(() => {});
+    ocultarPopup();
+  });
+  lista.append(botonUltimoUsado);
+
+  const separador = document.createElement("div");
+  separador.className = "app-popup-separador";
+  lista.append(separador);
+
+  const titulo = document.createElement("span");
+  titulo.className = "app-popup-lista-titulo";
+  titulo.textContent = "Perfiles:";
+  lista.append(titulo);
+
+  const perfiles = await invoke<string[]>("obtener_perfiles");
+
+  for (const nombre of perfiles) {
+    const botonPerfil = document.createElement("button");
+    botonPerfil.className = "ui-btn";
+    botonPerfil.textContent = nombre;
+    botonPerfil.addEventListener("click", () => {
+      perfilInicioSeleccionado = nombre;
+      actualizarBotonIniciarConPerfil();
+      invoke("guardar_iniciar_con_perfil", {
+        valor: perfilInicioSeleccionado,
+      }).catch(() => {});
+      ocultarPopup();
+    });
+    lista.append(botonPerfil);
+  }
+
+  mostrarPopup(lista, evento.clientX, evento.clientY);
+}
+
+botonIniciarConPerfil.addEventListener("click", (evento) => {
+  abrirPopupIniciarConPerfil(evento);
+});
+
+filaIniciarConPerfil.append(etiquetaIniciarConPerfil, botonIniciarConPerfil);
+
+filaIniciarConWindows.insertAdjacentElement("afterend", filaIniciarConPerfil);
+
+// ======================================================
+// 📦 PROGRAMA (subtítulo fijo, pestaña General)
+// ------------------------------------------------------
+// "Mostrar en bandeja de sistema" y "Minimizar a bandeja de
+// sistema" nacen ambos en Off (default nuevo). "Minimizar a
+// bandeja de sistema" depende de "Mostrar en bandeja de sistema"
+// con idéntico criterio al de "Iniciar con Windows" / "Iniciar
+// minimizado".
+// ======================================================
+
+const subtituloPrograma = document.createElement("span");
+subtituloPrograma.className = "configuracion-subtitulo-fija";
+subtituloPrograma.textContent = "Programa";
+
+filaIniciarConPerfil.insertAdjacentElement("afterend", subtituloPrograma);
+
+let mostrarEnBandejaActivo = false;
+let minimizarABandejaActivo = false;
+
+const filaBandeja = document.createElement("div");
+filaBandeja.className = "configuracion-escala-fila";
+
+const interruptorMostrarEnBandeja = crearInterruptor(
+  "Mostrar en bandeja de sistema",
+  mostrarEnBandejaActivo,
+  () => {
+    const anteriorMostrarEnBandeja = mostrarEnBandejaActivo;
+    const anteriorMinimizarABandeja = minimizarABandejaActivo;
+
+    mostrarEnBandejaActivo = !mostrarEnBandejaActivo;
+    interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaActivo
+      ? "true"
+      : "false";
+
+    if (!mostrarEnBandejaActivo) {
+      // Misma dependencia que Iniciar con Windows/Iniciar minimizado:
+      // si se apaga mientras estaba en On, no se conserva.
+      minimizarABandejaActivo = false;
+      interruptorMinimizarABandeja.dataset.activo = "false";
+    }
+
+    interruptorMinimizarABandeja.disabled = !mostrarEnBandejaActivo;
+    interruptorMinimizarABandeja.dataset.deshabilitado = mostrarEnBandejaActivo
+      ? "false"
+      : "true";
+
+    invoke("guardar_mostrar_en_bandeja", {
+      activo: mostrarEnBandejaActivo,
+    }).catch(() => {
+      mostrarEnBandejaActivo = anteriorMostrarEnBandeja;
+      minimizarABandejaActivo = anteriorMinimizarABandeja;
+
+      interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaActivo
+        ? "true"
+        : "false";
+      interruptorMinimizarABandeja.dataset.activo = minimizarABandejaActivo
+        ? "true"
+        : "false";
+      interruptorMinimizarABandeja.disabled = !mostrarEnBandejaActivo;
+      interruptorMinimizarABandeja.dataset.deshabilitado =
+        mostrarEnBandejaActivo ? "false" : "true";
+    });
+
+    if (!mostrarEnBandejaActivo) {
+      invoke("guardar_minimizar_a_bandeja", { activo: false }).catch(
+        () => {},
+      );
+    }
+  },
+);
+
+const interruptorMinimizarABandeja = crearInterruptor(
+  "Minimizar a bandeja de sistema",
+  minimizarABandejaActivo,
+  () => {
+    minimizarABandejaActivo = !minimizarABandejaActivo;
+    interruptorMinimizarABandeja.dataset.activo = minimizarABandejaActivo
+      ? "true"
+      : "false";
+
+    invoke("guardar_minimizar_a_bandeja", {
+      activo: minimizarABandejaActivo,
+    }).catch(() => {});
+  },
+  !mostrarEnBandejaActivo,
+);
+
+filaBandeja.append(interruptorMostrarEnBandeja, interruptorMinimizarABandeja);
+
+subtituloPrograma.insertAdjacentElement("afterend", filaBandeja);
+
+// Carga el estado persistido y lo refleja en los 4 interruptores +
+// el botón de "Iniciar con perfil" (reemplaza los valores en
+// memoria con los guardados, si los hay).
+async function cargarEstadoInicio(): Promise<void> {
+  const estado = await invoke<EstadoInicioUI>("obtener_estado_inicio");
+
+  iniciarConWindowsActivo = estado.iniciarConWindows;
+  interruptorIniciarConWindows.dataset.activo = iniciarConWindowsActivo
+    ? "true"
+    : "false";
+
+  iniciarMinimizadoActivo = iniciarConWindowsActivo
+    ? estado.iniciarMinimizado
+    : false;
+  interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoActivo
+    ? "true"
+    : "false";
+  interruptorIniciarMinimizado.disabled = !iniciarConWindowsActivo;
+  interruptorIniciarMinimizado.dataset.deshabilitado = iniciarConWindowsActivo
+    ? "false"
+    : "true";
+
+  mostrarEnBandejaActivo = estado.mostrarEnBandeja;
+  interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaActivo
+    ? "true"
+    : "false";
+
+  minimizarABandejaActivo = mostrarEnBandejaActivo
+    ? estado.minimizarABandeja
+    : false;
+  interruptorMinimizarABandeja.dataset.activo = minimizarABandejaActivo
+    ? "true"
+    : "false";
+  interruptorMinimizarABandeja.disabled = !mostrarEnBandejaActivo;
+  interruptorMinimizarABandeja.dataset.deshabilitado = mostrarEnBandejaActivo
+    ? "false"
+    : "true";
+
+  perfilInicioSeleccionado = estado.iniciarConPerfil;
+  actualizarBotonIniciarConPerfil();
+}
+
+cargarEstadoInicio();
+
+
 function aplicarEstadoCarpetaUsuario(estado: EstadoCarpetaUsuario): void {
   if (estado.tipo === "otra") {
     const nombre =

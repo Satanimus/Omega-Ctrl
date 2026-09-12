@@ -205,14 +205,11 @@ pub(crate) fn notificar_estado_perfil(activado: bool) {
     notificar_estado_perfil_interno(activado, true);
 }
 
-// [Etapa A] Variante para llamar desde un comando Tauri síncrono
-// (ej. comandos::seleccionar_perfil), que ya corre en el hilo
-// principal: NO debe encolar con run_on_main_thread (encolar una
-// tarea en el hilo principal desde el propio hilo principal, dentro
-// de un command síncrono que aún no terminó de ejecutarse, es lo que
-// producía el deadlock/cuelgue — la tarea encolada no se procesaba
-// hasta que el bucle de eventos volvía a girar, y una ráfaga de
-// comandos sucesivos nunca le daba lugar). Acá se llama directo a
+// Variante para llamar desde un comando Tauri `async fn` (ej.
+// comandos::seleccionar_perfil), que por serlo ya corre en contexto
+// seguro para WebView2 (mismo motivo documentado en
+// abrir_ventana_captura_coordenada): NO debe encolar con
+// run_on_main_thread, se llama directo a
 // abrir_ventana_notificacion_interno, igual que ya hace
 // abrir_notificacion_ubicacion.
 pub(crate) fn notificar_estado_perfil_directo(activado: bool) {

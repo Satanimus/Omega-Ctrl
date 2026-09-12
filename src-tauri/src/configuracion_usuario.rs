@@ -523,6 +523,123 @@ pub fn leer_visible_panel_ayuda() -> Result<Option<bool>, String> {
 }
 
 // ======================================================
+// 🚀 INICIO / PROGRAMA (pestaña General)
+// ------------------------------------------------------
+// Persistencia de las 4 opciones nuevas (Iniciar con Windows/
+// Iniciar minimizado/Minimizar a bandeja/Iniciar con perfil), sin
+// efecto real todavía.
+// ======================================================
+
+const CLAVE_INICIAR_CON_WINDOWS: &str = "inicio.con_windows";
+const CLAVE_INICIAR_MINIMIZADO: &str = "inicio.minimizado";
+const CLAVE_MOSTRAR_EN_BANDEJA: &str = "programa.mostrar_en_bandeja";
+const CLAVE_MINIMIZAR_A_BANDEJA: &str = "programa.minimizar_a_bandeja";
+const CLAVE_INICIAR_CON_PERFIL: &str = "inicio.con_perfil";
+
+pub fn guardar_iniciar_con_windows(activo: bool) -> Result<(), String> {
+    let mut mapa = leer_mapa_completo()?;
+
+    mapa.insert(CLAVE_INICIAR_CON_WINDOWS.to_string(), activo.to_string());
+
+    escribir_mapa_completo(&mapa)
+}
+
+pub fn leer_iniciar_con_windows() -> Result<Option<bool>, String> {
+    let mapa = leer_mapa_completo()?;
+
+    Ok(mapa
+        .get(CLAVE_INICIAR_CON_WINDOWS)
+        .and_then(|valor| valor.trim().parse::<bool>().ok()))
+}
+
+pub fn guardar_iniciar_minimizado(activo: bool) -> Result<(), String> {
+    let mut mapa = leer_mapa_completo()?;
+
+    mapa.insert(CLAVE_INICIAR_MINIMIZADO.to_string(), activo.to_string());
+
+    escribir_mapa_completo(&mapa)
+}
+
+pub fn leer_iniciar_minimizado() -> Result<Option<bool>, String> {
+    let mapa = leer_mapa_completo()?;
+
+    Ok(mapa
+        .get(CLAVE_INICIAR_MINIMIZADO)
+        .and_then(|valor| valor.trim().parse::<bool>().ok()))
+}
+
+pub fn guardar_minimizar_a_bandeja(activo: bool) -> Result<(), String> {
+    let mut mapa = leer_mapa_completo()?;
+
+    mapa.insert(CLAVE_MINIMIZAR_A_BANDEJA.to_string(), activo.to_string());
+
+    escribir_mapa_completo(&mapa)
+}
+
+pub fn leer_minimizar_a_bandeja() -> Result<Option<bool>, String> {
+    let mapa = leer_mapa_completo()?;
+
+    Ok(mapa
+        .get(CLAVE_MINIMIZAR_A_BANDEJA)
+        .and_then(|valor| valor.trim().parse::<bool>().ok()))
+}
+
+pub fn guardar_mostrar_en_bandeja(activo: bool) -> Result<(), String> {
+    let mut mapa = leer_mapa_completo()?;
+
+    mapa.insert(CLAVE_MOSTRAR_EN_BANDEJA.to_string(), activo.to_string());
+
+    escribir_mapa_completo(&mapa)
+}
+
+pub fn leer_mostrar_en_bandeja() -> Result<Option<bool>, String> {
+    let mapa = leer_mapa_completo()?;
+
+    Ok(mapa
+        .get(CLAVE_MOSTRAR_EN_BANDEJA)
+        .and_then(|valor| valor.trim().parse::<bool>().ok()))
+}
+
+pub fn guardar_iniciar_con_perfil(valor: &str) -> Result<(), String> {
+    let mut mapa = leer_mapa_completo()?;
+
+    mapa.insert(CLAVE_INICIAR_CON_PERFIL.to_string(), valor.to_string());
+
+    escribir_mapa_completo(&mapa)
+}
+
+pub fn leer_iniciar_con_perfil() -> Result<Option<String>, String> {
+    let mapa = leer_mapa_completo()?;
+
+    Ok(mapa
+        .get(CLAVE_INICIAR_CON_PERFIL)
+        .map(|valor| valor.trim().to_string()))
+}
+
+// ======================================================
+// ✅ VALIDAR "INICIAR CON PERFIL" (Etapa G)
+// ------------------------------------------------------
+// Si el valor guardado es un perfil específico que ya no existe
+// o falla al cargar, resetea a "ultimo" sin avisar al usuario
+// (Regla 19). Se llama al arrancar y al abrir Configuración.
+// ======================================================
+pub fn validar_iniciar_con_perfil() -> Result<(), String> {
+    let valor = leer_iniciar_con_perfil()?;
+
+    match valor {
+        None => {}
+        Some(nombre) if nombre == "ultimo" => {}
+        Some(nombre) => {
+            if !crate::perfil::perfil_existe_y_carga(&nombre) {
+                guardar_iniciar_con_perfil("ultimo")?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
+// ======================================================
 // 📍 POSICIÓN VENTANA INDICADOR_MACRO
 // ------------------------------------------------------
 // Última posición (x, y lógicos) a la que el usuario arrastró

@@ -73,6 +73,11 @@ pub fn run() {
     back_app::iniciar_monitor();
     tauri::Builder::default()
         .device_event_filter(tauri::DeviceEventFilter::Always)
+        // Iniciar con Windows (Configuración → General) — Regla 5.
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .setup(|app| {
             // AppHandle global para back_menu_express.rs — el trigger
             // que abre una ventana MenuExpress llega desde el hilo de
@@ -103,7 +108,16 @@ pub fn run() {
 
             // Ícono de bandeja de sistema y su menú contextual — mismo
             // ícono ya embebido para las ventanas (icons/icon.ico).
-            back_tray::inicializar(app.handle());
+            // Solo se crea si "Mostrar en bandeja de sistema"
+            // (Configuración → General) está activo (default false:
+            // sin cache la primera vez, no se crea).
+            let mostrar_en_bandeja = configuracion_usuario::leer_mostrar_en_bandeja()
+                .unwrap_or(None)
+                .unwrap_or(false);
+
+            if mostrar_en_bandeja {
+                back_tray::inicializar(app.handle());
+            }
 
             // Aplica sobre config.rs los overrides guardados en
             // Configuracion_Usuario.txt (pestaña General de la
@@ -112,34 +126,52 @@ pub fn run() {
             // ninguna ventana — se hace apenas arranca.
             configuracion_usuario::cargar_al_iniciar(app.handle());
 
-            // Bug fix: cerrar la ventana principal (botón X) no debe
-            // salir del programa — el menú de bandeja ya distingue
-            // "Abrir Omega Ctrl" (restaurar) de "Salir" (salir de
-            // verdad), lo que solo tiene sentido si cerrar la
-            // ventana la oculta y deja el proceso vivo en la
-            // bandeja. Antes no había ningún prevent_default() acá:
-            // cerrar la ventana disparaba ExitRequested y el
-            // proceso terminaba de verdad, dejando el ícono de
-            // bandeja húerfano (ya sin proceso detrás que le
-            // responda a los clicks — el bug reportado de "el ícono
-            // se queda pegado sin responder"). api.prevent_close()
-            // + hide() corrige eso: la ventana solo se oculta, el
-            // proceso (y el ícono de bandeja) sigue vivo y
-            // respondiendo.
+            // Etapa G: si "Iniciar con perfil" apunta a un perfil
+            // específico que ya no existe o falla al cargar, resetea
+            // a "El último usado" sin avisar (Regla 19). No bloquea
+            // el arranque si falla.
+            let _ = configuracion_usuario::validar_iniciar_con_perfil();
+
+            // Corrección (Regla 9): el botón cerrar (X) de la ventana
+            // principal SIEMPRE cierra el programa por completo, sin
+            // importar "Mostrar en bandeja de sistema" ni "Minimizar
+            // a bandeja de sistema". Se elimina el bloque anterior que
+            // interceptaba CloseRequested para ocultar a bandeja — la
+            // manera de enviar el programa a la bandeja pasa a ser
+            // minimizar la ventana, no cerrarla.
+
+            // Minimizar a bandeja de sistema (Reglas 10-13): al
+            // minimizar la ventana principal, si "Mostrar en bandeja
+            // de sistema" y "Minimizar a bandeja de sistema" están
+            // ambos activos, se quita la ventana de la barra de
+            // tareas y queda solo como ícono en la bandeja. Se lee el
+            // estado real en cada evento, sin cache (default false si
+            // la clave no existe o falla la lectura).
             if let Some(ventana_principal) = app.get_webview_window("main") {
                 let handle = app.handle().clone();
 
                 ventana_principal.on_window_event(move |evento| {
-                    if let tauri::WindowEvent::CloseRequested { api, .. } = evento {
-                        api.prevent_close();
+                    if let tauri::WindowEvent::Resized(_) = evento {
+                        let Some(ventana) = handle.get_webview_window("main") else {
+                            return;
+                        };
 
-                        for ventana in handle.webview_windows().values() {
-                            if ventana.label() != "main" {
-                                let _ = ventana.close();
-                            }
-                        }
+                        let Ok(true) = ventana.is_minimized() else {
+                            return;
+                        };
 
-                        if let Some(ventana) = handle.get_webview_window("main") {
+                        let mostrar_en_bandeja =
+                            configuracion_usuario::leer_mostrar_en_bandeja()
+                                .unwrap_or(None)
+                                .unwrap_or(false);
+
+                        let minimizar_a_bandeja =
+                            configuracion_usuario::leer_minimizar_a_bandeja()
+                                .unwrap_or(None)
+                                .unwrap_or(false);
+
+                        if mostrar_en_bandeja && minimizar_a_bandeja {
+                            let _ = ventana.set_skip_taskbar(true);
                             let _ = ventana.hide();
                         }
                     }
@@ -165,6 +197,13 @@ pub fn run() {
             comandos::obtener_ruta_instalacion_carpeta_usuario,
             comandos::verificar_carpeta_usuario,
             comandos::resolver_carpeta_usuario_existente,
+            comandos::obtener_estado_inicio,
+            comandos::guardar_iniciar_con_windows,
+            comandos::establecer_autostart,
+            comandos::guardar_iniciar_minimizado,
+            comandos::guardar_mostrar_en_bandeja,
+            comandos::guardar_minimizar_a_bandeja,
+            comandos::guardar_iniciar_con_perfil,
             comandos::confirmar_cambio_carpeta_usuario,
             comandos::eliminar_carpeta_usuario_antigua,
             comandos::renombrar_carpeta_usuario_antigua,

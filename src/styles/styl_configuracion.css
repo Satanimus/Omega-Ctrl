@@ -164,6 +164,18 @@
   margin: 0;
 }
 
+/* Subtítulos "Inicio"/"Programa" (filas fijas de General, fuera de
+   la tabla en árbol) — mismo tamaño que .configuracion-apariencia-
+   subtitulo, pero color deshabilitado (Regla 2). */
+.configuracion-subtitulo-fija {
+  font-size: var(--fs13);
+  color: var(--text-disabled);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
 .configuracion-escala-etiqueta {
   font-size: var(--fs13);
   color: var(--text);
