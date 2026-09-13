@@ -1203,115 +1203,121 @@ interface EstadoInicioUI {
 // 🪟 INICIAR CON WINDOWS / INICIAR MINIMIZADO (fila fija,
 // pestaña General)
 // ------------------------------------------------------
-// Persiste al instante (Regla 4), sin efecto real todavía — se
-// cablea a tauri-plugin-autostart en la Etapa E. "Iniciar
-// minimizado" depende de "Iniciar con Windows" (Reglas 6/7/8).
+// Participa del flujo de cambios pendientes/Aplicar (Regla 13): el
+// switch solo edita el estado en memoria (Editado); la persistencia
+// real (incl. tauri-plugin-autostart) ocurre en guardarInicio(),
+// llamado por pestanaGeneral.aplicarGuardado al pulsar "Aplicar
+// cambios". "Iniciar minimizado" depende de "Iniciar con Windows"
+// (Reglas 6/7/8).
 // ======================================================
 
-let iniciarConWindowsActivo = false;
-let iniciarMinimizadoActivo = false;
+let iniciarConWindowsActual = false;
+let iniciarConWindowsEditado = false;
+let iniciarMinimizadoActual = false;
+let iniciarMinimizadoEditado = false;
 
 const filaIniciarConWindows = document.createElement("div");
-filaIniciarConWindows.className =
-  "configuracion-opciones-fila configuracion-fila-sangria";
+filaIniciarConWindows.className = "configuracion-opciones-fila configuracion-fila-sangria";
 
 const colIniciarConWindows = document.createElement("div");
 colIniciarConWindows.className = "configuracion-opciones-col1";
 
 const interruptorIniciarConWindows = crearInterruptor(
   "Iniciar con Windows",
-  iniciarConWindowsActivo,
-  async () => {
-    const anteriorIniciarConWindows = iniciarConWindowsActivo;
-    const anteriorIniciarMinimizado = iniciarMinimizadoActivo;
-
-    iniciarConWindowsActivo = !iniciarConWindowsActivo;
-    interruptorIniciarConWindows.dataset.activo = iniciarConWindowsActivo
+  iniciarConWindowsEditado,
+  () => {
+    iniciarConWindowsEditado = !iniciarConWindowsEditado;
+    interruptorIniciarConWindows.dataset.activo = iniciarConWindowsEditado
       ? "true"
       : "false";
 
-    if (!iniciarConWindowsActivo) {
+    if (!iniciarConWindowsEditado) {
       // Regla 8: si se apaga mientras estaba en On, no se conserva.
-      iniciarMinimizadoActivo = false;
+      iniciarMinimizadoEditado = false;
       interruptorIniciarMinimizado.dataset.activo = "false";
     }
 
     // Regla 7: solo interactuable si "Iniciar con Windows" está On.
-    interruptorIniciarMinimizado.disabled = !iniciarConWindowsActivo;
-    interruptorIniciarMinimizado.dataset.deshabilitado = iniciarConWindowsActivo
+    interruptorIniciarMinimizado.disabled = !iniciarConWindowsEditado;
+    interruptorIniciarMinimizado.dataset.deshabilitado = iniciarConWindowsEditado
       ? "false"
       : "true";
-
-    try {
-      await invoke("establecer_autostart", {
-        activo: iniciarConWindowsActivo,
-      });
-
-      invoke("guardar_iniciar_con_windows", {
-        activo: iniciarConWindowsActivo,
-      }).catch(() => {});
-
-      if (!iniciarConWindowsActivo) {
-        invoke("guardar_iniciar_minimizado", { activo: false }).catch(() => {});
-      }
-    } catch (error) {
-      iniciarConWindowsActivo = anteriorIniciarConWindows;
-      iniciarMinimizadoActivo = anteriorIniciarMinimizado;
-
-      interruptorIniciarConWindows.dataset.activo = iniciarConWindowsActivo
-        ? "true"
-        : "false";
-      interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoActivo
-        ? "true"
-        : "false";
-      interruptorIniciarMinimizado.disabled = !iniciarConWindowsActivo;
-      interruptorIniciarMinimizado.dataset.deshabilitado =
-        iniciarConWindowsActivo ? "false" : "true";
-
-      window.alert(
-        `No se pudo cambiar "Iniciar con Windows": ${String(error)}`,
-      );
-    }
   },
 );
 
 const interruptorIniciarMinimizado = crearInterruptor(
   "Iniciar minimizado",
-  iniciarMinimizadoActivo,
+  iniciarMinimizadoEditado,
   () => {
-    iniciarMinimizadoActivo = !iniciarMinimizadoActivo;
-    interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoActivo
+    iniciarMinimizadoEditado = !iniciarMinimizadoEditado;
+    interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoEditado
       ? "true"
       : "false";
-
-    invoke("guardar_iniciar_minimizado", {
-      activo: iniciarMinimizadoActivo,
-    }).catch(() => {});
   },
-  !iniciarConWindowsActivo,
+  !iniciarConWindowsEditado,
 );
 
 colIniciarConWindows.append(interruptorIniciarConWindows);
 
-filaIniciarConWindows.append(
-  colIniciarConWindows,
-  interruptorIniciarMinimizado,
-);
+filaIniciarConWindows.append(colIniciarConWindows, interruptorIniciarMinimizado);
 
 subtituloOpciones.insertAdjacentElement("afterend", filaIniciarConWindows);
+
+function hayEdicionPendienteInicio(): boolean {
+  return (
+    iniciarConWindowsEditado !== iniciarConWindowsActual ||
+    iniciarMinimizadoEditado !== iniciarMinimizadoActual
+  );
+}
+
+function restablecerInicio(): void {
+  iniciarConWindowsEditado = iniciarConWindowsActual;
+  iniciarMinimizadoEditado = iniciarMinimizadoActual;
+
+  interruptorIniciarConWindows.dataset.activo = iniciarConWindowsEditado
+    ? "true"
+    : "false";
+  interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoEditado
+    ? "true"
+    : "false";
+  interruptorIniciarMinimizado.disabled = !iniciarConWindowsEditado;
+  interruptorIniciarMinimizado.dataset.deshabilitado = iniciarConWindowsEditado
+    ? "false"
+    : "true";
+}
+
+function sincronizarInicioTrasGuardado(): void {
+  iniciarConWindowsActual = iniciarConWindowsEditado;
+  iniciarMinimizadoActual = iniciarMinimizadoEditado;
+}
+
+// Persiste "Iniciar con Windows"/"Iniciar minimizado" (incl.
+// tauri-plugin-autostart) — llamado desde pestanaGeneral.aplicarGuardado,
+// no desde el switch.
+async function guardarInicio(): Promise<void> {
+  await invoke("establecer_autostart", { activo: iniciarConWindowsEditado });
+  await invoke("guardar_iniciar_con_windows", {
+    activo: iniciarConWindowsEditado,
+  });
+  await invoke("guardar_iniciar_minimizado", {
+    activo: iniciarMinimizadoEditado,
+  });
+}
 
 // ======================================================
 // 👤 INICIAR CON PERFIL (fila fija, pestaña General)
 // ------------------------------------------------------
-// Persiste al instante (Regla 4). "ultimo" es el valor especial
-// para "El último usado" (Regla 15).
+// Mismo criterio que Iniciar con Windows: el popup solo edita el
+// estado en memoria (Editado); guardarIniciarConPerfil() persiste al
+// Aplicar cambios. "ultimo" es el valor especial para "El último
+// usado" (Regla 15).
 // ======================================================
 
-let perfilInicioSeleccionado = "ultimo";
+let perfilInicioActual = "ultimo";
+let perfilInicioEditado = "ultimo";
 
 const filaIniciarConPerfil = document.createElement("div");
-filaIniciarConPerfil.className =
-  "configuracion-opciones-fila configuracion-fila-sangria";
+filaIniciarConPerfil.className = "configuracion-opciones-fila configuracion-fila-sangria";
 
 const colIniciarConPerfil = document.createElement("div");
 colIniciarConPerfil.className = "configuracion-opciones-col1";
@@ -1329,9 +1335,7 @@ botonIniciarConPerfil.className =
 
 function actualizarBotonIniciarConPerfil(): void {
   botonIniciarConPerfil.textContent =
-    perfilInicioSeleccionado === "ultimo"
-      ? "El último usado"
-      : perfilInicioSeleccionado;
+    perfilInicioEditado === "ultimo" ? "El último usado" : perfilInicioEditado;
 }
 
 actualizarBotonIniciarConPerfil();
@@ -1344,11 +1348,8 @@ async function abrirPopupIniciarConPerfil(evento: MouseEvent): Promise<void> {
   botonUltimoUsado.className = "ui-btn";
   botonUltimoUsado.textContent = "El último usado";
   botonUltimoUsado.addEventListener("click", () => {
-    perfilInicioSeleccionado = "ultimo";
+    perfilInicioEditado = "ultimo";
     actualizarBotonIniciarConPerfil();
-    invoke("guardar_iniciar_con_perfil", {
-      valor: perfilInicioSeleccionado,
-    }).catch(() => {});
     ocultarPopup();
   });
   lista.append(botonUltimoUsado);
@@ -1369,11 +1370,8 @@ async function abrirPopupIniciarConPerfil(evento: MouseEvent): Promise<void> {
     botonPerfil.className = "ui-btn";
     botonPerfil.textContent = nombre;
     botonPerfil.addEventListener("click", () => {
-      perfilInicioSeleccionado = nombre;
+      perfilInicioEditado = nombre;
       actualizarBotonIniciarConPerfil();
-      invoke("guardar_iniciar_con_perfil", {
-        valor: perfilInicioSeleccionado,
-      }).catch(() => {});
       ocultarPopup();
     });
     lista.append(botonPerfil);
@@ -1388,87 +1386,78 @@ botonIniciarConPerfil.addEventListener("click", (evento) => {
 
 filaIniciarConPerfil.append(colIniciarConPerfil, botonIniciarConPerfil);
 
+function hayEdicionPendienteIniciarConPerfil(): boolean {
+  return perfilInicioEditado !== perfilInicioActual;
+}
+
+function restablecerIniciarConPerfil(): void {
+  perfilInicioEditado = perfilInicioActual;
+  actualizarBotonIniciarConPerfil();
+}
+
+function sincronizarIniciarConPerfilTrasGuardado(): void {
+  perfilInicioActual = perfilInicioEditado;
+}
+
+async function guardarIniciarConPerfil(): Promise<void> {
+  await invoke("guardar_iniciar_con_perfil", { valor: perfilInicioEditado });
+}
+
 // ======================================================
 // 📦 MOSTRAR/MINIMIZAR A BANDEJA (fila fija, pestaña General)
 // ------------------------------------------------------
-// "Mostrar en bandeja de sistema" y "Minimizar a bandeja de
-// sistema" nacen ambos en Off (default nuevo). "Minimizar a
-// bandeja de sistema" depende de "Mostrar en bandeja de sistema"
-// con idéntico criterio al de "Iniciar con Windows" / "Iniciar
-// minimizado".
+// Mismo criterio que Iniciar con Windows: participa del flujo de
+// cambios pendientes/Aplicar, con guardarBandeja() llamado desde
+// pestanaGeneral.aplicarGuardado. "Mostrar en bandeja de sistema" y
+// "Minimizar a bandeja de sistema" nacen ambos en Off (default
+// nuevo). "Minimizar a bandeja de sistema" depende de "Mostrar en
+// bandeja de sistema".
 // ======================================================
 
-let mostrarEnBandejaActivo = false;
-let minimizarABandejaActivo = false;
+let mostrarEnBandejaActual = false;
+let mostrarEnBandejaEditado = false;
+let minimizarABandejaActual = false;
+let minimizarABandejaEditado = false;
 
 const filaBandeja = document.createElement("div");
-filaBandeja.className =
-  "configuracion-opciones-fila configuracion-fila-sangria";
+filaBandeja.className = "configuracion-opciones-fila configuracion-fila-sangria";
 
 const colMostrarEnBandeja = document.createElement("div");
 colMostrarEnBandeja.className = "configuracion-opciones-col1";
 
 const interruptorMostrarEnBandeja = crearInterruptor(
   "Mostrar en bandeja de sistema",
-  mostrarEnBandejaActivo,
+  mostrarEnBandejaEditado,
   () => {
-    const anteriorMostrarEnBandeja = mostrarEnBandejaActivo;
-    const anteriorMinimizarABandeja = minimizarABandejaActivo;
-
-    mostrarEnBandejaActivo = !mostrarEnBandejaActivo;
-    interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaActivo
+    mostrarEnBandejaEditado = !mostrarEnBandejaEditado;
+    interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaEditado
       ? "true"
       : "false";
 
-    if (!mostrarEnBandejaActivo) {
+    if (!mostrarEnBandejaEditado) {
       // Misma dependencia que Iniciar con Windows/Iniciar minimizado:
       // si se apaga mientras estaba en On, no se conserva.
-      minimizarABandejaActivo = false;
+      minimizarABandejaEditado = false;
       interruptorMinimizarABandeja.dataset.activo = "false";
     }
 
-    interruptorMinimizarABandeja.disabled = !mostrarEnBandejaActivo;
-    interruptorMinimizarABandeja.dataset.deshabilitado = mostrarEnBandejaActivo
+    interruptorMinimizarABandeja.disabled = !mostrarEnBandejaEditado;
+    interruptorMinimizarABandeja.dataset.deshabilitado = mostrarEnBandejaEditado
       ? "false"
       : "true";
-
-    invoke("guardar_mostrar_en_bandeja", {
-      activo: mostrarEnBandejaActivo,
-    }).catch(() => {
-      mostrarEnBandejaActivo = anteriorMostrarEnBandeja;
-      minimizarABandejaActivo = anteriorMinimizarABandeja;
-
-      interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaActivo
-        ? "true"
-        : "false";
-      interruptorMinimizarABandeja.dataset.activo = minimizarABandejaActivo
-        ? "true"
-        : "false";
-      interruptorMinimizarABandeja.disabled = !mostrarEnBandejaActivo;
-      interruptorMinimizarABandeja.dataset.deshabilitado =
-        mostrarEnBandejaActivo ? "false" : "true";
-    });
-
-    if (!mostrarEnBandejaActivo) {
-      invoke("guardar_minimizar_a_bandeja", { activo: false }).catch(() => {});
-    }
   },
 );
 
 const interruptorMinimizarABandeja = crearInterruptor(
   "Minimizar a bandeja de sistema",
-  minimizarABandejaActivo,
+  minimizarABandejaEditado,
   () => {
-    minimizarABandejaActivo = !minimizarABandejaActivo;
-    interruptorMinimizarABandeja.dataset.activo = minimizarABandejaActivo
+    minimizarABandejaEditado = !minimizarABandejaEditado;
+    interruptorMinimizarABandeja.dataset.activo = minimizarABandejaEditado
       ? "true"
       : "false";
-
-    invoke("guardar_minimizar_a_bandeja", {
-      activo: minimizarABandejaActivo,
-    }).catch(() => {});
   },
-  !mostrarEnBandejaActivo,
+  !mostrarEnBandejaEditado,
 );
 
 colMostrarEnBandeja.append(interruptorMostrarEnBandeja);
@@ -1477,49 +1466,90 @@ filaBandeja.append(colMostrarEnBandeja, interruptorMinimizarABandeja);
 
 filaIniciarConWindows.insertAdjacentElement("afterend", filaBandeja);
 
+function hayEdicionPendienteBandeja(): boolean {
+  return (
+    mostrarEnBandejaEditado !== mostrarEnBandejaActual ||
+    minimizarABandejaEditado !== minimizarABandejaActual
+  );
+}
+
+function restablecerBandeja(): void {
+  mostrarEnBandejaEditado = mostrarEnBandejaActual;
+  minimizarABandejaEditado = minimizarABandejaActual;
+
+  interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaEditado
+    ? "true"
+    : "false";
+  interruptorMinimizarABandeja.dataset.activo = minimizarABandejaEditado
+    ? "true"
+    : "false";
+  interruptorMinimizarABandeja.disabled = !mostrarEnBandejaEditado;
+  interruptorMinimizarABandeja.dataset.deshabilitado = mostrarEnBandejaEditado
+    ? "false"
+    : "true";
+}
+
+function sincronizarBandejaTrasGuardado(): void {
+  mostrarEnBandejaActual = mostrarEnBandejaEditado;
+  minimizarABandejaActual = minimizarABandejaEditado;
+}
+
+async function guardarBandeja(): Promise<void> {
+  await invoke("guardar_mostrar_en_bandeja", {
+    activo: mostrarEnBandejaEditado,
+  });
+  await invoke("guardar_minimizar_a_bandeja", {
+    activo: minimizarABandejaEditado,
+  });
+}
+
 // Carga el estado persistido y lo refleja en los 4 interruptores +
 // el botón de "Iniciar con perfil" (reemplaza los valores en
-// memoria con los guardados, si los hay).
+// memoria — Actual y Editado — con los guardados, si los hay).
 async function cargarEstadoInicio(): Promise<void> {
   const estado = await invoke<EstadoInicioUI>("obtener_estado_inicio");
 
-  iniciarConWindowsActivo = estado.iniciarConWindows;
-  interruptorIniciarConWindows.dataset.activo = iniciarConWindowsActivo
+  iniciarConWindowsActual = estado.iniciarConWindows;
+  iniciarConWindowsEditado = iniciarConWindowsActual;
+  interruptorIniciarConWindows.dataset.activo = iniciarConWindowsEditado
     ? "true"
     : "false";
 
-  iniciarMinimizadoActivo = iniciarConWindowsActivo
+  iniciarMinimizadoActual = iniciarConWindowsActual
     ? estado.iniciarMinimizado
     : false;
-  interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoActivo
+  iniciarMinimizadoEditado = iniciarMinimizadoActual;
+  interruptorIniciarMinimizado.dataset.activo = iniciarMinimizadoEditado
     ? "true"
     : "false";
-  interruptorIniciarMinimizado.disabled = !iniciarConWindowsActivo;
-  interruptorIniciarMinimizado.dataset.deshabilitado = iniciarConWindowsActivo
+  interruptorIniciarMinimizado.disabled = !iniciarConWindowsEditado;
+  interruptorIniciarMinimizado.dataset.deshabilitado = iniciarConWindowsEditado
     ? "false"
     : "true";
 
-  mostrarEnBandejaActivo = estado.mostrarEnBandeja;
-  interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaActivo
+  mostrarEnBandejaActual = estado.mostrarEnBandeja;
+  mostrarEnBandejaEditado = mostrarEnBandejaActual;
+  interruptorMostrarEnBandeja.dataset.activo = mostrarEnBandejaEditado
     ? "true"
     : "false";
 
-  minimizarABandejaActivo = mostrarEnBandejaActivo
+  minimizarABandejaActual = mostrarEnBandejaActual
     ? estado.minimizarABandeja
     : false;
-  interruptorMinimizarABandeja.dataset.activo = minimizarABandejaActivo
+  minimizarABandejaEditado = minimizarABandejaActual;
+  interruptorMinimizarABandeja.dataset.activo = minimizarABandejaEditado
     ? "true"
     : "false";
-  interruptorMinimizarABandeja.disabled = !mostrarEnBandejaActivo;
-  interruptorMinimizarABandeja.dataset.deshabilitado = mostrarEnBandejaActivo
+  interruptorMinimizarABandeja.disabled = !mostrarEnBandejaEditado;
+  interruptorMinimizarABandeja.dataset.deshabilitado = mostrarEnBandejaEditado
     ? "false"
     : "true";
 
-  perfilInicioSeleccionado = estado.iniciarConPerfil;
+  perfilInicioActual = estado.iniciarConPerfil;
+  perfilInicioEditado = perfilInicioActual;
   actualizarBotonIniciarConPerfil();
 }
 
-cargarEstadoInicio();
 
 // ======================================================
 // 🔔 NOTIFICACIONES (fila alineada, pestaña General)
@@ -1540,8 +1570,7 @@ let duracionActual = 0;
 let duracionEditado = 0;
 
 const filaNotificaciones = document.createElement("div");
-filaNotificaciones.className =
-  "configuracion-opciones-fila configuracion-fila-sangria";
+filaNotificaciones.className = "configuracion-opciones-fila configuracion-fila-sangria";
 
 const colMostrarNotificaciones = document.createElement("div");
 colMostrarNotificaciones.className = "configuracion-opciones-col1";
@@ -1660,11 +1689,7 @@ botonUbicacionNotificacion.addEventListener("click", async () => {
   }
 });
 
-grupoUbicacion.append(
-  crearIndicadorPunto(),
-  etiquetaUbicacionNotificacion,
-  botonUbicacionNotificacion,
-);
+grupoUbicacion.append(crearIndicadorPunto(), etiquetaUbicacionNotificacion, botonUbicacionNotificacion);
 grupoDerechoNotificaciones.append(grupoDuracion, grupoUbicacion);
 
 filaNotificaciones.append(colMostrarNotificaciones, grupoDerechoNotificaciones);
@@ -1744,11 +1769,15 @@ const pestanaGeneral: Pestana = {
   cargar: async () => {
     await pestanaGeneralTabla.cargar();
     await cargarFilaNotificaciones();
+    await cargarEstadoInicio();
   },
 
   hayEdicionesPendientes: () =>
     pestanaGeneralTabla.hayEdicionesPendientes() ||
-    hayEdicionPendienteFilaNotificaciones(),
+    hayEdicionPendienteFilaNotificaciones() ||
+    hayEdicionPendienteInicio() ||
+    hayEdicionPendienteBandeja() ||
+    hayEdicionPendienteIniciarConPerfil(),
 
   validarYRecolectar: () => {
     const resultado = pestanaGeneralTabla.validarYRecolectar();
@@ -1762,7 +1791,38 @@ const pestanaGeneral: Pestana = {
     };
   },
 
-  aplicarGuardado: (cambios) => pestanaGeneralTabla.aplicarGuardado(cambios),
+  // Iniciar con Windows/Minimizado, Bandeja e Iniciar con perfil no
+  // pasan por clave/valor genérico (invocan comandos Tauri propios,
+  // igual que Carpeta de Usuario/Motor en Avanzado) — se aplican acá
+  // mismo, después de la tabla/Notificaciones y solo si esa parte no
+  // falló.
+  aplicarGuardado: async (cambios) => {
+    const resultado = await pestanaGeneralTabla.aplicarGuardado(cambios);
+
+    if (resultado.errores.length > 0) {
+      return resultado;
+    }
+
+    try {
+      if (hayEdicionPendienteInicio()) {
+        await guardarInicio();
+      }
+
+      if (hayEdicionPendienteBandeja()) {
+        await guardarBandeja();
+      }
+
+      if (hayEdicionPendienteIniciarConPerfil()) {
+        await guardarIniciarConPerfil();
+      }
+    } catch (error) {
+      return {
+        errores: [{ clave: "inicio", mensaje: String(error) }],
+      };
+    }
+
+    return resultado;
+  },
 
   marcarErroresGuardado: (errores) =>
     pestanaGeneralTabla.marcarErroresGuardado(errores),
@@ -1770,11 +1830,17 @@ const pestanaGeneral: Pestana = {
   limpiarEstadoTrasGuardado: async () => {
     await pestanaGeneralTabla.limpiarEstadoTrasGuardado();
     sincronizarFilaNotificacionesTrasGuardado();
+    sincronizarInicioTrasGuardado();
+    sincronizarBandejaTrasGuardado();
+    sincronizarIniciarConPerfilTrasGuardado();
   },
 
   restablecerPestana: async () => {
     await pestanaGeneralTabla.restablecerPestana();
     restablecerFilaNotificaciones();
+    restablecerInicio();
+    restablecerBandeja();
+    restablecerIniciarConPerfil();
   },
 
   textoConfirmacionRestablecer:
@@ -2036,23 +2102,16 @@ interface CarpetaUsuarioPendiente {
   decisionConflicto: "renombrar" | "eliminar";
 }
 
-const ETIQUETAS_TIPO_CARPETA_USUARIO: Record<
-  "default" | "instalacion",
-  string
-> = {
+const ETIQUETAS_TIPO_CARPETA_USUARIO: Record<"default" | "instalacion", string> = {
   default: "%AppData%",
   instalacion: "OmegaCtrl",
 };
 
-let estadoActualCarpetaUsuario: EstadoCarpetaUsuario = {
-  tipo: "default",
-  ruta: "",
-};
+let estadoActualCarpetaUsuario: EstadoCarpetaUsuario = { tipo: "default", ruta: "" };
 let carpetaUsuarioPendiente: CarpetaUsuarioPendiente | null = null;
 
 const filaCarpetaUsuario = document.createElement("div");
-filaCarpetaUsuario.className =
-  "configuracion-opciones-fila configuracion-fila-sangria";
+filaCarpetaUsuario.className = "configuracion-opciones-fila configuracion-fila-sangria";
 
 const colCarpetaUsuario = document.createElement("div");
 colCarpetaUsuario.className = "configuracion-opciones-col1";
@@ -2161,7 +2220,9 @@ async function elegirTipoCarpetaUsuario(
   if (tipo === "default") {
     destino = await invoke<string>("obtener_ruta_default_carpeta_usuario");
   } else if (tipo === "instalacion") {
-    destino = await invoke<string>("obtener_ruta_instalacion_carpeta_usuario");
+    destino = await invoke<string>(
+      "obtener_ruta_instalacion_carpeta_usuario",
+    );
   } else {
     const elegida = await invoke<string | null>("seleccionar_carpeta");
 
@@ -2224,6 +2285,7 @@ function dibujarPopupCarpetaUsuario(): HTMLElement {
           elegirTipoCarpetaUsuario(valor).then(redibujarPopupCarpetaUsuario);
         },
         "popup-grupo-vertical",
+        true,
       ),
     ),
   );
@@ -2263,10 +2325,7 @@ function dibujarPopupCarpetaUsuario(): HTMLElement {
           "Si ya existe una carpeta de usuario en el destino:",
           crearGrupoOpciones(
             [
-              {
-                texto: 'Renombrarla a "Usuario_old"',
-                valor: "renombrar" as const,
-              },
+              { texto: 'Renombrarla a "Usuario_old"', valor: "renombrar" as const },
               { texto: "Eliminarla", valor: "eliminar" as const },
             ],
             pendiente.decisionConflicto,
@@ -2299,7 +2358,11 @@ function redibujarPopupCarpetaUsuario(): void {
 }
 
 botonSelectorCarpetaUsuario.addEventListener("click", (evento) => {
-  mostrarPopup(dibujarPopupCarpetaUsuario(), evento.clientX, evento.clientY);
+  mostrarPopup(
+    dibujarPopupCarpetaUsuario(),
+    evento.clientX,
+    evento.clientY,
+  );
 });
 
 const tituloModoMotor = document.createElement("h3");
@@ -2409,10 +2472,12 @@ const pestanaAvanzado: Pestana = {
 // ======================================================
 // 🧭 BARRA DE ACCIONES GLOBAL
 // ------------------------------------------------------
-// Única y fija para las 4 pestañas: "Aplicar cambios" junta y guarda
-// los cambios pendientes de TODAS las pestañas (no solo la activa).
-// "Restablecer esta pestaña" actúa solo sobre la pestaña activa
-// (título/mensaje cambia según cuál sea).
+// Única y fija para las 4 pestañas. Izquierda: "Restablecer esta
+// pestaña", actúa solo sobre la pestaña activa (título/mensaje
+// cambia según cuál sea). Derecha: "Cancelar cambios"/"Aplicar
+// cambios", ambos globales — actúan sobre los cambios pendientes de
+// TODAS las pestañas (no solo la activa) y solo se muestran si hay
+// algo pendiente en cualquiera de ellas.
 // ======================================================
 
 const TODAS_LAS_PESTANAS: ReadonlyArray<readonly [HTMLButtonElement, Pestana]> =
@@ -2434,12 +2499,22 @@ botonRestablecerGlobal.type = "button";
 botonRestablecerGlobal.className = "configuracion-boton";
 botonRestablecerGlobal.textContent = "Restablecer esta pestaña";
 
+const grupoAccionesDerecha = document.createElement("div");
+grupoAccionesDerecha.className = "configuracion-acciones-derecha";
+
+const botonCancelarGlobal = document.createElement("button");
+botonCancelarGlobal.type = "button";
+botonCancelarGlobal.className = "configuracion-boton";
+botonCancelarGlobal.textContent = "Cancelar cambios";
+
 const botonGuardarGlobal = document.createElement("button");
 botonGuardarGlobal.type = "button";
 botonGuardarGlobal.className = "configuracion-boton familia-highdark";
 botonGuardarGlobal.textContent = "Aplicar cambios";
 
-barraGlobal.append(botonRestablecerGlobal, botonGuardarGlobal);
+grupoAccionesDerecha.append(botonCancelarGlobal, botonGuardarGlobal);
+
+barraGlobal.append(botonRestablecerGlobal, grupoAccionesDerecha);
 
 filaAcciones.append(barraGlobal);
 
@@ -2522,6 +2597,28 @@ botonConfirmarConfirmacion.addEventListener("click", async () => {
 
     filaConfirmacionSlot.classList.add("oculto");
     filaAcciones.classList.remove("oculto");
+  }
+});
+
+// "Cancelar cambios": descarta las ediciones no guardadas de TODAS
+// las pestañas (no solo la activa) recargando cada una desde su
+// último estado persistido — mismo camino de solo-lectura que usa
+// restablecerPestana() para "Restablecer esta pestaña", pero
+// aplicado a las 4 pestañas a la vez y sin pedir confirmación.
+botonCancelarGlobal.addEventListener("click", async () => {
+  botonCancelarGlobal.disabled = true;
+  botonGuardarGlobal.disabled = true;
+
+  try {
+    for (const [, pestana] of TODAS_LAS_PESTANAS) {
+      await pestana.restablecerPestana();
+    }
+  } catch (error) {
+    window.alert(`No se pudo cancelar: ${String(error)}`);
+  } finally {
+    botonCancelarGlobal.disabled = false;
+    botonGuardarGlobal.disabled = false;
+    actualizarVisibilidadGuardarGlobal();
   }
 });
 
@@ -2611,7 +2708,7 @@ function actualizarVisibilidadGuardarGlobal(): void {
     pestana.hayEdicionesPendientes(),
   );
 
-  botonGuardarGlobal.classList.toggle("oculto", !hayCambios);
+  grupoAccionesDerecha.classList.toggle("oculto", !hayCambios);
 }
 
 setInterval(actualizarVisibilidadGuardarGlobal, 250);

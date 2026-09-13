@@ -647,6 +647,10 @@
   background: var(--highlight);
 }
 
+.popup-indicador-vacio {
+  background: transparent;
+}
+
 /* ======================================================
    Opción inhabilitada dentro de un popup-grupo (ej. "En App"
    en el popup Extra de Multimedia mientras no hay programa

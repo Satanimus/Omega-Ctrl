@@ -797,10 +797,20 @@
 
 .configuracion-acciones {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   gap: var(--gap8);
   padding: var(--gap12) var(--gap16);
+}
+
+.configuracion-acciones-derecha {
+  display: flex;
+  align-items: center;
+  gap: var(--gap8);
+}
+
+.configuracion-acciones-derecha.oculto {
+  display: none;
 }
 
 .configuracion-confirmacion {
@@ -836,10 +846,6 @@
 .configuracion-boton:disabled {
   opacity: 0.5;
   cursor: default;
-}
-
-.configuracion-boton.oculto {
-  display: none;
 }
 
 .configuracion-boton-primario {

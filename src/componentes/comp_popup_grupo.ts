@@ -23,6 +23,18 @@ export function crearIndicadorActivo(): HTMLSpanElement {
   return indicador;
 }
 
+// Mismo tamaño que el indicador activo pero sin color — reserva el
+// espacio en opciones no activas (ver alinearIzquierda en
+// crearGrupoOpciones) para que el texto no se corra según cuál esté
+// seleccionada.
+function crearIndicadorVacio(): HTMLSpanElement {
+  const indicador = document.createElement("span");
+
+  indicador.className = "popup-indicador-activo popup-indicador-vacio";
+
+  return indicador;
+}
+
 // ======================================================
 // 🔘 GRUPO DE OPCIONES (fila de botones tipo radio)
 // ======================================================
@@ -42,6 +54,13 @@ export function crearGrupoOpciones<T extends string>(
   valorActual: T,
   onSeleccionar: (valor: T) => void,
   claseExtra?: string,
+  // Para listas verticales de opciones (ej. selector de carpeta de
+  // Configuración): texto pegado a la izquierda (.ui-btn--desborda,
+  // ya usado en otras partes para ese mismo propósito) en vez de
+  // centrado, y un indicador vacío (mismo tamaño que el cyan, sin
+  // color) en las opciones no activas para que el texto arranque
+  // siempre en el mismo x sin importar cuál esté activa.
+  alinearIzquierda?: boolean,
 ): HTMLElement {
   const grupo = document.createElement("div");
 
@@ -50,7 +69,9 @@ export function crearGrupoOpciones<T extends string>(
   opciones.forEach((opcion) => {
     const boton = document.createElement("button");
 
-    boton.className = "ui-btn popup-opcion";
+    boton.className = alinearIzquierda
+      ? "ui-btn ui-btn--desborda popup-opcion"
+      : "ui-btn popup-opcion";
 
     const activo = opcion.valor === valorActual;
 
@@ -58,6 +79,8 @@ export function crearGrupoOpciones<T extends string>(
 
     if (activo) {
       boton.append(crearIndicadorActivo());
+    } else if (alinearIzquierda) {
+      boton.append(crearIndicadorVacio());
     }
 
     boton.append(document.createTextNode(opcion.texto));
