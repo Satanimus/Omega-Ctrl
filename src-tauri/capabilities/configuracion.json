@@ -1,0 +1,10 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "configuracion",
+    "description": "Capability for the Configuración window (pestaña Acerca de: abrir links externos con opener)",
+    "windows": ["configuracion"],
+    "permissions": [
+      "core:default",
+      "opener:default"
+    ]
+  }

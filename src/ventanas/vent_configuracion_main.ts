@@ -27,6 +27,8 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
+import { openUrl } from "@tauri-apps/plugin-opener";
+
 import {
   crearContenedorPopup,
   mostrarPopup,
@@ -138,6 +140,7 @@ const tabGeneral = crearBotonTab("General", true);
 const tabApariencia = crearBotonTab("Apariencia", false);
 const tabTeclas = crearBotonTab("Teclas", false);
 const tabAvanzado = crearBotonTab("Avanzado", false);
+const tabAcerca = crearBotonTab("Acerca de", false);
 
 const botonCarpetaUsuario = document.createElement("button");
 botonCarpetaUsuario.type = "button";
@@ -158,6 +161,7 @@ tabs.append(
   tabApariencia,
   tabTeclas,
   tabAvanzado,
+  tabAcerca,
   botonCarpetaUsuario,
 );
 
@@ -176,7 +180,16 @@ panelTeclas.className = "configuracion-panel oculto";
 const panelAvanzado = document.createElement("div");
 panelAvanzado.className = "configuracion-panel oculto";
 
-cuerpo.append(panelGeneral, panelApariencia, panelTeclas, panelAvanzado);
+const panelAcerca = document.createElement("div");
+panelAcerca.className = "configuracion-panel oculto";
+
+cuerpo.append(
+  panelGeneral,
+  panelApariencia,
+  panelTeclas,
+  panelAvanzado,
+  panelAcerca,
+);
 
 card.append(tabs, cuerpo);
 raiz.append(card);
@@ -211,6 +224,7 @@ const paresTab: ReadonlyArray<readonly [HTMLButtonElement, HTMLDivElement]> = [
   [tabApariencia, panelApariencia],
   [tabTeclas, panelTeclas],
   [tabAvanzado, panelAvanzado],
+  [tabAcerca, panelAcerca],
 ];
 
 function activarTab(botonElegido: HTMLButtonElement): void {
@@ -227,6 +241,7 @@ tabGeneral.addEventListener("click", () => activarTab(tabGeneral));
 tabApariencia.addEventListener("click", () => activarTab(tabApariencia));
 tabTeclas.addEventListener("click", () => activarTab(tabTeclas));
 tabAvanzado.addEventListener("click", () => activarTab(tabAvanzado));
+tabAcerca.addEventListener("click", () => activarTab(tabAcerca));
 
 // ======================================================
 // 🍞 TOAST (compartido por todas las pestañas)
@@ -2481,9 +2496,140 @@ const pestanaAvanzado: Pestana = {
 };
 
 // ======================================================
+// ℹ️ PESTAÑA ACERCA DE
+// ------------------------------------------------------
+// Versión preliminar: solo lectura, sin cambios pendientes/Aplicar
+// (Pestana con no-ops). Verificación de actualización sin backend
+// real todavía — placeholder fijo (ver comentario en
+// verificarActualizacion) hasta que se defina el mecanismo.
+// ======================================================
+
+const VERSION_ACTUAL = "1.0.0";
+const URL_REPOSITORIO = "https://github.com/Satanimus/Omega-Ctrl";
+const URL_ISSUES = "https://github.com/Satanimus/Omega-Ctrl/issues";
+
+// TODO: reemplazar por el link real en cuanto el usuario termine de
+// configurar la página de Sponsor.
+const URL_SPONSOR = "https://github.com/sponsors/Satanimus";
+
+async function abrirLinkExterno(url: string): Promise<void> {
+  try {
+    await openUrl(url);
+  } catch (error) {
+    window.alert(`No se pudo abrir el link: ${String(error)}`);
+  }
+}
+
+const tituloVersion = document.createElement("h3");
+tituloVersion.className = "configuracion-avanzado-titulo";
+tituloVersion.textContent = "Versión";
+
+const parrafoVersion = document.createElement("p");
+parrafoVersion.className = "configuracion-acerca-version";
+parrafoVersion.textContent = `Omega Ctrl v${VERSION_ACTUAL}`;
+
+const filaActualizacion = document.createElement("div");
+filaActualizacion.className = "configuracion-acerca-fila";
+
+const botonVerificarActualizacion = document.createElement("button");
+botonVerificarActualizacion.type = "button";
+botonVerificarActualizacion.className = "configuracion-boton";
+botonVerificarActualizacion.textContent = "Verificar actualización";
+
+const estadoActualizacion = document.createElement("span");
+estadoActualizacion.className = "configuracion-acerca-estado";
+
+botonVerificarActualizacion.addEventListener("click", async () => {
+  estadoActualizacion.textContent = "Buscando actualizaciones...";
+
+  // Preliminar: todavía no hay un mecanismo real de verificación
+  // (ej. comparar contra el último release del repositorio). Por
+  // ahora siempre informa que no hay novedades; cuando exista ese
+  // mecanismo, este bloque se reemplaza por el resultado real (algo
+  // como "Existe nueva actualización vX.Y.Z").
+  estadoActualizacion.textContent = "No hay nuevas actualizaciones.";
+});
+
+const enlaceRepositorio = document.createElement("button");
+enlaceRepositorio.type = "button";
+enlaceRepositorio.className = "configuracion-acerca-link";
+enlaceRepositorio.textContent = URL_REPOSITORIO;
+enlaceRepositorio.addEventListener("click", () =>
+  abrirLinkExterno(URL_REPOSITORIO),
+);
+
+filaActualizacion.append(botonVerificarActualizacion, estadoActualizacion);
+
+const parrafoDesarrollador = document.createElement("p");
+parrafoDesarrollador.textContent = "Desarrollado por SatAnimus.";
+
+const parrafoApoyo = document.createElement("p");
+parrafoApoyo.textContent =
+  "Si le ha sido de utilidad considere hacer un aporte para apoyar " +
+  "el desarrollo de nuevos programas y agregar nuevas características " +
+  "a Omega Ctrl.";
+
+const botonSponsor = document.createElement("button");
+botonSponsor.type = "button";
+botonSponsor.className = "configuracion-boton";
+botonSponsor.textContent = "❤️ Apoyar el desarrollo (Sponsor)";
+botonSponsor.addEventListener("click", () => abrirLinkExterno(URL_SPONSOR));
+
+const separadorAcerca = document.createElement("hr");
+separadorAcerca.className = "configuracion-acerca-separador";
+
+const tituloIssues = document.createElement("h3");
+tituloIssues.className = "configuracion-avanzado-titulo";
+tituloIssues.textContent = "Reportar errores y sugerencias";
+
+const notaIssues = document.createElement("div");
+notaIssues.className = "configuracion-nota-pestana";
+
+const parrafoIssues = document.createElement("p");
+parrafoIssues.textContent =
+  '¿Encontraste un error, quieres solicitar una nueva característica, ' +
+  "dejar una opinión o sugerencia, o pedir una aclaración de uso? " +
+  'Entra al link de Issues del repositorio y haz click en el botón ' +
+  '"New Issue".';
+
+notaIssues.append(parrafoIssues);
+
+const botonIssues = document.createElement("button");
+botonIssues.type = "button";
+botonIssues.className = "configuracion-boton";
+botonIssues.textContent = "Abrir Issues en GitHub";
+botonIssues.addEventListener("click", () => abrirLinkExterno(URL_ISSUES));
+
+panelAcerca.append(
+  tituloVersion,
+  parrafoVersion,
+  filaActualizacion,
+  enlaceRepositorio,
+  parrafoDesarrollador,
+  parrafoApoyo,
+  botonSponsor,
+  separadorAcerca,
+  tituloIssues,
+  notaIssues,
+  botonIssues,
+);
+
+const pestanaAcerca: Pestana = {
+  cargar: async () => {},
+  hayEdicionesPendientes: () => false,
+  validarYRecolectar: () => ({ cambios: [], erroresLocales: [] }),
+  aplicarGuardado: async () => ({ errores: [] }),
+  marcarErroresGuardado: () => {},
+  limpiarEstadoTrasGuardado: async () => {},
+  restablecerPestana: async () => {},
+  textoConfirmacionRestablecer:
+    "Esta pestaña no tiene cambios que restablecer.",
+};
+
+// ======================================================
 // 🧭 BARRA DE ACCIONES GLOBAL
 // ------------------------------------------------------
-// Única y fija para las 4 pestañas. Izquierda: "Restablecer esta
+// Única y fija para las 5 pestañas. Izquierda: "Restablecer esta
 // pestaña", actúa solo sobre la pestaña activa (título/mensaje
 // cambia según cuál sea). Derecha: "Cancelar cambios"/"Aplicar
 // cambios", ambos globales — actúan sobre los cambios pendientes de
@@ -2497,6 +2643,7 @@ const TODAS_LAS_PESTANAS: ReadonlyArray<readonly [HTMLButtonElement, Pestana]> =
     [tabApariencia, pestanaApariencia],
     [tabTeclas, pestanaTeclas],
     [tabAvanzado, pestanaAvanzado],
+    [tabAcerca, pestanaAcerca],
   ];
 
 const filaAcciones = document.createElement("div");

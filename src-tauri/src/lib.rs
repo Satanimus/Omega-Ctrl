@@ -78,6 +78,11 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ))
+        // Abrir links externos (pestaña Acerca de) en el navegador
+        // del sistema — dependencia y permiso ("opener:default") ya
+        // estaban en Cargo.toml/capabilities/default.json, faltaba
+        // registrar el plugin.
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             // AppHandle global para back_menu_express.rs — el trigger
             // que abre una ventana MenuExpress llega desde el hilo de
