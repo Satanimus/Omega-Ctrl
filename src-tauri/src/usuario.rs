@@ -453,6 +453,14 @@ fn nombre_desde_ruta(ruta: &Path) -> Option<String> {
     Some(nombre.to_string())
 }
 
+// Wrapper público de nombre_desde_ruta — usado por
+// perfil::obtener_nombre_actual() para resolver el nombre del
+// perfil de arranque elegido en "Iniciar con perfil", sin duplicar
+// la lógica de parseo del nombre de archivo.
+pub fn nombre_desde_ruta_pub(ruta: &Path) -> Option<String> {
+    nombre_desde_ruta(ruta)
+}
+
 // ======================================================
 // 📍 RUTA POR NOMBRE
 // ======================================================

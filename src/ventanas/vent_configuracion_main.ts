@@ -637,7 +637,18 @@ export interface Pestana {
   ) => Promise<ResultadoGuardado>;
   marcarErroresGuardado: (errores: ErrorConfiguracion[]) => void;
   limpiarEstadoTrasGuardado: () => Promise<void>;
+
+  // "Restablecer esta pestaña": acción destructiva con confirmación,
+  // borra todo Valor personalizado y persiste el estado de fábrica.
   restablecerPestana: () => Promise<void>;
+
+  // "Cancelar cambios" (barra global): descarta solo la edición en
+  // memoria sin aplicar, sin tocar lo ya guardado. Opcional — las
+  // pestañas que no la definen (no tienen ese matiz, restablecer ya
+  // es no-destructivo para ellas más allá de recargar) caen en
+  // restablecerPestana.
+  cancelarEdicion?: () => Promise<void>;
+
   textoConfirmacionRestablecer: string;
 }
 
@@ -2602,16 +2613,19 @@ botonConfirmarConfirmacion.addEventListener("click", async () => {
 
 // "Cancelar cambios": descarta las ediciones no guardadas de TODAS
 // las pestañas (no solo la activa) recargando cada una desde su
-// último estado persistido — mismo camino de solo-lectura que usa
-// restablecerPestana() para "Restablecer esta pestaña", pero
-// aplicado a las 4 pestañas a la vez y sin pedir confirmación.
+// último estado persistido, SIN borrar valores ya aplicados —
+// distinto de "Restablecer esta pestaña" (restablecerPestana), que sí
+// borra todo Valor personalizado. Usa cancelarEdicion() cuando la
+// pestaña la define (Apariencia, donde restablecerPestana es
+// destructivo); las demás no tienen ese matiz y caen en
+// restablecerPestana, que para ellas ya es un simple recargar.
 botonCancelarGlobal.addEventListener("click", async () => {
   botonCancelarGlobal.disabled = true;
   botonGuardarGlobal.disabled = true;
 
   try {
     for (const [, pestana] of TODAS_LAS_PESTANAS) {
-      await pestana.restablecerPestana();
+      await (pestana.cancelarEdicion ?? pestana.restablecerPestana)();
     }
   } catch (error) {
     window.alert(`No se pudo cancelar: ${String(error)}`);

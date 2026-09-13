@@ -1340,9 +1340,13 @@ export function crearPestanaApariencia(
     await despuesDeAplicar();
   }
 
-  // Restablecer esta pestaña: recarga el mismo tema que hay en sesión
-  // (idéntico a pulsar "Cargar" sobre ese tema) y luego ejecuta el
-  // flujo completo de "Aplicar cambios" — validar → guardar → limpiar.
+  // Restablecer esta pestaña: borra TODO valor personalizado (recarga
+  // el tema base de la sesión, que limpia los overrides css.* vigentes
+  // — incluye los que quedaron con "Valor personalizado" por vínculo,
+  // ej. "color texto" heredando de "highlight") y persiste ese estado
+  // limpio con el flujo completo de Aplicar cambios. Distinto de
+  // cancelarEdicion() (usada por "Cancelar cambios" global), que solo
+  // descarta la edición en memoria sin tocar lo ya aplicado.
   async function restablecerPestana(): Promise<void> {
     await invoke("configuracion_tema_cargar", {
       nombre: nombreTemaSesion,
@@ -1359,6 +1363,28 @@ export function crearPestanaApariencia(
     if (resultado.errores.length === 0) {
       await limpiarEstadoTrasGuardado();
     }
+  }
+
+  // "Cancelar cambios" (barra global): descarta solo las ediciones en
+  // memoria sin aplicar (filasConCambio, huboCargaDeTema), recargando
+  // la tabla desde lo que ya está persistido en disco — sin pasar por
+  // configuracion_tema_cargar, que borraría también los cambios ya
+  // guardados con "Aplicar cambios" en una vuelta anterior dentro de
+  // la misma apertura de la ventana (ej.: color 01 ya aplicado, se
+  // edita color 02 sin aplicar, "Cancelar cambios" debe descartar solo
+  // 02 y dejar 01 intacto). Mismo patrón que cargar(): reinicia la
+  // sesión de apariencia (descarta cualquier preview de "Cargar ▾" no
+  // aplicado) y relee la tabla desde disco.
+  async function cancelarEdicion(): Promise<void> {
+    const sesion = await invoke<{ nombre: string; origen: string }>(
+      "configuracion_apariencia_iniciar_sesion",
+    );
+
+    nombreTemaSesion = sesion.nombre;
+    origenTemaSesion = sesion.origen;
+    huboCargaDeTema = false;
+
+    await recargarTablaApariencia();
   }
 
   // Fila combinada "Seleccionar tema" + "Escala general" arriba de la
@@ -1402,6 +1428,7 @@ export function crearPestanaApariencia(
     marcarErroresGuardado,
     limpiarEstadoTrasGuardado,
     restablecerPestana,
+    cancelarEdicion,
 
     textoConfirmacionRestablecer: opciones.textoConfirmacionRestablecer,
   };

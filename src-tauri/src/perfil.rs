@@ -117,7 +117,7 @@ use crate::runtime;
 use crate::usuario;
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::compilador::{AdvertenciaCompilacion, ResultadoCompilacion};
 use crate::perfil_ui::{ResultadoPerfil, ResultadoPerfilInicial};
@@ -169,6 +169,28 @@ pub fn detener_si_activo() {
 }
 
 // ======================================================
+// 🚩 RUTA DEL PERFIL DE ARRANQUE
+// ------------------------------------------------------
+// Único punto que decide qué perfil abre el programa al iniciar,
+// según "Iniciar con perfil" (Configuración → General). Usado por
+// obtener_perfil_actual() (contenido) y obtener_nombre_actual()
+// (nombre mostrado en el toolbar) — antes solo el primero la
+// consultaba, así que el toolbar mostraba el último perfil por
+// fecha de modificación (usuario::perfil_actual()) aunque el
+// contenido cargado fuera el perfil fijo elegido acá.
+// ======================================================
+
+fn ruta_perfil_inicial() -> Result<PathBuf, String> {
+    let iniciar_con_perfil = crate::configuracion_usuario::leer_iniciar_con_perfil()?;
+
+    match iniciar_con_perfil {
+        None => usuario::perfil_actual(),
+        Some(nombre) if nombre == "ultimo" => usuario::perfil_actual(),
+        Some(nombre) => usuario::ruta_perfil(&nombre),
+    }
+}
+
+// ======================================================
 // 📂 OBTENER PERFIL ACTUAL
 // ------------------------------------------------------
 // Devuelve también las advertencias de esta compilación automática
@@ -177,13 +199,7 @@ pub fn detener_si_activo() {
 // ======================================================
 
 pub fn obtener_perfil_actual() -> Result<ResultadoPerfilInicial, String> {
-    let iniciar_con_perfil = crate::configuracion_usuario::leer_iniciar_con_perfil()?;
-
-    let ruta = match iniciar_con_perfil {
-        None => usuario::perfil_actual()?,
-        Some(nombre) if nombre == "ultimo" => usuario::perfil_actual()?,
-        Some(nombre) => usuario::ruta_perfil(&nombre)?,
-    };
+    let ruta = ruta_perfil_inicial()?;
 
     if !ruta.exists() {
         let perfil = PerfilJson::nuevo();
@@ -233,10 +249,23 @@ pub fn obtener_perfiles() -> Result<Vec<String>, String> {
 
 // ======================================================
 // 🆔 OBTENER NOMBRE ACTUAL
+// ------------------------------------------------------
+// Usado por el toolbar al arrancar (ui_toolbar.ts) para mostrar el
+// nombre del perfil activo — tiene que resolver la misma ruta que
+// obtener_perfil_actual(), no usuario::nombre_actual() directo, o
+// mostraría el último perfil modificado en vez del elegido en
+// "Iniciar con perfil".
 // ======================================================
 
 pub fn obtener_nombre_actual() -> Result<String, String> {
-    usuario::nombre_actual()
+    let ruta = ruta_perfil_inicial()?;
+
+    if !ruta.exists() {
+        return usuario::nombre_actual();
+    }
+
+    usuario::nombre_desde_ruta_pub(&ruta)
+        .ok_or_else(|| "No se pudo determinar el nombre del perfil".to_string())
 }
 
 // ======================================================
