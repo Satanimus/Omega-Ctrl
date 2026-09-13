@@ -31,6 +31,7 @@ import {
   crearContenedorPopup,
   mostrarPopup,
   ocultarPopup,
+  actualizarContenidoPopup,
 } from "../componentes/comp_popup_contenedor";
 
 import {
@@ -44,7 +45,11 @@ import { triggerAHTML, triggerATexto } from "../core/core_trigger";
 import { aplicarOverridesApariencia } from "../core/core_apariencia";
 import { crearPestanaApariencia } from "./vent_configuracion_apariencia";
 import { crearBoton } from "../componentes/comp_boton";
-import { crearInterruptor } from "../componentes/comp_popup_grupo";
+import {
+  crearInterruptor,
+  crearGrupoOpciones,
+  crearFilaPopup,
+} from "../componentes/comp_popup_grupo";
 
 import "../styles/styl_variables.css";
 import "../styles/styl_general.css";
@@ -1152,58 +1157,39 @@ const pestanaGeneralTabla = crearPestanaEditable({
 });
 
 // ======================================================
-// 📁 CARPETA DE USUARIO (fila independiente, pestaña General)
+// 🔵 INDICADOR CIRCULAR (filas fijas de Opciones)
 // ------------------------------------------------------
-// No participa del flujo de "cambios pendientes"/Aplicar de
-// crearPestanaEditable — el cambio se aplica al momento a través
-// del popup del selector (Etapa G), no queda pendiente de Guardar.
-// Acá solo la fila con el botón que refleja el estado actual.
-// Reordenamiento visual: queda dentro de "Programa", al final de
-// todo (se encadena después de filaNotificaciones más abajo), en
-// vez de ser la primera fila de la pestaña.
+// Reemplaza al switch en filas que no tienen uno — mismo ancho que
+// .popup-switch-pista para quedar centrado en la misma columna que
+// los switches de las demás filas.
 // ======================================================
 
-interface EstadoCarpetaUsuario {
-  tipo: "default" | "instalacion" | "otra";
-  ruta: string;
+function crearIndicadorPunto(): HTMLDivElement {
+  const indicador = document.createElement("div");
+  indicador.className = "configuracion-opciones-indicador";
+
+  const punto = document.createElement("span");
+  punto.className = "configuracion-opciones-punto";
+
+  indicador.append(punto);
+
+  return indicador;
 }
 
-const ETIQUETAS_TIPO_CARPETA_USUARIO: Record<"default" | "instalacion", string> = {
-  default: "%AppData%",
-  instalacion: "OmegaCtrl",
-};
-
-const filaCarpetaUsuario = document.createElement("div");
-filaCarpetaUsuario.className = "configuracion-fila-alineada configuracion-fila-sangria";
-
-const etiquetaCarpetaUsuario = document.createElement("span");
-etiquetaCarpetaUsuario.className = "configuracion-escala-etiqueta";
-etiquetaCarpetaUsuario.textContent = "Ruta para carpeta de usuario:";
-
-const botonSelectorCarpetaUsuario = document.createElement("button");
-botonSelectorCarpetaUsuario.type = "button";
-botonSelectorCarpetaUsuario.className =
-  "ui-btn configuracion-carpeta-usuario-boton configuracion-boton-ghost-izquierda";
-botonSelectorCarpetaUsuario.textContent = "Seleccionar Carpeta";
-
-filaCarpetaUsuario.append(etiquetaCarpetaUsuario, botonSelectorCarpetaUsuario);
-
 // ======================================================
-// 🚀 INICIO (subtítulo fijo, pestaña General)
+// 🚀 OPCIONES (subtítulo fijo, pestaña General)
 // ------------------------------------------------------
-// Encabezado de la sección "Inicio" (Iniciar con Windows/Iniciar
-// minimizado/Iniciar con perfil) — fuera del flujo de cambios
-// pendientes, primera sección de la pestaña. Reordenamiento visual:
-// Carpeta de Usuario pasa a quedar dentro de "Programa", al final
-// de todo, para agrupar mejor con el resto de opciones del programa
-// (Notificaciones, Mostrar/Minimizar a bandeja).
+// Único subtítulo para toda la sección fija de la pestaña (Iniciar
+// con Windows/Iniciar minimizado/Iniciar con perfil/Mostrar y
+// Minimizar a bandeja/Notificaciones/Carpeta de Usuario) — fuera del
+// flujo de cambios pendientes, primera sección de la pestaña.
 // ======================================================
 
-const subtituloInicio = document.createElement("span");
-subtituloInicio.className = "configuracion-subtitulo-fija";
-subtituloInicio.textContent = "Inicio";
+const subtituloOpciones = document.createElement("span");
+subtituloOpciones.className = "configuracion-subtitulo-fija";
+subtituloOpciones.textContent = "Opciones";
 
-panelGeneral.prepend(subtituloInicio);
+panelGeneral.prepend(subtituloOpciones);
 
 interface EstadoInicioUI {
   iniciarConWindows: boolean;
@@ -1226,7 +1212,11 @@ let iniciarConWindowsActivo = false;
 let iniciarMinimizadoActivo = false;
 
 const filaIniciarConWindows = document.createElement("div");
-filaIniciarConWindows.className = "configuracion-escala-fila configuracion-fila-sangria";
+filaIniciarConWindows.className =
+  "configuracion-opciones-fila configuracion-fila-sangria";
+
+const colIniciarConWindows = document.createElement("div");
+colIniciarConWindows.className = "configuracion-opciones-col1";
 
 const interruptorIniciarConWindows = crearInterruptor(
   "Iniciar con Windows",
@@ -1262,9 +1252,7 @@ const interruptorIniciarConWindows = crearInterruptor(
       }).catch(() => {});
 
       if (!iniciarConWindowsActivo) {
-        invoke("guardar_iniciar_minimizado", { activo: false }).catch(
-          () => {},
-        );
+        invoke("guardar_iniciar_minimizado", { activo: false }).catch(() => {});
       }
     } catch (error) {
       iniciarConWindowsActivo = anteriorIniciarConWindows;
@@ -1303,12 +1291,14 @@ const interruptorIniciarMinimizado = crearInterruptor(
   !iniciarConWindowsActivo,
 );
 
+colIniciarConWindows.append(interruptorIniciarConWindows);
+
 filaIniciarConWindows.append(
-  interruptorIniciarConWindows,
+  colIniciarConWindows,
   interruptorIniciarMinimizado,
 );
 
-subtituloInicio.insertAdjacentElement("afterend", filaIniciarConWindows);
+subtituloOpciones.insertAdjacentElement("afterend", filaIniciarConWindows);
 
 // ======================================================
 // 👤 INICIAR CON PERFIL (fila fija, pestaña General)
@@ -1320,16 +1310,22 @@ subtituloInicio.insertAdjacentElement("afterend", filaIniciarConWindows);
 let perfilInicioSeleccionado = "ultimo";
 
 const filaIniciarConPerfil = document.createElement("div");
-filaIniciarConPerfil.className = "configuracion-fila-alineada configuracion-fila-sangria";
+filaIniciarConPerfil.className =
+  "configuracion-opciones-fila configuracion-fila-sangria";
+
+const colIniciarConPerfil = document.createElement("div");
+colIniciarConPerfil.className = "configuracion-opciones-col1";
 
 const etiquetaIniciarConPerfil = document.createElement("span");
 etiquetaIniciarConPerfil.className = "configuracion-escala-etiqueta";
 etiquetaIniciarConPerfil.textContent = "Iniciar con perfil:";
 
+colIniciarConPerfil.append(crearIndicadorPunto(), etiquetaIniciarConPerfil);
+
 const botonIniciarConPerfil = document.createElement("button");
 botonIniciarConPerfil.type = "button";
 botonIniciarConPerfil.className =
-  "ui-btn configuracion-carpeta-usuario-boton configuracion-boton-ghost-izquierda";
+  "ui-btn configuracion-carpeta-usuario-boton configuracion-boton-alineado-izquierda";
 
 function actualizarBotonIniciarConPerfil(): void {
   botonIniciarConPerfil.textContent =
@@ -1390,12 +1386,10 @@ botonIniciarConPerfil.addEventListener("click", (evento) => {
   abrirPopupIniciarConPerfil(evento);
 });
 
-filaIniciarConPerfil.append(etiquetaIniciarConPerfil, botonIniciarConPerfil);
-
-filaIniciarConWindows.insertAdjacentElement("afterend", filaIniciarConPerfil);
+filaIniciarConPerfil.append(colIniciarConPerfil, botonIniciarConPerfil);
 
 // ======================================================
-// 📦 PROGRAMA (subtítulo fijo, pestaña General)
+// 📦 MOSTRAR/MINIMIZAR A BANDEJA (fila fija, pestaña General)
 // ------------------------------------------------------
 // "Mostrar en bandeja de sistema" y "Minimizar a bandeja de
 // sistema" nacen ambos en Off (default nuevo). "Minimizar a
@@ -1404,17 +1398,15 @@ filaIniciarConWindows.insertAdjacentElement("afterend", filaIniciarConPerfil);
 // minimizado".
 // ======================================================
 
-const subtituloPrograma = document.createElement("span");
-subtituloPrograma.className = "configuracion-subtitulo-fija";
-subtituloPrograma.textContent = "Programa";
-
-filaIniciarConPerfil.insertAdjacentElement("afterend", subtituloPrograma);
-
 let mostrarEnBandejaActivo = false;
 let minimizarABandejaActivo = false;
 
 const filaBandeja = document.createElement("div");
-filaBandeja.className = "configuracion-escala-fila configuracion-fila-sangria";
+filaBandeja.className =
+  "configuracion-opciones-fila configuracion-fila-sangria";
+
+const colMostrarEnBandeja = document.createElement("div");
+colMostrarEnBandeja.className = "configuracion-opciones-col1";
 
 const interruptorMostrarEnBandeja = crearInterruptor(
   "Mostrar en bandeja de sistema",
@@ -1458,9 +1450,7 @@ const interruptorMostrarEnBandeja = crearInterruptor(
     });
 
     if (!mostrarEnBandejaActivo) {
-      invoke("guardar_minimizar_a_bandeja", { activo: false }).catch(
-        () => {},
-      );
+      invoke("guardar_minimizar_a_bandeja", { activo: false }).catch(() => {});
     }
   },
 );
@@ -1481,9 +1471,11 @@ const interruptorMinimizarABandeja = crearInterruptor(
   !mostrarEnBandejaActivo,
 );
 
-filaBandeja.append(interruptorMostrarEnBandeja, interruptorMinimizarABandeja);
+colMostrarEnBandeja.append(interruptorMostrarEnBandeja);
 
-subtituloPrograma.insertAdjacentElement("afterend", filaBandeja);
+filaBandeja.append(colMostrarEnBandeja, interruptorMinimizarABandeja);
+
+filaIniciarConWindows.insertAdjacentElement("afterend", filaBandeja);
 
 // Carga el estado persistido y lo refleja en los 4 interruptores +
 // el botón de "Iniciar con perfil" (reemplaza los valores en
@@ -1529,43 +1521,14 @@ async function cargarEstadoInicio(): Promise<void> {
 
 cargarEstadoInicio();
 
-
-function aplicarEstadoCarpetaUsuario(estado: EstadoCarpetaUsuario): void {
-  if (estado.tipo === "otra") {
-    const nombre =
-      estado.ruta.split(/[\\/]/).filter(Boolean).pop() ?? estado.ruta;
-
-    botonSelectorCarpetaUsuario.textContent = nombre;
-  } else {
-    botonSelectorCarpetaUsuario.textContent = ETIQUETAS_TIPO_CARPETA_USUARIO[estado.tipo];
-  }
-
-  botonSelectorCarpetaUsuario.title = estado.ruta;
-}
-
-async function cargarEstadoCarpetaUsuario(): Promise<void> {
-  const estado = await invoke<EstadoCarpetaUsuario>(
-    "obtener_estado_carpeta_usuario",
-  );
-
-  aplicarEstadoCarpetaUsuario(estado);
-}
-
-botonSelectorCarpetaUsuario.addEventListener("click", (evento) => {
-  abrirPopupSelectorCarpetaUsuario(evento);
-});
-
-cargarEstadoCarpetaUsuario();
-
 // ======================================================
 // 🔔 NOTIFICACIONES (fila alineada, pestaña General)
 // ------------------------------------------------------
-// Agrupada dentro de "Programa" (después de Mostrar/Minimizar a
-// bandeja), no en su propia sección — reordenamiento visual. El
-// toggle y la Duración SÍ participan del flujo de cambios
-// pendientes/Aplicar (Regla 13) — se combinan con
+// Va después de Mostrar/Minimizar a bandeja, antes de Iniciar con
+// perfil. El toggle y la Duración SÍ participan del flujo de
+// cambios pendientes/Aplicar (Regla 13) — se combinan con
 // pestanaGeneralTabla más abajo para formar la pestanaGeneral
-// final. Solo el botón Ubicación/Guardar se aplica al instante
+// final. Solo el botón Mostrar/Guardar se aplica al instante
 // (Regla 14, mismo criterio que el botón Ubicación del popup Extra
 // de Macro, ver comp_popup_macro_extra.ts).
 // ======================================================
@@ -1577,10 +1540,22 @@ let duracionActual = 0;
 let duracionEditado = 0;
 
 const filaNotificaciones = document.createElement("div");
-filaNotificaciones.className = "configuracion-fila-alineada configuracion-fila-sangria";
+filaNotificaciones.className =
+  "configuracion-opciones-fila configuracion-fila-sangria";
 
-const grupoIzquierdoNotificaciones = document.createElement("div");
-grupoIzquierdoNotificaciones.className = "configuracion-escala-fila";
+const colMostrarNotificaciones = document.createElement("div");
+colMostrarNotificaciones.className = "configuracion-opciones-col1";
+
+// Agrupa Duración y Ubicación (col2), cada uno con su indicador +
+// etiqueta + botón, a continuación del switch de Notificaciones.
+const grupoDerechoNotificaciones = document.createElement("div");
+grupoDerechoNotificaciones.className = "configuracion-opciones-col2";
+
+const grupoDuracion = document.createElement("div");
+grupoDuracion.className = "configuracion-opciones-grupo";
+
+const grupoUbicacion = document.createElement("div");
+grupoUbicacion.className = "configuracion-opciones-grupo";
 
 const interruptorNotificaciones = crearInterruptor(
   "Mostrar Notificaciones",
@@ -1638,26 +1613,31 @@ botonDuracionNotificaciones.addEventListener("click", (evento) => {
   mostrarPopup(popup, evento.clientX, evento.clientY);
 });
 
-grupoIzquierdoNotificaciones.append(
-  interruptorNotificaciones,
+colMostrarNotificaciones.append(interruptorNotificaciones);
+grupoDuracion.append(
+  crearIndicadorPunto(),
   etiquetaDuracionNotificaciones,
   botonDuracionNotificaciones,
 );
 
-// Botón "Ubicación"/"Guardar" — se aplica al instante (no participa
+// Botón "Mostrar"/"Guardar" — se aplica al instante (no participa
 // de cambios pendientes), mismo comportamiento que su homónimo en
 // comp_popup_macro_extra.ts pero contra las ventanas de notificación.
 let ubicacionNotificacionActiva = false;
 
+const etiquetaUbicacionNotificacion = document.createElement("span");
+etiquetaUbicacionNotificacion.className = "configuracion-escala-etiqueta";
+etiquetaUbicacionNotificacion.textContent = "Ubicación:";
+
 const botonUbicacionNotificacion = crearBoton({
-  texto: "Ubicación",
-  clase: "configuracion-boton-ghost-izquierda",
+  texto: "Mostrar",
+  clase: "configuracion-boton-alineado-izquierda",
 });
 
 function actualizarBotonUbicacionNotificacion(): void {
   botonUbicacionNotificacion.textContent = ubicacionNotificacionActiva
     ? "Guardar"
-    : "Ubicación";
+    : "Mostrar";
 }
 
 botonUbicacionNotificacion.addEventListener("click", async () => {
@@ -1680,12 +1660,21 @@ botonUbicacionNotificacion.addEventListener("click", async () => {
   }
 });
 
-filaNotificaciones.append(
-  grupoIzquierdoNotificaciones,
+grupoUbicacion.append(
+  crearIndicadorPunto(),
+  etiquetaUbicacionNotificacion,
   botonUbicacionNotificacion,
 );
+grupoDerechoNotificaciones.append(grupoDuracion, grupoUbicacion);
+
+filaNotificaciones.append(colMostrarNotificaciones, grupoDerechoNotificaciones);
 filaBandeja.insertAdjacentElement("afterend", filaNotificaciones);
-filaNotificaciones.insertAdjacentElement("afterend", filaCarpetaUsuario);
+filaNotificaciones.insertAdjacentElement("afterend", filaIniciarConPerfil);
+
+// Línea separadora entre la sección "Opciones" y la tabla de abajo.
+const separadorOpciones = document.createElement("div");
+separadorOpciones.className = "configuracion-opciones-separador";
+filaIniciarConPerfil.insertAdjacentElement("afterend", separadorOpciones);
 
 async function cargarFilaNotificaciones(): Promise<void> {
   const [mostrar, duracion] = await Promise.all([
@@ -1791,238 +1780,6 @@ const pestanaGeneral: Pestana = {
   textoConfirmacionRestablecer:
     pestanaGeneralTabla.textoConfirmacionRestablecer,
 };
-
-// ======================================================
-// 🗂️ POPUP SELECTOR — 3 opciones (Default/Instalación/Otra)
-// ------------------------------------------------------
-// Etapa H se encarga de lo que pasa después de elegir destino
-// (verificar, avisos de sistema/conflicto, confirmar, carpeta
-// antigua) — procesarDestinoCarpetaUsuario() es el punto de
-// entrada que esa etapa completa.
-// ======================================================
-
-function crearOpcionPopupCarpetaUsuario(
-  texto: string,
-  alElegir: () => void | Promise<void>,
-): HTMLButtonElement {
-  const boton = document.createElement("button");
-  boton.className = "ui-btn";
-  boton.textContent = texto;
-
-  boton.addEventListener("click", async () => {
-    ocultarPopup();
-    await alElegir();
-  });
-
-  return boton;
-}
-
-// ======================================================
-// ⚠️ POPUPS DE FLUJO (Etapa H)
-// ------------------------------------------------------
-// Mismo patrón que comp_popup_confirmar.ts/_modo.ts
-// (.popup-confirmar + mostrarPopup posicionado en el click),
-// pero locales acá porque cada paso tiene su propio set de
-// botones (1, 2 o 3), a diferencia del Sí/No genérico.
-// ======================================================
-
-interface OpcionPopupFlujo {
-  texto: string;
-  valor: string;
-}
-
-function mostrarPopupFlujo(
-  mensaje: string,
-  opciones: OpcionPopupFlujo[],
-  evento: MouseEvent,
-): Promise<string | null> {
-  return new Promise((resolver) => {
-    let resuelto = false;
-
-    const resolverUnaVez = (valor: string | null) => {
-      if (resuelto) {
-        return;
-      }
-
-      resuelto = true;
-      resolver(valor);
-    };
-
-    const contenedor = document.createElement("div");
-    contenedor.className = "popup-confirmar";
-
-    const texto = document.createElement("p");
-    texto.className = "popup-confirmar-mensaje";
-    texto.textContent = mensaje;
-
-    const botones = document.createElement("div");
-    botones.className = "popup-confirmar-botones";
-
-    for (const opcion of opciones) {
-      const boton = crearBoton({ texto: opcion.texto });
-
-      boton.addEventListener("click", () => {
-        resolverUnaVez(opcion.valor);
-        ocultarPopup();
-      });
-
-      botones.append(boton);
-    }
-
-    contenedor.append(texto, botones);
-
-    mostrarPopup(contenedor, evento.clientX, evento.clientY, () =>
-      resolverUnaVez(null),
-    );
-  });
-}
-
-interface VerificacionCarpetaUsuario {
-  es_sistema: boolean;
-  tiene_usuario_existente: boolean;
-}
-
-interface ResultadoCambioCarpetaUsuario {
-  ruta_antigua: string | null;
-  requiere_renombrar_si_mantiene: boolean;
-}
-
-async function procesarDestinoCarpetaUsuario(
-  destino: string,
-  esDefault: boolean,
-  evento: MouseEvent,
-): Promise<void> {
-  let verificacion: VerificacionCarpetaUsuario;
-
-  try {
-    verificacion = await invoke<VerificacionCarpetaUsuario>(
-      "verificar_carpeta_usuario",
-      { ruta: destino },
-    );
-  } catch (error) {
-    window.alert(`No se pudo usar esa carpeta: ${String(error)}`);
-    return;
-  }
-
-  if (verificacion.es_sistema) {
-    await mostrarPopupFlujo(
-      "Esa carpeta está dentro de una carpeta de sistema (Program Files, " +
-        "Program Files (x86) o Windows). Debe ejecutar el programa en modo " +
-        "administrador para poder escribir los perfiles ahí, o elegir otra carpeta.",
-      [{ texto: "Entendido", valor: "ok" }],
-      evento,
-    );
-  }
-
-  if (verificacion.tiene_usuario_existente) {
-    const accion = await mostrarPopupFlujo(
-      "Ya existe una carpeta de usuario en el destino ¿qué desea hacer con ella?",
-      [
-        { texto: "Renombrarla a usuario_old", valor: "renombrar" },
-        { texto: "Eliminarla", valor: "eliminar" },
-        { texto: "Cancelar", valor: "cancelar" },
-      ],
-      evento,
-    );
-
-    if (accion === null || accion === "cancelar") {
-      return;
-    }
-
-    try {
-      await invoke("resolver_carpeta_usuario_existente", {
-        ruta: destino,
-        accion,
-      });
-    } catch (error) {
-      window.alert(`No se pudo resolver la carpeta existente: ${String(error)}`);
-      return;
-    }
-  }
-
-  let resultado: ResultadoCambioCarpetaUsuario;
-
-  try {
-    resultado = await invoke<ResultadoCambioCarpetaUsuario>(
-      "confirmar_cambio_carpeta_usuario",
-      { ruta: destino, esDefault },
-    );
-  } catch (error) {
-    window.alert(`No se pudo cambiar la carpeta de usuario: ${String(error)}`);
-    return;
-  }
-
-  if (resultado.ruta_antigua !== null) {
-    const rutaAntigua = resultado.ruta_antigua;
-
-    const decision = await mostrarPopupFlujo(
-      "Migración de datos de usuario a nueva ruta exitosa. ¿Qué desea hacer " +
-        "con los archivos en la ruta antigua?",
-      [
-        { texto: "Eliminar", valor: "eliminar" },
-        { texto: "Mantener", valor: "mantener" },
-      ],
-      evento,
-    );
-
-    try {
-      if (decision === "eliminar") {
-        await invoke("eliminar_carpeta_usuario_antigua", {
-          ruta: rutaAntigua,
-        });
-      } else if (
-        decision === "mantener" &&
-        resultado.requiere_renombrar_si_mantiene
-      ) {
-        await invoke("renombrar_carpeta_usuario_antigua", {
-          ruta: rutaAntigua,
-        });
-      }
-    } catch (error) {
-      window.alert(`No se pudo procesar la carpeta antigua: ${String(error)}`);
-    }
-  }
-
-  await cargarEstadoCarpetaUsuario();
-}
-
-function abrirPopupSelectorCarpetaUsuario(evento: MouseEvent): void {
-  const lista = document.createElement("div");
-  lista.className = "popup-lista";
-
-  lista.append(
-    crearOpcionPopupCarpetaUsuario("Default: %AppData%", async () => {
-      const destino = await invoke<string>(
-        "obtener_ruta_default_carpeta_usuario",
-      );
-
-      await procesarDestinoCarpetaUsuario(destino, true, evento);
-    }),
-
-    crearOpcionPopupCarpetaUsuario(
-      "Carpeta de instalación OmegaCtrl",
-      async () => {
-        const destino = await invoke<string>(
-          "obtener_ruta_instalacion_carpeta_usuario",
-        );
-
-        await procesarDestinoCarpetaUsuario(destino, false, evento);
-      },
-    ),
-
-    crearOpcionPopupCarpetaUsuario("Otra", async () => {
-      const destino = await invoke<string | null>("seleccionar_carpeta");
-
-      if (destino === null) {
-        return;
-      }
-
-      await procesarDestinoCarpetaUsuario(destino, false, evento);
-    }),
-  );
-
-  mostrarPopup(lista, evento.clientX, evento.clientY);
-}
 
 // ======================================================
 // ⌨️ PESTAÑA TECLAS (Etapa 5)
@@ -2233,6 +1990,318 @@ const pestanaApariencia = crearPestanaApariencia(
 // cambio pendiente, sin aplicar nada hasta "Aplicar cambios".
 // ======================================================
 
+// ======================================================
+// 📁 CARPETAS — Ruta para carpeta de usuario
+// ------------------------------------------------------
+// Todo el cambio (destino + decisiones de migración) queda
+// pendiente en carpetaUsuarioPendiente hasta "Aplicar cambios"
+// (guardarCarpetaUsuario, ver BARRA DE ACCIONES GLOBAL) — la
+// única excepción de la pestaña General/Avanzado es la Ubicación
+// de Notificaciones, que sigue aplicándose al toque.
+//
+// El popup del selector es persistente (mismo patrón que los
+// popups Extra: comp_popup_abrir_extra.ts) — elegir una carpeta no
+// lo cierra, solo lo redibuja mostrando (si aplica) las preguntas
+// de migración con una opción preseleccionada. Se cierra solo con
+// click afuera o Esc (comportamiento por defecto de mostrarPopup).
+// ======================================================
+
+const tituloCarpetas = document.createElement("h3");
+tituloCarpetas.className = "configuracion-avanzado-titulo";
+tituloCarpetas.textContent = "Carpetas";
+
+interface EstadoCarpetaUsuario {
+  tipo: "default" | "instalacion" | "otra";
+  ruta: string;
+}
+
+type TipoCarpetaUsuario = EstadoCarpetaUsuario["tipo"];
+
+interface VerificacionCarpetaUsuario {
+  es_sistema: boolean;
+  tiene_usuario_existente: boolean;
+}
+
+interface ResultadoCambioCarpetaUsuario {
+  ruta_antigua: string | null;
+  requiere_renombrar_si_mantiene: boolean;
+}
+
+interface CarpetaUsuarioPendiente {
+  tipo: TipoCarpetaUsuario;
+  ruta: string;
+  esSistema: boolean;
+  tieneUsuarioExistente: boolean;
+  decisionRutaAntigua: "mantener" | "eliminar";
+  decisionConflicto: "renombrar" | "eliminar";
+}
+
+const ETIQUETAS_TIPO_CARPETA_USUARIO: Record<
+  "default" | "instalacion",
+  string
+> = {
+  default: "%AppData%",
+  instalacion: "OmegaCtrl",
+};
+
+let estadoActualCarpetaUsuario: EstadoCarpetaUsuario = {
+  tipo: "default",
+  ruta: "",
+};
+let carpetaUsuarioPendiente: CarpetaUsuarioPendiente | null = null;
+
+const filaCarpetaUsuario = document.createElement("div");
+filaCarpetaUsuario.className =
+  "configuracion-opciones-fila configuracion-fila-sangria";
+
+const colCarpetaUsuario = document.createElement("div");
+colCarpetaUsuario.className = "configuracion-opciones-col1";
+
+const etiquetaCarpetaUsuario = document.createElement("span");
+etiquetaCarpetaUsuario.className = "configuracion-escala-etiqueta";
+etiquetaCarpetaUsuario.textContent = "Ruta para carpeta de usuario:";
+
+colCarpetaUsuario.append(crearIndicadorPunto(), etiquetaCarpetaUsuario);
+
+const botonSelectorCarpetaUsuario = document.createElement("button");
+botonSelectorCarpetaUsuario.type = "button";
+botonSelectorCarpetaUsuario.className =
+  "ui-btn configuracion-carpeta-usuario-boton configuracion-boton-alineado-izquierda";
+botonSelectorCarpetaUsuario.textContent = "Seleccionar Carpeta";
+
+filaCarpetaUsuario.append(colCarpetaUsuario, botonSelectorCarpetaUsuario);
+
+panelAvanzado.append(tituloCarpetas, filaCarpetaUsuario);
+
+function actualizarBotonCarpetaUsuario(): void {
+  const mostrado = carpetaUsuarioPendiente ?? estadoActualCarpetaUsuario;
+
+  if (mostrado.tipo === "otra") {
+    const nombre =
+      mostrado.ruta.split(/[\\/]/).filter(Boolean).pop() ?? mostrado.ruta;
+
+    botonSelectorCarpetaUsuario.textContent = nombre;
+  } else {
+    botonSelectorCarpetaUsuario.textContent =
+      ETIQUETAS_TIPO_CARPETA_USUARIO[mostrado.tipo];
+  }
+
+  botonSelectorCarpetaUsuario.title = mostrado.ruta;
+}
+
+async function cargarEstadoCarpetaUsuario(): Promise<void> {
+  estadoActualCarpetaUsuario = await invoke<EstadoCarpetaUsuario>(
+    "obtener_estado_carpeta_usuario",
+  );
+
+  carpetaUsuarioPendiente = null;
+
+  actualizarBotonCarpetaUsuario();
+}
+
+function hayEdicionPendienteCarpetaUsuario(): boolean {
+  return (
+    carpetaUsuarioPendiente !== null &&
+    (carpetaUsuarioPendiente.tipo !== estadoActualCarpetaUsuario.tipo ||
+      carpetaUsuarioPendiente.ruta !== estadoActualCarpetaUsuario.ruta)
+  );
+}
+
+function restablecerCarpetaUsuario(): void {
+  carpetaUsuarioPendiente = null;
+  actualizarBotonCarpetaUsuario();
+}
+
+// Ejecuta el cambio real (llamado solo desde "Aplicar cambios").
+// Orden clave (Regla del usuario): confirmar_cambio_carpeta_usuario
+// migra los datos ANTES de guardar el override, y solo si migró sin
+// error se limpia la ruta antigua (eliminar/renombrar) — si algo
+// falla acá, el error sube tal cual al catch de "Aplicar cambios".
+async function guardarCarpetaUsuario(): Promise<void> {
+  const pendiente = carpetaUsuarioPendiente;
+
+  if (!pendiente) {
+    return;
+  }
+
+  if (pendiente.tieneUsuarioExistente) {
+    await invoke("resolver_carpeta_usuario_existente", {
+      ruta: pendiente.ruta,
+      accion: pendiente.decisionConflicto,
+    });
+  }
+
+  const resultado = await invoke<ResultadoCambioCarpetaUsuario>(
+    "confirmar_cambio_carpeta_usuario",
+    { ruta: pendiente.ruta, esDefault: pendiente.tipo === "default" },
+  );
+
+  if (resultado.ruta_antigua !== null) {
+    const rutaAntigua = resultado.ruta_antigua;
+
+    if (pendiente.decisionRutaAntigua === "eliminar") {
+      await invoke("eliminar_carpeta_usuario_antigua", { ruta: rutaAntigua });
+    } else if (resultado.requiere_renombrar_si_mantiene) {
+      await invoke("renombrar_carpeta_usuario_antigua", { ruta: rutaAntigua });
+    }
+  }
+
+  await cargarEstadoCarpetaUsuario();
+}
+
+// Resuelve el destino según el tipo elegido, verifica (escribible +
+// es_sistema + ya existe) y arma/limpia carpetaUsuarioPendiente. No
+// toca disco más allá de la verificación — la migración real queda
+// para guardarCarpetaUsuario().
+async function elegirTipoCarpetaUsuario(
+  tipo: TipoCarpetaUsuario,
+): Promise<void> {
+  let destino: string;
+
+  if (tipo === "default") {
+    destino = await invoke<string>("obtener_ruta_default_carpeta_usuario");
+  } else if (tipo === "instalacion") {
+    destino = await invoke<string>("obtener_ruta_instalacion_carpeta_usuario");
+  } else {
+    const elegida = await invoke<string | null>("seleccionar_carpeta");
+
+    if (elegida === null) {
+      return;
+    }
+
+    destino = elegida;
+  }
+
+  let verificacion: VerificacionCarpetaUsuario;
+
+  try {
+    verificacion = await invoke<VerificacionCarpetaUsuario>(
+      "verificar_carpeta_usuario",
+      { ruta: destino },
+    );
+  } catch (error) {
+    window.alert(`No se pudo usar esa carpeta: ${String(error)}`);
+    return;
+  }
+
+  if (destino === estadoActualCarpetaUsuario.ruta) {
+    carpetaUsuarioPendiente = null;
+  } else {
+    carpetaUsuarioPendiente = {
+      tipo,
+      ruta: destino,
+      esSistema: verificacion.es_sistema,
+      tieneUsuarioExistente: verificacion.tiene_usuario_existente,
+      decisionRutaAntigua: "mantener",
+      decisionConflicto: "renombrar",
+    };
+  }
+
+  actualizarBotonCarpetaUsuario();
+  actualizarVisibilidadGuardarGlobal();
+}
+
+function dibujarPopupCarpetaUsuario(): HTMLElement {
+  const popup = document.createElement("div");
+  popup.className = "popup-extra";
+
+  const opcionesTipo: { texto: string; valor: TipoCarpetaUsuario }[] = [
+    { texto: "%AppData%", valor: "default" },
+    { texto: "Carpeta de instalación OmegaCtrl", valor: "instalacion" },
+    { texto: "📁 Otra", valor: "otra" },
+  ];
+
+  const tipoMostrado =
+    carpetaUsuarioPendiente?.tipo ?? estadoActualCarpetaUsuario.tipo;
+
+  popup.append(
+    crearFilaPopup(
+      "Seleccionar",
+      crearGrupoOpciones(
+        opcionesTipo,
+        tipoMostrado,
+        (valor) => {
+          elegirTipoCarpetaUsuario(valor).then(redibujarPopupCarpetaUsuario);
+        },
+        "popup-grupo-vertical",
+      ),
+    ),
+  );
+
+  if (carpetaUsuarioPendiente) {
+    const separador = document.createElement("div");
+    separador.className = "app-popup-separador";
+    popup.append(separador);
+
+    const subtitulo = document.createElement("div");
+    subtitulo.className = "popup-fila-label";
+    subtitulo.textContent = "Luego de migrar datos:";
+    popup.append(subtitulo);
+
+    const pendiente = carpetaUsuarioPendiente;
+
+    popup.append(
+      crearFilaPopup(
+        "¿Qué hacer con archivos en ruta antigua?",
+        crearGrupoOpciones(
+          [
+            { texto: "Mantener", valor: "mantener" as const },
+            { texto: "Eliminar", valor: "eliminar" as const },
+          ],
+          pendiente.decisionRutaAntigua,
+          (valor) => {
+            pendiente.decisionRutaAntigua = valor;
+            redibujarPopupCarpetaUsuario();
+          },
+        ),
+      ),
+    );
+
+    if (pendiente.tieneUsuarioExistente) {
+      popup.append(
+        crearFilaPopup(
+          "Si ya existe una carpeta de usuario en el destino:",
+          crearGrupoOpciones(
+            [
+              {
+                texto: 'Renombrarla a "Usuario_old"',
+                valor: "renombrar" as const,
+              },
+              { texto: "Eliminarla", valor: "eliminar" as const },
+            ],
+            pendiente.decisionConflicto,
+            (valor) => {
+              pendiente.decisionConflicto = valor;
+              redibujarPopupCarpetaUsuario();
+            },
+          ),
+        ),
+      );
+    }
+
+    if (pendiente.esSistema) {
+      const aviso = document.createElement("p");
+      aviso.className = "popup-fila-label";
+      aviso.textContent =
+        "Esa carpeta está dentro de una carpeta de sistema (Program " +
+        "Files, Program Files (x86) o Windows). Necesitará modo " +
+        "administrador para escribir los perfiles ahí, o elija otra " +
+        "carpeta.";
+      popup.append(aviso);
+    }
+  }
+
+  return popup;
+}
+
+function redibujarPopupCarpetaUsuario(): void {
+  actualizarContenidoPopup(dibujarPopupCarpetaUsuario());
+}
+
+botonSelectorCarpetaUsuario.addEventListener("click", (evento) => {
+  mostrarPopup(dibujarPopupCarpetaUsuario(), evento.clientX, evento.clientY);
+});
+
 const tituloModoMotor = document.createElement("h3");
 tituloModoMotor.className = "configuracion-avanzado-titulo";
 tituloModoMotor.textContent = "Motor de entrada/salida";
@@ -2307,23 +2376,34 @@ async function restablecerModoMotor(): Promise<void> {
 }
 
 const pestanaAvanzado: Pestana = {
-  cargar: cargarModoMotor,
-  hayEdicionesPendientes: hayEdicionPendienteModoMotor,
+  cargar: async () => {
+    await cargarModoMotor();
+    await cargarEstadoCarpetaUsuario();
+  },
 
-  // Sin validación posible (es un <select> de dos opciones fijas):
-  // si hay cambio pendiente, se recolecta como un único "cambio" sin
-  // clave real — Aplicar cambios global lo aplica llamando a
-  // guardarModoMotor() en vez de pasar por guardarLote genérico (ver
-  // manejo especial en el bloque "BARRA DE ACCIONES GLOBAL").
+  hayEdicionesPendientes: () =>
+    hayEdicionPendienteModoMotor() || hayEdicionPendienteCarpetaUsuario(),
+
+  // Sin validación posible (Motor es un <select> de dos opciones
+  // fijas, Carpeta de Usuario resuelve todo en el popup): si hay
+  // cambio pendiente en cualquiera de las dos, se recolecta como un
+  // único "cambio" sin clave real — Aplicar cambios global las aplica
+  // llamando a guardarModoMotor()/guardarCarpetaUsuario() en vez de
+  // pasar por guardarLote genérico (ver "BARRA DE ACCIONES GLOBAL").
   validarYRecolectar: () => ({ cambios: [], erroresLocales: [] }),
   aplicarGuardado: async () => ({ errores: [] }),
   marcarErroresGuardado: () => {},
 
   limpiarEstadoTrasGuardado: async () => {},
-  restablecerPestana: restablecerModoMotor,
+
+  restablecerPestana: async () => {
+    await restablecerModoMotor();
+    restablecerCarpetaUsuario();
+  },
 
   textoConfirmacionRestablecer:
-    "¿Restablecer el motor seleccionado al modo activo actual?",
+    "¿Descartar los cambios pendientes de Motor de entrada/salida y " +
+    "Carpeta de Usuario?",
 };
 
 // ======================================================
@@ -2446,7 +2526,8 @@ botonConfirmarConfirmacion.addEventListener("click", async () => {
 });
 
 botonGuardarGlobal.addEventListener("click", async () => {
-  const huboCambioModo = pestanaAvanzado.hayEdicionesPendientes();
+  const huboCambioModo = hayEdicionPendienteModoMotor();
+  const huboCambioCarpetaUsuario = hayEdicionPendienteCarpetaUsuario();
 
   // Junta y valida los cambios pendientes de las 3 pestañas de
   // tabla. Si CUALQUIERA falla, se bloquea el guardado completo (no
@@ -2466,6 +2547,7 @@ botonGuardarGlobal.addEventListener("click", async () => {
 
   if (
     !huboCambioModo &&
+    !huboCambioCarpetaUsuario &&
     recolecciones.every(
       ({ pestana, resultado }) =>
         resultado.cambios.length === 0 && !pestana.hayEdicionesPendientes(),
@@ -2493,9 +2575,14 @@ botonGuardarGlobal.addEventListener("click", async () => {
       await pestana.limpiarEstadoTrasGuardado();
     }
 
-    // El cambio de motor se guarda al final: si algún cambio de las
-    // otras pestañas falló, el motor no llega a tocarse (Regla 12
-    // solo debe dispararse cuando el guardado completo es exitoso).
+    // Carpeta de Usuario y el cambio de motor se guardan al final: si
+    // algún cambio de las otras pestañas falló, ninguno de los dos
+    // llega a tocarse (Regla 12 solo debe dispararse cuando el
+    // guardado completo es exitoso).
+    if (huboCambioCarpetaUsuario) {
+      await guardarCarpetaUsuario();
+    }
+
     if (huboCambioModo) {
       await guardarModoMotor();
     }

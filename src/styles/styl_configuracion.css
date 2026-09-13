@@ -97,11 +97,7 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  /* min-height: 0 es necesario para que un hijo flex con overflow
-       (.configuracion-tabla-scroll) pueda scrollear en vez de
-       empujar la altura del panel — sin esto, un flex item por
-       defecto no se encoge más allá del tamaño de su contenido. */
-  min-height: 0;
+  overflow-y: auto;
   padding: var(--gap16);
   gap: var(--gap12);
 }
@@ -164,9 +160,9 @@
   margin: 0;
 }
 
-/* Subtítulos "Inicio"/"Programa" (filas fijas de General, fuera de
-   la tabla en árbol) — mismo tamaño que .configuracion-apariencia-
-   subtitulo, pero color deshabilitado (Regla 2). */
+/* Subtítulo "Opciones" (fila fija de General, fuera de la tabla en
+   árbol) — mismo tamaño que .configuracion-apariencia-subtitulo,
+   pero color deshabilitado (Regla 2). */
 .configuracion-subtitulo-fija {
   font-size: var(--fs13);
   color: var(--text-disabled);
@@ -235,47 +231,106 @@
 
 /* Filas de botones/texto (no subtítulos) de la pestaña General:
    sangría respecto al borde izquierdo del panel para que se lean
-   anidadas bajo su subtítulo ("Inicio"/"Programa"), en vez de
-   alineadas al mismo margen que los subtítulos. */
+   anidadas bajo el subtítulo "Opciones", en vez de alineadas al
+   mismo margen que el subtítulo. */
 .configuracion-fila-sangria {
-  margin-left: var(--gap16);
+  margin-left: var(--gap24);
 }
 
-/* Fila "etiqueta: botón" de la pestaña General (Carpeta de Usuario,
-   Iniciar con perfil, Notificaciones) — reemplaza el viejo
-   .configuracion-fila-combinada (justify-content: space-between,
-   que empujaba el botón al borde derecho de la ventana). La
-   etiqueta ocupa una columna de ancho fijo y el botón queda pegado
-   justo a su derecha: todos los botones de esta zona quedan
-   alineados en la misma columna vertical, en vez de sueltos por
-   toda la fila. */
-.configuracion-fila-alineada {
+/* Fila de la sección "Opciones" (Iniciar con Windows/Iniciar
+   minimizado, Mostrar/Minimizar a bandeja, Notificaciones, Iniciar
+   con perfil, Carpeta de Usuario): dos columnas — la primera
+   (.configuracion-opciones-col1) de ancho fijo, con el switch o el
+   indicador+etiqueta de esa fila; la segunda columna (el switch,
+   grupo o botón que sigue) arranca siempre en el mismo x, sin
+   importar el contenido de la primera. */
+.configuracion-opciones-fila {
   display: flex;
   align-items: center;
-  gap: var(--gap12);
+  gap: var(--gap16);
   flex-shrink: 0;
 }
 
-.configuracion-fila-alineada .configuracion-escala-etiqueta {
+/* 40px del indicador/pista + 8px de gap + 180px de la etiqueta —
+   mismo ancho de etiqueta que se usaba antes, para no cambiar cómo
+   entra el texto más largo ("Ruta para carpeta de usuario:"). El
+   switch (.popup-switch, width:100%) se estira a ocupar todo este
+   ancho cuando es lo único que hay adentro. */
+.configuracion-opciones-col1 {
+  display: flex;
+  align-items: center;
+  gap: var(--gap8);
+  width: 228px;
+  flex-shrink: 0;
+}
+
+.configuracion-opciones-col1 .configuracion-escala-etiqueta {
   width: 180px;
   flex-shrink: 0;
 }
 
-/* Botones "Seleccionar Carpeta" (Carpeta de Usuario), "Iniciar con
-   perfil" y "Ubicación" (Notificaciones): texto alineado a la
-   izquierda dentro del botón, y mismo criterio fantasma que los
-   switches de arriba — sin fondo ni borde en reposo, borde solo en
-   hover. */
-.configuracion-boton-ghost-izquierda {
-  justify-content: flex-start;
-  text-align: left;
-  background: transparent;
-  border-color: transparent;
+/* Columna derecha de la fila de Notificaciones: agrupa Duración y
+   Ubicación una al lado de la otra, cada una con su propio
+   indicador+etiqueta+botón. */
+.configuracion-opciones-col2 {
+  display: flex;
+  align-items: center;
+  gap: var(--gap24);
+  flex-wrap: wrap;
 }
 
-.configuracion-boton-ghost-izquierda:hover {
-  background: color-mix(in srgb, var(--highlight) var(--botones-ghost-opacidad-hover), transparent);
-  border-color: var(--highlight);
+.configuracion-opciones-grupo {
+  display: flex;
+  align-items: center;
+  gap: var(--gap8);
+}
+
+/* Indicador circular: reemplaza al switch en las filas que no
+   tienen uno (Iniciar con perfil, Carpeta de Usuario, Duración,
+   Ubicación). Ancho 40px (no 32, como .popup-switch-pista) para
+   compensar el padding horizontal de 8px que trae .ui-btn en el
+   switch (pista+padding = mismo punto de arranque para el texto
+   que sigue en ambos casos). */
+.configuracion-opciones-indicador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+.configuracion-opciones-punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--highlight);
+}
+
+/* Etiquetas junto a un indicador circular (no un switch): mismo
+   color deshabilitado que el subtítulo "Opciones", en vez del color
+   de texto normal que usa .configuracion-escala-etiqueta en otras
+   pestañas. */
+.configuracion-opciones-col1 .configuracion-escala-etiqueta,
+.configuracion-opciones-grupo .configuracion-escala-etiqueta {
+  color: var(--text-disabled);
+}
+
+/* Línea separadora entre la sección "Opciones" (subtítulo + filas
+   fijas) y la tabla de la pestaña. */
+.configuracion-opciones-separador {
+  border-top: 1px solid var(--border);
+  margin: var(--gap4) 0;
+}
+
+/* Botones "Seleccionar Carpeta" (Carpeta de Usuario), "Iniciar con
+   perfil" y "Mostrar"/"Guardar" (Notificaciones): texto alineado a
+   la izquierda dentro del botón, con el mismo borde y fondo sólido
+   que el botón de Duración (sin la variante fantasma que tenían
+   antes). */
+.configuracion-boton-alineado-izquierda {
+  justify-content: flex-start;
+  text-align: left;
 }
 
 /* ======================================================
@@ -287,11 +342,9 @@
    que scrollea es este contenedor, que la envuelve. La tabla adentro
    queda a su altura natural y el thead se pega arriba (sticky) sobre
    ESTE contenedor, no sobre la ventana. */
-.configuracion-tabla-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
+/* El scroll de la pestaña ahora es del panel completo (arriba) —
+   Opciones + tabla se desplazan juntos, en vez de scrollear solo
+   la tabla con Opciones fija encima. */
 
 .configuracion-tabla {
   border-collapse: collapse;
