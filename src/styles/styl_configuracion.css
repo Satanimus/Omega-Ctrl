@@ -235,10 +235,30 @@
 
 /* Filas de botones/texto (no subtítulos) de la pestaña General:
    sangría respecto al borde izquierdo del panel para que se lean
-   anidadas bajo su subtítulo ("Inicio"/"Programa"/etc.), en vez de
+   anidadas bajo su subtítulo ("Inicio"/"Programa"), en vez de
    alineadas al mismo margen que los subtítulos. */
 .configuracion-fila-sangria {
   margin-left: var(--gap16);
+}
+
+/* Fila "etiqueta: botón" de la pestaña General (Carpeta de Usuario,
+   Iniciar con perfil, Notificaciones) — reemplaza el viejo
+   .configuracion-fila-combinada (justify-content: space-between,
+   que empujaba el botón al borde derecho de la ventana). La
+   etiqueta ocupa una columna de ancho fijo y el botón queda pegado
+   justo a su derecha: todos los botones de esta zona quedan
+   alineados en la misma columna vertical, en vez de sueltos por
+   toda la fila. */
+.configuracion-fila-alineada {
+  display: flex;
+  align-items: center;
+  gap: var(--gap12);
+  flex-shrink: 0;
+}
+
+.configuracion-fila-alineada .configuracion-escala-etiqueta {
+  width: 180px;
+  flex-shrink: 0;
 }
 
 /* Botones "Seleccionar Carpeta" (Carpeta de Usuario), "Iniciar con

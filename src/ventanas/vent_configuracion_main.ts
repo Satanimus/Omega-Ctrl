@@ -1158,6 +1158,9 @@ const pestanaGeneralTabla = crearPestanaEditable({
 // crearPestanaEditable — el cambio se aplica al momento a través
 // del popup del selector (Etapa G), no queda pendiente de Guardar.
 // Acá solo la fila con el botón que refleja el estado actual.
+// Reordenamiento visual: queda dentro de "Programa", al final de
+// todo (se encadena después de filaNotificaciones más abajo), en
+// vez de ser la primera fila de la pestaña.
 // ======================================================
 
 interface EstadoCarpetaUsuario {
@@ -1171,7 +1174,7 @@ const ETIQUETAS_TIPO_CARPETA_USUARIO: Record<"default" | "instalacion", string> 
 };
 
 const filaCarpetaUsuario = document.createElement("div");
-filaCarpetaUsuario.className = "configuracion-fila-combinada configuracion-fila-sangria";
+filaCarpetaUsuario.className = "configuracion-fila-alineada configuracion-fila-sangria";
 
 const etiquetaCarpetaUsuario = document.createElement("span");
 etiquetaCarpetaUsuario.className = "configuracion-escala-etiqueta";
@@ -1184,15 +1187,16 @@ botonSelectorCarpetaUsuario.className =
 botonSelectorCarpetaUsuario.textContent = "Seleccionar Carpeta";
 
 filaCarpetaUsuario.append(etiquetaCarpetaUsuario, botonSelectorCarpetaUsuario);
-panelGeneral.prepend(filaCarpetaUsuario);
 
 // ======================================================
 // 🚀 INICIO (subtítulo fijo, pestaña General)
 // ------------------------------------------------------
 // Encabezado de la sección "Inicio" (Iniciar con Windows/Iniciar
-// minimizado/Iniciar con perfil) — mismo criterio que Carpeta de
-// Usuario: fuera del flujo de cambios pendientes, va arriba de
-// todo (Regla 1/3).
+// minimizado/Iniciar con perfil) — fuera del flujo de cambios
+// pendientes, primera sección de la pestaña. Reordenamiento visual:
+// Carpeta de Usuario pasa a quedar dentro de "Programa", al final
+// de todo, para agrupar mejor con el resto de opciones del programa
+// (Notificaciones, Mostrar/Minimizar a bandeja).
 // ======================================================
 
 const subtituloInicio = document.createElement("span");
@@ -1316,7 +1320,7 @@ subtituloInicio.insertAdjacentElement("afterend", filaIniciarConWindows);
 let perfilInicioSeleccionado = "ultimo";
 
 const filaIniciarConPerfil = document.createElement("div");
-filaIniciarConPerfil.className = "configuracion-fila-combinada configuracion-fila-sangria";
+filaIniciarConPerfil.className = "configuracion-fila-alineada configuracion-fila-sangria";
 
 const etiquetaIniciarConPerfil = document.createElement("span");
 etiquetaIniciarConPerfil.className = "configuracion-escala-etiqueta";
@@ -1554,14 +1558,16 @@ botonSelectorCarpetaUsuario.addEventListener("click", (evento) => {
 cargarEstadoCarpetaUsuario();
 
 // ======================================================
-// 🔔 NOTIFICACIONES (fila combinada, pestaña General)
+// 🔔 NOTIFICACIONES (fila alineada, pestaña General)
 // ------------------------------------------------------
-// A diferencia de Carpeta de Usuario, el toggle y la Duración SÍ
-// participan del flujo de cambios pendientes/Aplicar (Regla 13) —
-// se combinan con pestanaGeneralTabla más abajo para formar la
-// pestanaGeneral final. Solo el botón Ubicación/Guardar se aplica
-// al instante (Regla 14, mismo criterio que el botón Ubicación del
-// popup Extra de Macro, ver comp_popup_macro_extra.ts).
+// Agrupada dentro de "Programa" (después de Mostrar/Minimizar a
+// bandeja), no en su propia sección — reordenamiento visual. El
+// toggle y la Duración SÍ participan del flujo de cambios
+// pendientes/Aplicar (Regla 13) — se combinan con
+// pestanaGeneralTabla más abajo para formar la pestanaGeneral
+// final. Solo el botón Ubicación/Guardar se aplica al instante
+// (Regla 14, mismo criterio que el botón Ubicación del popup Extra
+// de Macro, ver comp_popup_macro_extra.ts).
 // ======================================================
 
 let mostrarNotificacionesActual = false;
@@ -1571,7 +1577,7 @@ let duracionActual = 0;
 let duracionEditado = 0;
 
 const filaNotificaciones = document.createElement("div");
-filaNotificaciones.className = "configuracion-fila-combinada configuracion-fila-sangria";
+filaNotificaciones.className = "configuracion-fila-alineada configuracion-fila-sangria";
 
 const grupoIzquierdoNotificaciones = document.createElement("div");
 grupoIzquierdoNotificaciones.className = "configuracion-escala-fila";
@@ -1678,7 +1684,8 @@ filaNotificaciones.append(
   grupoIzquierdoNotificaciones,
   botonUbicacionNotificacion,
 );
-filaCarpetaUsuario.insertAdjacentElement("afterend", filaNotificaciones);
+filaBandeja.insertAdjacentElement("afterend", filaNotificaciones);
+filaNotificaciones.insertAdjacentElement("afterend", filaCarpetaUsuario);
 
 async function cargarFilaNotificaciones(): Promise<void> {
   const [mostrar, duracion] = await Promise.all([
