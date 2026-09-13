@@ -12,7 +12,7 @@ export const ANCHOS_DEFAULT: Record<string, number> = {
   app: 52,
   trigger: 150,
 
-  tipo: 60,
+  tipo: 52,
   accion: 150,
   extra: 52,
 

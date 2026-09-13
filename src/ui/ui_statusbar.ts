@@ -60,7 +60,7 @@ export function crearStatusbar(alCambiarModo?: () => void): HTMLElement {
 }
 
 // ======================================================
-// 🛠️ MODO MOTOR (Driver/Portable) — polling
+// 🛠️ MODO MOTOR (Driver/Simple) — polling
 // ------------------------------------------------------
 // motor_obtener_modo no empuja eventos (ver comandos.rs), así
 // que se consulta por polling, igual que otros datos vivos de
@@ -93,9 +93,11 @@ async function actualizarBoxModoMotor(): Promise<void> {
   try {
     const modo = await invoke<string>("motor_obtener_modo");
 
-    boxModoActual.textContent = modo === "Portable" ? "(P)" : "(D)";
+    boxModoActual.textContent = modo === "Portable" ? "(S)" : "(D)";
     boxModoActual.title =
-      modo === "Portable" ? "Modo Portable" : "Modo Driver (Interception)";
+      modo === "Portable"
+        ? "Modo Simple (API Windows)"
+        : "Modo Driver (Interception)";
 
     if (modoMotorConocido !== null && modo !== modoMotorConocido) {
       alCambiarModoMotor?.();

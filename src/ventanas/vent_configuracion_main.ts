@@ -2060,7 +2060,7 @@ const pestanaApariencia = crearPestanaApariencia(
 // ======================================================
 // 🛠️ PESTAÑA AVANZADO
 // ------------------------------------------------------
-// Selector de modo de motor (Interception / Portable). No usa
+// Selector de modo de motor (Interception / Simple). No usa
 // crearPestanaEditable (no es una tabla), pero expone la misma
 // interfaz Pestana para integrarse con la barra de acciones global
 // (ver "BARRA DE ACCIONES GLOBAL"): tocar el selector solo marca un
@@ -2389,7 +2389,7 @@ opcionInterception.textContent = "Driver (Interception)";
 
 const opcionPortable = document.createElement("option");
 opcionPortable.value = "Portable";
-opcionPortable.textContent = "Portable";
+opcionPortable.textContent = "Simple (API Windows)";
 
 selectorModoMotor.append(opcionInterception, opcionPortable);
 
@@ -2403,10 +2403,10 @@ notaAvanzado.className = "configuracion-nota-pestana";
 
 const notaAvanzadoIntro = document.createElement("p");
 notaAvanzadoIntro.textContent =
-  "¿El modo Portable no es suficiente? Interception es un driver a " +
-  "nivel de kernel: intercepta cada evento de teclado/mouse antes de " +
-  "que Windows lo entregue a las demás apps, lo que permite un " +
-  "bloqueo más confiable que los hooks del modo Portable. A cambio, " +
+  "¿El modo Simple (API Windows) no es suficiente? Interception es un " +
+  "driver a nivel de kernel: intercepta cada evento de teclado/mouse " +
+  "antes de que Windows lo entregue a las demás apps, lo que permite " +
+  "un bloqueo más confiable que los hooks del modo Simple. A cambio, " +
   "requiere instalarlo con permisos de administrador (y reiniciar), " +
   "y algunos anticheats lo detectan como riesgo de seguridad y lo " +
   "bloquean.";
