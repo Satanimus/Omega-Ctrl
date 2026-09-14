@@ -78,9 +78,10 @@ use crate::{back_interception, back_windows, configuracion_usuario, perfil};
 // ======================================================
 // 🔀 MODO
 // ------------------------------------------------------
-// Interception = 0, Portable = 1. Interception es el valor
-// por defecto (arranque en frío, antes de que Etapa C cargue
-// el modo guardado en Configuracion_Usuario.txt).
+// Interception = 0, Portable = 1. Portable es el valor por
+// defecto (arranque en frío, antes de que Etapa C cargue el
+// modo guardado en Configuracion_Usuario.txt) — no requiere
+// el driver Interception instalado.
 // ======================================================
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -89,7 +90,7 @@ pub enum Modo {
     Portable,
 }
 
-static MODO_ACTIVO: AtomicU8 = AtomicU8::new(0);
+static MODO_ACTIVO: AtomicU8 = AtomicU8::new(1);
 
 pub fn modo_activo() -> Modo {
     match MODO_ACTIVO.load(Ordering::SeqCst) {
@@ -166,11 +167,11 @@ pub fn solicitar_cambio_modo(nuevo_modo: Modo) {
 
 pub fn cargar_modo_desde_config() {
     match configuracion_usuario::leer_modo_motor() {
-        Ok(Some(valor)) if valor == "Portable" => {
-            establecer_modo(Modo::Portable);
+        Ok(Some(valor)) if valor == "Interception" => {
+            establecer_modo(Modo::Interception);
         }
         _ => {
-            // Ausencia, valor desconocido o error: deja Interception
+            // Ausencia, valor desconocido o error: deja Portable
             // (el default de MODO_ACTIVO) sin tocarlo.
         }
     }

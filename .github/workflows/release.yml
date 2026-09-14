@@ -59,6 +59,7 @@ jobs:
           New-Item -ItemType Directory -Path $carpeta -Force | Out-Null
           Copy-Item "src-tauri/target/release/omegactrl.exe" $carpeta
           Copy-Item "src-tauri/target/release/themes" "$carpeta/themes" -Recurse
+          Copy-Item "src-tauri/target/release/interception.dll" $carpeta
           Compress-Archive -Path $carpeta -DestinationPath "OmegaCtrl-${{ github.ref_name }}-portable.zip"
 
       # Sube el zip portable al MISMO Release que ya creó/actualizó
