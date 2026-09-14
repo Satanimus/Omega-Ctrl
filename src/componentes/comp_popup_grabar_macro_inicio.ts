@@ -18,7 +18,7 @@ import { crearBoton } from "./comp_boton";
 import { crearGrupoOpciones, crearFilaPopup } from "./comp_popup_grupo";
 
 import {
-  OPCIONES_MODO_COORDENADAS,
+  OPCIONES_TIPO_COORDENADA,
   OPCIONES_MODO_ESPERA,
   configInicioGrabacionPorDefecto,
   type ConfigInicioGrabacion,
@@ -61,10 +61,10 @@ export function abrirPopupIniciarGrabacion(
     const filaModoCoordenadas = crearFilaPopup(
       "Modo de Coordenadas",
       crearGrupoOpciones(
-        OPCIONES_MODO_COORDENADAS,
-        estado.claveModoCoordenadas,
+        OPCIONES_TIPO_COORDENADA,
+        estado.tipoCoordenada,
         (valor) => {
-          estado.claveModoCoordenadas = valor;
+          estado.tipoCoordenada = valor;
         },
       ),
     );

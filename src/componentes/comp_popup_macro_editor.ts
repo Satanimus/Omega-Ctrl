@@ -2648,7 +2648,6 @@ function crearFilaPaso(
       extra.append(
         crearControlMarcador(
           paso,
-          macroArchivo,
           calcularLetrasDisponiblesParaFila(macroArchivo.pasos, paso, indice),
           letrasNecesitadas,
           guardarYRedibujar,
@@ -2860,7 +2859,6 @@ function crearIconoBucle(paso: PasoMacro): HTMLElement {
 
 function crearControlMarcador(
   paso: PasoMacro,
-  macroArchivo: MacroArchivo,
   letrasDisponibles: string[],
   letrasNecesitadas: string[],
   guardarYRedibujar: () => void,
