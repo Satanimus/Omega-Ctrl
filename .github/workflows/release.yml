@@ -1,0 +1,70 @@
+# Se dispara al pushear un tag "vX.Y.Z" (ej. git tag v0.1.0 && git
+# push --tags). Compila en un runner Windows y publica un Release en
+# GitHub (queda como Draft para poder revisarlo antes de publicarlo)
+# con dos assets:
+#   - instalador NSIS (.exe)   — subido automáticamente por tauri-action
+#   - zip portable (.zip)      — armado a mano en el paso de abajo
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Instalar dependencias npm
+        run: npm install
+
+      # Compila (npm run build vía beforeBuildCommand de
+      # tauri.conf.json + cargo build) y crea/actualiza el Release
+      # de GitHub para este tag, subiendo el instalador NSIS
+      # (src-tauri/target/release/bundle/nsis/*.exe) como asset.
+      - name: Build + Release (instalador)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Omega Ctrl ${{ github.ref_name }}"
+          releaseDraft: true
+          prerelease: false
+
+      # Portable: mismo .exe que ya compiló el paso de arriba +
+      # carpeta themes/ (Tauri la copia sola al lado del .exe por
+      # los "resources" de tauri.conf.json). Nada de Interception
+      # acá — ese driver se instala aparte, solo si el usuario elige
+      # modo Driver (ver pestaña Avanzado).
+      - name: Armar zip portable
+        shell: pwsh
+        run: |
+          $carpeta = "OmegaCtrl-portable"
+          New-Item -ItemType Directory -Path $carpeta -Force | Out-Null
+          Copy-Item "src-tauri/target/release/omegactrl.exe" $carpeta
+          Copy-Item "src-tauri/target/release/themes" "$carpeta/themes" -Recurse
+          Compress-Archive -Path $carpeta -DestinationPath "OmegaCtrl-${{ github.ref_name }}-portable.zip"
+
+      # Sube el zip portable al MISMO Release que ya creó/actualizó
+      # tauri-action arriba (mismo tag_name).
+      - name: Subir zip portable al Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: OmegaCtrl-${{ github.ref_name }}-portable.zip
