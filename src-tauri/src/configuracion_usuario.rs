@@ -1601,16 +1601,6 @@ pub fn guardar_lote_css(cambios: &[(String, String)]) -> Result<(), Vec<(String,
 // con prefijo "css.").
 // ======================================================
 
-pub fn tema_aplicado_actual_pub() -> (String, String) {
-    tema_aplicado_actual()
-}
-
-pub fn restablecer_todos_los_overrides_css() -> Result<(), String> {
-    let mut mapa = leer_mapa_completo()?;
-    mapa.retain(|clave, _| !clave.starts_with(PREFIJO_CSS));
-    escribir_mapa_completo(&mapa)
-}
-
 // Al borrar un Valor Personalizado no basta con quitar el override:
 // si el tema de sesión trae para esa variable un valor propio que
 // difiere del de fábrica, hay que dejarlo grabado como override —
