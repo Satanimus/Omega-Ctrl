@@ -350,6 +350,7 @@ pub fn run() {
             comandos::obtener_visible_panel_ayuda,
             comandos::establecer_visible_panel_ayuda,
             comandos::obtener_primer_inicio_ayuda,
+            comandos::verificar_actualizacion,
         ])
         .build(tauri::generate_context!())
         .expect("error al construir Tauri")

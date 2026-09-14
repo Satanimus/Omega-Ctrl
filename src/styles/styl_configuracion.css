@@ -132,11 +132,29 @@
   margin-bottom: 0;
 }
 
-/* Pestaña Acerca de. */
-.configuracion-acerca-fila {
+/* Pestaña Acerca de — mismo lenguaje visual que la sección fija de
+   General: título (.configuracion-subtitulo-fija) + contenido con
+   sangría (.configuracion-fila-sangria, ver arriba). .configuracion-separador
+   (separador <hr> entre bloques) también se reusa en Avanzado. */
+.configuracion-acerca-contenido {
   display: flex;
-  align-items: center;
-  gap: var(--gap12);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap8);
+  margin-top: var(--gap8);
+}
+
+.configuracion-acerca-version {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs13);
+}
+
+.configuracion-acerca-cita {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs13);
+  line-height: 1.5;
 }
 
 .configuracion-acerca-estado {
@@ -155,11 +173,23 @@
   font-size: var(--fs13);
 }
 
-.configuracion-acerca-separador {
+.configuracion-separador {
   width: 100%;
   border: none;
-  border-top: 1px solid var(--overlay-contraste);
+  border-top: 1px solid var(--border-light);
   margin: var(--gap8) 0;
+}
+
+/* Firma final ("-Desarrollado por SatAnimus-"): pegada al fondo del
+   panel (panelAcerca ya es flex-column, ver .configuracion-panel) y
+   centrada — si el contenido no llena el panel, queda justo arriba
+   de la barra de acciones inferior, a modo de firma. */
+.configuracion-acerca-firma {
+  margin-top: auto;
+  padding-top: var(--gap12);
+  text-align: center;
+  color: var(--text-disabled);
+  font-size: var(--fs13);
 }
 
 /* ======================================================
@@ -184,15 +214,16 @@
   flex-shrink: 0;
 }
 
+/* Título "EDITAR TEMA" (antes "Personalizar estilo:"), pestaña
+   Apariencia: mismo estilo que los demás títulos
+   (.configuracion-subtitulo-fija) + separación extra arriba (una
+   línea en blanco) para no quedar pegado a los botones de tema. */
 .configuracion-apariencia-subtitulo {
-  font-size: var(--fs13);
-  color: var(--text);
-  margin: 0;
+  margin-top: var(--gap24);
 }
 
 /* Subtítulo "Opciones" (fila fija de General, fuera de la tabla en
-   árbol) — mismo tamaño que .configuracion-apariencia-subtitulo,
-   pero color deshabilitado (Regla 2). */
+   árbol). */
 .configuracion-subtitulo-fija {
   font-size: var(--fs13);
   color: var(--text-disabled);
@@ -265,6 +296,23 @@
    mismo margen que el subtítulo. */
 .configuracion-fila-sangria {
   margin-left: var(--gap24);
+}
+
+/* Selector de Motor de entrada/salida (pestaña Avanzado): sin esto,
+   al ser hijo directo de .configuracion-panel (flex-column, stretch
+   por defecto) ocupaba todo el ancho de la ventana. */
+.configuracion-avanzado-select {
+  align-self: flex-start;
+  width: auto;
+  min-width: 220px;
+  margin-left: var(--gap24);
+}
+
+/* Nota explicativa bajo el selector: sangría un poco mayor que la
+   del selector (var(--gap24) + var(--gap8)) para diferenciarla
+   visualmente como una aclaración aparte. */
+.configuracion-avanzado-nota {
+  margin-left: calc(var(--gap24) + var(--gap8));
 }
 
 /* Fila de la sección "Opciones" (Iniciar con Windows/Iniciar
@@ -840,6 +888,12 @@
 }
 
 .configuracion-acciones-derecha.oculto {
+  display: none;
+}
+
+/* Botón "Restablecer esta pestaña" oculto en Acerca de (ver toggle
+   en activarTab()) — mismo criterio que los .oculto de arriba. */
+.configuracion-boton.oculto {
   display: none;
 }
 

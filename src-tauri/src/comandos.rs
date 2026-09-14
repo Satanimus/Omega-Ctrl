@@ -2911,3 +2911,72 @@ pub fn establecer_visible_panel_ayuda(visible: bool) -> Result<(), String> {
 pub fn obtener_primer_inicio_ayuda() -> bool {
     configuracion_usuario::primer_inicio()
 }
+
+// ======================================================
+// ℹ️ ACERCA DE — VERIFICAR ACTUALIZACIÓN
+// ------------------------------------------------------
+// Compara la versión instalada (app.package_info().version,
+// la misma que expone tauri.conf.json/getVersion()) contra el
+// tag del último release publicado en GitHub
+// (GET /repos/.../releases/latest). Sin releases publicados
+// todavía, GitHub devuelve 404 — se propaga como error para
+// que la pestaña Acerca de lo muestre tal cual, en vez de
+// disfrazarlo de "no hay actualizaciones".
+// ======================================================
+
+const URL_ULTIMO_RELEASE_GITHUB: &str =
+    "https://api.github.com/repos/Satanimus/Omega-Ctrl/releases/latest";
+
+#[derive(serde::Deserialize)]
+struct ReleaseGithub {
+    tag_name: String,
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResultadoVerificacionActualizacion {
+    pub version_actual: String,
+    pub version_disponible: String,
+    pub hay_actualizacion: bool,
+}
+
+#[tauri::command]
+pub async fn verificar_actualizacion(
+    app: tauri::AppHandle,
+) -> Result<ResultadoVerificacionActualizacion, String> {
+    let version_actual = app.package_info().version.to_string();
+
+    let respuesta = reqwest::Client::new()
+        .get(URL_ULTIMO_RELEASE_GITHUB)
+        // La API de GitHub rechaza pedidos sin User-Agent (403).
+        .header("User-Agent", "OmegaCtrl")
+        .send()
+        .await
+        .map_err(|error| format!("No se pudo contactar a GitHub: {error}"))?;
+
+    if !respuesta.status().is_success() {
+        return Err(format!(
+            "GitHub respondió {} al buscar el último release (¿el \
+             repositorio todavía no tiene ninguno publicado?)",
+            respuesta.status()
+        ));
+    }
+
+    let release: ReleaseGithub = respuesta
+        .json()
+        .await
+        .map_err(|error| format!("Respuesta inesperada de GitHub: {error}"))?;
+
+    let version_disponible = release
+        .tag_name
+        .trim_start_matches('v')
+        .trim_start_matches('V')
+        .to_string();
+
+    Ok(ResultadoVerificacionActualizacion {
+        hay_actualizacion: version_disponible != version_actual,
+        version_actual,
+        version_disponible,
+    })
+}
+

@@ -17,6 +17,11 @@ tauri = { version = "2", features = ["protocol-asset", "devtools", "tray-icon"] 
 tauri-plugin-opener = "2"
 tauri-plugin-autostart = "2"
 
+# Verificar actualización (pestaña Acerca de) — consulta el último
+# release publicado en GitHub. TLS por default (schannel en Windows,
+# sin dependencias de sistema extra).
+reqwest = { version = "0.12", features = ["json"] }
+
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

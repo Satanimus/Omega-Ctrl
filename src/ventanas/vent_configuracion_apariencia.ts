@@ -1388,7 +1388,7 @@ export function crearPestanaApariencia(
   }
 
   // Fila combinada "Seleccionar tema" + "Escala general" arriba de la
-  // tabla, seguida del subtítulo "Personalizar estilo:" — pestaña
+  // tabla, seguida del título "EDITAR TEMA" — pestaña
   // única (ex Apariencia+Tema fusionadas), ambos controles comparten
   // la misma sesión de apariencia en el backend (ver apariencia.tsv).
   if (opciones.incluirSelectorTema && opciones.incluirEscala) {
@@ -1398,8 +1398,9 @@ export function crearPestanaApariencia(
     panel.prepend(filaCombinada);
 
     const subtitulo = document.createElement("h3");
-    subtitulo.className = "configuracion-apariencia-subtitulo";
-    subtitulo.textContent = "Personalizar estilo:";
+    subtitulo.className =
+      "configuracion-subtitulo-fija configuracion-apariencia-subtitulo";
+    subtitulo.textContent = "Editar tema";
 
     const scrollTabla = panel.querySelector(".configuracion-tabla-scroll");
     panel.insertBefore(subtitulo, scrollTabla);

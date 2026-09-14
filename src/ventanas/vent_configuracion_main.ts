@@ -29,6 +29,8 @@ import { invoke } from "@tauri-apps/api/core";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
+import { getVersion } from "@tauri-apps/api/app";
+
 import {
   crearContenedorPopup,
   mostrarPopup,
@@ -235,6 +237,9 @@ function activarTab(botonElegido: HTMLButtonElement): void {
 
     panel.classList.toggle("oculto", !activa);
   }
+
+  // Acerca de es de solo lectura: no tiene qué restablecer.
+  botonRestablecerGlobal.classList.toggle("oculto", botonElegido === tabAcerca);
 }
 
 tabGeneral.addEventListener("click", () => activarTab(tabGeneral));
@@ -2099,7 +2104,7 @@ const pestanaApariencia = crearPestanaApariencia(
 // ======================================================
 
 const tituloCarpetas = document.createElement("h3");
-tituloCarpetas.className = "configuracion-avanzado-titulo";
+tituloCarpetas.className = "configuracion-subtitulo-fija";
 tituloCarpetas.textContent = "Carpetas";
 
 interface EstadoCarpetaUsuario {
@@ -2391,8 +2396,11 @@ botonSelectorCarpetaUsuario.addEventListener("click", (evento) => {
   );
 });
 
+const separadorModoMotor = document.createElement("hr");
+separadorModoMotor.className = "configuracion-separador";
+
 const tituloModoMotor = document.createElement("h3");
-tituloModoMotor.className = "configuracion-avanzado-titulo";
+tituloModoMotor.className = "configuracion-subtitulo-fija";
 tituloModoMotor.textContent = "Motor de entrada/salida";
 
 const selectorModoMotor = document.createElement("select");
@@ -2408,13 +2416,14 @@ opcionPortable.textContent = "Simple (API Windows)";
 
 selectorModoMotor.append(opcionInterception, opcionPortable);
 
-panelAvanzado.append(tituloModoMotor, selectorModoMotor);
+panelAvanzado.append(separadorModoMotor, tituloModoMotor, selectorModoMotor);
 
 // Texto explicativo al pie, mismo criterio que las demás pestañas
 // (ver .configuracion-nota-pestana) — acá con varios párrafos, así
 // que el estilo se aplica al contenedor y cada <p> hijo hereda.
 const notaAvanzado = document.createElement("div");
-notaAvanzado.className = "configuracion-nota-pestana";
+notaAvanzado.className =
+  "configuracion-nota-pestana configuracion-avanzado-nota";
 
 const notaAvanzadoIntro = document.createElement("p");
 notaAvanzadoIntro.textContent =
@@ -2498,13 +2507,15 @@ const pestanaAvanzado: Pestana = {
 // ======================================================
 // ℹ️ PESTAÑA ACERCA DE
 // ------------------------------------------------------
-// Versión preliminar: solo lectura, sin cambios pendientes/Aplicar
-// (Pestana con no-ops). Verificación de actualización sin backend
-// real todavía — placeholder fijo (ver comentario en
-// verificarActualizacion) hasta que se defina el mecanismo.
+// Solo lectura (sin "Restablecer esta pestaña", ver toggle en
+// activarTab()). Mismo lenguaje visual que la sección fija de
+// General: título en mayúscula/color deshabilitado
+// (configuracion-subtitulo-fija) + contenido con sangría
+// (configuracion-fila-sangria), separadores <hr> entre bloques.
+// Verificar actualización llama al comando verificar_actualizacion
+// (comandos.rs), que compara contra el último release de GitHub.
 // ======================================================
 
-const VERSION_ACTUAL = "1.0.0";
 const URL_REPOSITORIO = "https://github.com/Satanimus/Omega-Ctrl";
 const URL_ISSUES = "https://github.com/Satanimus/Omega-Ctrl/issues";
 
@@ -2520,21 +2531,32 @@ async function abrirLinkExterno(url: string): Promise<void> {
   }
 }
 
-const tituloVersion = document.createElement("h3");
-tituloVersion.className = "configuracion-avanzado-titulo";
-tituloVersion.textContent = "Versión";
+function crearTituloAcerca(texto: string): HTMLSpanElement {
+  const titulo = document.createElement("span");
+  titulo.className = "configuracion-subtitulo-fija";
+  titulo.textContent = texto;
+  return titulo;
+}
+
+function crearContenidoAcerca(): HTMLDivElement {
+  const contenido = document.createElement("div");
+  contenido.className = "configuracion-fila-sangria configuracion-acerca-contenido";
+  return contenido;
+}
+
+// --- VERSIÓN ---
+
+const tituloVersion = crearTituloAcerca("Versión");
+const contenidoVersion = crearContenidoAcerca();
 
 const parrafoVersion = document.createElement("p");
 parrafoVersion.className = "configuracion-acerca-version";
-parrafoVersion.textContent = `Omega Ctrl v${VERSION_ACTUAL}`;
-
-const filaActualizacion = document.createElement("div");
-filaActualizacion.className = "configuracion-acerca-fila";
+parrafoVersion.textContent = "Omega Ctrl";
 
 const botonVerificarActualizacion = document.createElement("button");
 botonVerificarActualizacion.type = "button";
 botonVerificarActualizacion.className = "configuracion-boton";
-botonVerificarActualizacion.textContent = "Verificar actualización";
+botonVerificarActualizacion.textContent = "🔔 Comprobar actualización";
 
 const estadoActualizacion = document.createElement("span");
 estadoActualizacion.className = "configuracion-acerca-estado";
@@ -2542,12 +2564,19 @@ estadoActualizacion.className = "configuracion-acerca-estado";
 botonVerificarActualizacion.addEventListener("click", async () => {
   estadoActualizacion.textContent = "Buscando actualizaciones...";
 
-  // Preliminar: todavía no hay un mecanismo real de verificación
-  // (ej. comparar contra el último release del repositorio). Por
-  // ahora siempre informa que no hay novedades; cuando exista ese
-  // mecanismo, este bloque se reemplaza por el resultado real (algo
-  // como "Existe nueva actualización vX.Y.Z").
-  estadoActualizacion.textContent = "No hay nuevas actualizaciones.";
+  try {
+    const resultado = await invoke<{
+      versionActual: string;
+      versionDisponible: string;
+      hayActualizacion: boolean;
+    }>("verificar_actualizacion");
+
+    estadoActualizacion.textContent = resultado.hayActualizacion
+      ? `Existe nueva actualización v${resultado.versionDisponible}`
+      : "No hay nuevas actualizaciones.";
+  } catch (error) {
+    estadoActualizacion.textContent = String(error);
+  }
 });
 
 const enlaceRepositorio = document.createElement("button");
@@ -2558,16 +2587,46 @@ enlaceRepositorio.addEventListener("click", () =>
   abrirLinkExterno(URL_REPOSITORIO),
 );
 
-filaActualizacion.append(botonVerificarActualizacion, estadoActualizacion);
+contenidoVersion.append(
+  parrafoVersion,
+  botonVerificarActualizacion,
+  estadoActualizacion,
+  enlaceRepositorio,
+);
 
-const parrafoDesarrollador = document.createElement("p");
-parrafoDesarrollador.textContent = "Desarrollado por SatAnimus.";
+const separadorVersion = document.createElement("hr");
+separadorVersion.className = "configuracion-separador";
+
+// --- TU OPINIÓN ---
+
+const tituloOpinion = crearTituloAcerca("Tu opinión");
+const contenidoOpinion = crearContenidoAcerca();
+
+const parrafoOpinion = document.createElement("p");
+parrafoOpinion.className = "configuracion-acerca-cita";
+parrafoOpinion.textContent =
+  "¿Algún error, sugerencia o duda? Entra al siguiente link, haz " +
+  'click en el botón "New Issue" y déjame tu comentario.';
+
+const botonIssues = document.createElement("button");
+botonIssues.type = "button";
+botonIssues.className = "configuracion-boton";
+botonIssues.textContent = "🗨 Abrir Issues en Github";
+botonIssues.addEventListener("click", () => abrirLinkExterno(URL_ISSUES));
+
+contenidoOpinion.append(parrafoOpinion, botonIssues);
+
+const separadorOpinion = document.createElement("hr");
+separadorOpinion.className = "configuracion-separador";
+
+// --- DESARROLLADOR ---
+
+const tituloDesarrollador = crearTituloAcerca("Desarrollador");
+const contenidoDesarrollador = crearContenidoAcerca();
 
 const parrafoApoyo = document.createElement("p");
 parrafoApoyo.textContent =
-  "Si le ha sido de utilidad considere hacer un aporte para apoyar " +
-  "el desarrollo de nuevos programas y agregar nuevas características " +
-  "a Omega Ctrl.";
+  "Si Omega Ctrl te resulta útil, puedes apoyar su desarrollo con un aporte.";
 
 const botonSponsor = document.createElement("button");
 botonSponsor.type = "button";
@@ -2575,47 +2634,34 @@ botonSponsor.className = "configuracion-boton";
 botonSponsor.textContent = "❤️ Apoyar el desarrollo (Sponsor)";
 botonSponsor.addEventListener("click", () => abrirLinkExterno(URL_SPONSOR));
 
-const separadorAcerca = document.createElement("hr");
-separadorAcerca.className = "configuracion-acerca-separador";
+contenidoDesarrollador.append(parrafoApoyo, botonSponsor);
 
-const tituloIssues = document.createElement("h3");
-tituloIssues.className = "configuracion-avanzado-titulo";
-tituloIssues.textContent = "Reportar errores y sugerencias";
+// --- Firma, pegada al fondo del panel (margin-top: auto), centrada ---
 
-const notaIssues = document.createElement("div");
-notaIssues.className = "configuracion-nota-pestana";
-
-const parrafoIssues = document.createElement("p");
-parrafoIssues.textContent =
-  '¿Encontraste un error, quieres solicitar una nueva característica, ' +
-  "dejar una opinión o sugerencia, o pedir una aclaración de uso? " +
-  'Entra al link de Issues del repositorio y haz click en el botón ' +
-  '"New Issue".';
-
-notaIssues.append(parrafoIssues);
-
-const botonIssues = document.createElement("button");
-botonIssues.type = "button";
-botonIssues.className = "configuracion-boton";
-botonIssues.textContent = "Abrir Issues en GitHub";
-botonIssues.addEventListener("click", () => abrirLinkExterno(URL_ISSUES));
+const firmaAcerca = document.createElement("div");
+firmaAcerca.className = "configuracion-acerca-firma";
+firmaAcerca.textContent = "-Desarrollado por SatAnimus-";
 
 panelAcerca.append(
   tituloVersion,
-  parrafoVersion,
-  filaActualizacion,
-  enlaceRepositorio,
-  parrafoDesarrollador,
-  parrafoApoyo,
-  botonSponsor,
-  separadorAcerca,
-  tituloIssues,
-  notaIssues,
-  botonIssues,
+  contenidoVersion,
+  separadorVersion,
+  tituloOpinion,
+  contenidoOpinion,
+  separadorOpinion,
+  tituloDesarrollador,
+  contenidoDesarrollador,
+  firmaAcerca,
 );
 
 const pestanaAcerca: Pestana = {
-  cargar: async () => {},
+  cargar: async () => {
+    try {
+      parrafoVersion.textContent = `Omega Ctrl v${await getVersion()}`;
+    } catch (error) {
+      parrafoVersion.textContent = `Omega Ctrl (no se pudo leer la versión: ${String(error)})`;
+    }
+  },
   hayEdicionesPendientes: () => false,
   validarYRecolectar: () => ({ cambios: [], erroresLocales: [] }),
   aplicarGuardado: async () => ({ errores: [] }),
@@ -2883,3 +2929,4 @@ pestanaGeneral.cargar();
 pestanaApariencia.cargar();
 pestanaTeclas.cargar();
 pestanaAvanzado.cargar();
+pestanaAcerca.cargar();
