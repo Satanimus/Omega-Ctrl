@@ -193,7 +193,7 @@ export function crearOpciones(
     contenedor.append(
       crearBotonesOpcionesExtra({
         onAbrirColor: (evento) => {
-          abrirPopupColor(evento, contexto, filaPerfil);
+          abrirPopupColor(evento, contexto, filaPerfil, alModificar);
         },
         onDuplicar: () => {
           clonarFilaPorId(contexto.id);

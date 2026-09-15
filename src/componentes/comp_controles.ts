@@ -14,7 +14,6 @@ import { ATRIBUTO_AYUDA_ID } from "../ui/ui_ayuda_hover";
 
 import {
   abrirPopupTipo,
-  abrirPopupColor,
   abrirPopupExtra,
   iconoDeTipo,
   tipoATexto,
@@ -427,33 +426,6 @@ export function crearApp(
       );
     },
   );
-
-  return boton;
-}
-
-export function crearColor(
-  contexto: ContextoFila,
-  filaPerfil: FilaPerfil,
-): HTMLButtonElement {
-  const boton = document.createElement("button");
-
-  boton.className = "ui-btn color-control";
-  boton.title = "Color";
-
-  if (filaPerfil.color) {
-    const muestra = document.createElement("span");
-
-    muestra.className = "color-control-muestra";
-    muestra.style.background = `var(--tag-${filaPerfil.color})`;
-
-    boton.append(muestra);
-  } else {
-    boton.textContent = "🎨";
-  }
-
-  boton.addEventListener("click", (evento) => {
-    abrirPopupColor(evento, contexto, filaPerfil);
-  });
 
   return boton;
 }

@@ -84,12 +84,16 @@ function llenarListaColorSeparador(
 export function abrirPopupColorSeparador(
   evento: MouseEvent,
   separador: SeparadorPerfil,
+  alModificar: () => void,
 ): void {
   const lista = document.createElement("div");
 
   lista.className = "popup-lista";
 
-  llenarListaColorSeparador(lista, separador, ocultarPopup);
+  llenarListaColorSeparador(lista, separador, () => {
+    ocultarPopup();
+    alModificar();
+  });
 
   mostrarPopup(lista, evento.clientX, evento.clientY);
 }

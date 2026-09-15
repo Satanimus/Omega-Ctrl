@@ -3,6 +3,7 @@
 Omega Ctrl es una aplicación de escritorio para Windows (Tauri + Rust) que permite remapear teclado y mouse, crear macros, menús flotantes y un portapapeles ampliado, todo organizado en **perfiles** que podés activar/desactivar y personalizar por aplicación.
 
 ![Captura general de la ventana principal](docs/screenshots/main.png)
+
 > **Captura 1 — Ventana principal.** Debe verse la tabla principal de remapeos con varias filas cargadas (con sus columnas de App, Trigger, Tipo, Acción y Extra visibles), el toolbar superior con el nombre del perfil activo y el indicador de estado (activo/inactivo), y el panel lateral de perfiles a la izquierda con al menos 2-3 perfiles listados.
 
 ## Características
@@ -25,21 +26,27 @@ Omega Ctrl es una aplicación de escritorio para Windows (Tauri + Rust) que perm
 ## Capturas de pantalla
 
 ![Panel lateral de perfiles](docs/screenshots/perfiles.png)
+
 > **Captura 2 — Panel lateral de perfiles.** Debe verse la lista de perfiles con el perfil activo resaltado/marcado, y el menú (clic derecho o botón "+") con las opciones de crear, clonar, renombrar y eliminar visibles.
 
 ![Editor de fila / trigger](docs/screenshots/editor_fila.png)
+
 > **Captura 3 — Edición de una fila.** Debe verse el popup o selector abierto donde se captura una tecla/combinación (trigger) y se elige el tipo de acción (Tecla/Mouse, Macro, Abrir, Multimedia, Menú Express o Portapapeles), idealmente con el popup de captura de tecla en pantalla mostrando una combinación con modificador (ej. Ctrl+Alt+K).
 
 ![Menú Express en uso](docs/screenshots/menu_express.png)
+
 > **Captura 4 — Menú Express.** Debe verse un Menú Express real, flotando sobre el escritorio (fondo semi-transparente), con varios botones dentro (mínimo 4-6), en su forma radial o en cuadrícula.
 
 ![Ventana de Configuración — pestaña Apariencia](docs/screenshots/configuracion_apariencia.png)
+
 > **Captura 5 — Configuración → Apariencia.** Debe verse la tabla de variables de color/tamaño con al menos una fila con "Valor personalizado" distinto del valor por defecto (para mostrar que la personalización funciona), el selector de tema arriba, y los botones "Restablecer esta pestaña" / "Cancelar cambios" / "Aplicar cambios" abajo.
 
 ![Ventana de Configuración — pestaña General](docs/screenshots/configuracion_general.png)
+
 > **Captura 6 — Configuración → General.** Debe verse "Iniciar con Windows", "Iniciar minimizado", "Mostrar/Minimizar a bandeja de sistema" e "Iniciar con perfil" con algún valor ya configurado (no todos en default), para que se entienda qué hace cada opción.
 
 ![Portapapeles ampliado](docs/screenshots/portapapeles.png)
+
 > **Captura 7 — Ventana de Portapapeles.** Debe verse la ventana flotante del Portapapeles con varios elementos en el pool (texto e imagen si es posible), y al menos uno marcado como fijado, para diferenciarlo visualmente de los rotativos.
 
 ## Requisitos
@@ -76,6 +83,12 @@ npm run tauri build
 - `src/` — frontend (TypeScript, sin framework), organizado por ventana (`ventanas/`), componentes reutilizables (`componentes/`) y lógica de UI/estado (`core/`, `ui/`).
 - `src-tauri/src/` — backend Rust: captura de entrada (`entrada.rs`, `back_interception.rs`, `back_windows.rs`), perfiles (`perfil.rs`, `perfil_json.rs`), compilación de remapeos a caché (`compilador.rs`, `cache.rs`), y una ventana/feature por archivo `back_*.rs` (menú express, portapapeles, bandeja, notificaciones, etc.).
 - Cada ventana tiene su propio `.html` en la raíz (`index.html`, `configuracion.html`, `menu_express.html`, `portapapeles.html`, `coordenadas.html`, `captura.html`, `indicador_macro.html`, `notificacion.html`).
+
+## ⚠️ Limitaciones conocidas
+
+1- ⚠️ Modo Simple (Portable): si usás el Administrador de tareas, ejecutá OmegaCtrl como administrador
+
+En Modo Portable, mientras el Administrador de tareas de Windows esté en primer plano, los clicks pueden dejar de responder en cualquier otra ventana (se soluciona haciendo Alt+Tab). Es una limitación de Windows, no un bug
 
 ## Licencia
 

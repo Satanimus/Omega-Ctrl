@@ -106,7 +106,7 @@ export function crearSeparadorHeader(
     contenedorOpciones.append(
       crearBotonesOpcionesExtra({
         onAbrirColor: (evento) => {
-          abrirPopupColorSeparador(evento, separador);
+          abrirPopupColorSeparador(evento, separador, alModificar);
         },
         onDuplicar: () => {
           clonarSeparadoresPorId(separador.id);

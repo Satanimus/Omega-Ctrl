@@ -40,17 +40,29 @@ body {
 #portapapeles {
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
+/* Bug ventana redimensionable (borde derecho/inferior recortado
+   al agrandar/achicar): la ventana es transparente/sin decoración
+   con resize nativo de Windows - al redimensionar, la superficie
+   de WebView2 queda un pixel más chica que el marco real de la
+   ventana (redondeo de escala DPI), y ese ultimo pixel del borde
+   right/bottom nunca se pinta. Fix: la tarjeta se ancla con
+   position:absolute y "sangra" 2px de más por la derecha/abajo
+   (right/bottom negativos) en vez de terminar justo en el 100% -
+   así el borde queda dentro de esa sangría y nunca coincide con
+   el pixel exacto que WebView2 puede perder. */
 .portapapeles-card {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: -2px;
+  bottom: -2px;
   display: flex;
   flex-direction: column;
-  background: var(
-    --portapapeles-gradient,
-    var(--portapapeles-color, color-mix(in srgb, var(--panel) 60%, transparent))
-  );
+  background: var(--portapapeles-gradient,
+      var(--portapapeles-color, color-mix(in srgb, var(--panel) 60%, transparent)));
   border: 1px solid var(--border-light);
   border-radius: 8px;
   overflow: hidden;
@@ -153,10 +165,8 @@ body {
 }
 
 .portapapeles-cuerpo::-webkit-scrollbar-thumb {
-  background: var(
-    --portapapeles-gradient,
-    var(--portapapeles-color, color-mix(in srgb, var(--overlay-contraste) 30%, transparent))
-  );
+  background: var(--portapapeles-gradient,
+      var(--portapapeles-color, color-mix(in srgb, var(--overlay-contraste) 30%, transparent)));
   border-radius: 4px;
 }
 
@@ -409,11 +419,9 @@ body {
 .portapapeles-boton-limpiar.confirmando:hover {
   color: var(--text-red);
   border-color: var(--highlight-red);
-  background: color-mix(
-    in srgb,
-    var(--highlight-red) 18%,
-    color-mix(in srgb, var(--panel) 85%, transparent)
-  );
+  background: color-mix(in srgb,
+      var(--highlight-red) 18%,
+      color-mix(in srgb, var(--panel) 85%, transparent));
 }
 
 /* ==========================

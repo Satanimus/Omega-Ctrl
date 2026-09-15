@@ -120,15 +120,15 @@ keyboard	0x28	Down	Down	Abajo	0x50	1
 
 keyboard	0x24	Home	Home	Inicio	0x47	1
 keyboard	0x23	End	End	Fin	0x4F	1
-keyboard	0x21	PageUp	PageUp	Re Pág	0x49	1
-keyboard	0x22	PageDown	PageDown	Av Pág	0x51	1
+keyboard	0x21	PageUp	PageUp	RePág	0x49	1
+keyboard	0x22	PageDown	PageDown	AvPág	0x51	1
 keyboard	0x2D	Insert	Insert	Insert	0x52	1
 keyboard	0x2E	Delete	Delete	Delete	0x53	1
 
-keyboard	0x14	CapsLock	CapsLock	Caps Lock	0x3A	0
-keyboard	0x90	NumLock	NumLock	Num Lock	0x45	0
-keyboard	0x91	ScrollLock	ScrollLock	Scroll Lock	0x46	0
-keyboard	0x2C	PrintScreen	PrintScreen	Impr Pant	0x37	1
+keyboard	0x14	CapsLock	CapsLock	CapsLock	0x3A	0
+keyboard	0x90	NumLock	NumLock	NumLock	0x45	0
+keyboard	0x91	ScrollLock	ScrollLock	ScrollLock	0x46	0
+keyboard	0x2C	PrintScreen	PrintScreen	ImprPant	0x37	1
 
 keyboard	0x70	F1	F1	F1	0x3B	0
 keyboard	0x71	F2	F2	F2	0x3C	0
@@ -143,11 +143,11 @@ keyboard	0x79	F10	F10	F10	0x44	0
 keyboard	0x7A	F11	F11	F11	0x57	0
 keyboard	0x7B	F12	F12	F12	0x58	0
 
-keyboard	0xA0	LeftShift	LeftShift	Shift izq	0x2A	0
+keyboard	0xA0	LeftShift	LeftShift	Shift	0x2A	0
 keyboard	0xA1	RightShift	RightShift	Shift der	0x36	0
-keyboard	0xA2	LeftControl	LeftControl	Ctrl izq	0x1D	0
+keyboard	0xA2	LeftControl	LeftControl	Ctrl	0x1D	0
 keyboard	0xA3	RightControl	RightControl	Ctrl der	0x1D	1
-keyboard	0xA4	LeftAlt	LeftAlt	Alt izq	0x38	0
+keyboard	0xA4	LeftAlt	LeftAlt	Alt	0x38	0
 keyboard	0xA5	RightAlt	RightAlt	Alt der	0x38	1
 
 # ------------------------------------------------------
@@ -179,10 +179,10 @@ keyboard	0xBF	Guion	Slash	-	0x35	0
 keyboard	0xE2	Int1	Int1	<	0x56	0
 keyboard	0x5B	LeftMeta	Oem2	Win	0x5B	1
 
-mouse	0x0201	LeftButton	LeftButton	Click izq
-mouse	0x0204	RightButton	RightButton	Click der
-mouse	0x0207	MiddleButton	MiddleButton	Click rueda
-mouse	0x020B	Button4	Button4	Botón 4
-mouse	0x020C	Button5	Button5	Botón 5
-mouse	0x020A_UP	WheelUp	WheelUp	Rueda arriba
-mouse	0x020A_DOWN	WheelDown	WheelDown	Rueda abajo
+mouse	0x0201	LeftButton	LeftButton	ClickIzq
+mouse	0x0204	RightButton	RightButton	ClickDer
+mouse	0x0207	MiddleButton	MiddleButton	ClickRueda
+mouse	0x020B	Button4	Button4	Botón4
+mouse	0x020C	Button5	Button5	Botón5
+mouse	0x020A_UP	WheelUp	WheelUp	RuedaUp
+mouse	0x020A_DOWN	WheelDown	WheelDown	RuedaDown

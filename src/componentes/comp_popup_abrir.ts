@@ -323,12 +323,16 @@ export function abrirPopupColor(
   evento: MouseEvent,
   contexto: ContextoFila,
   filaPerfil: FilaPerfil,
+  alModificar: () => void,
 ): void {
   const lista = document.createElement("div");
 
   lista.className = "popup-lista";
 
-  llenarListaColor(lista, contexto, filaPerfil, ocultarPopup);
+  llenarListaColor(lista, contexto, filaPerfil, () => {
+    ocultarPopup();
+    alModificar();
+  });
 
   mostrarPopup(lista, evento.clientX, evento.clientY);
 }
