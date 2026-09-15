@@ -111,6 +111,11 @@ pub fn run() {
             // comando Tauri.
             back_notificacion::inicializar(app.handle().clone());
 
+            // AppHandle para que cache.rs pueda emitir "cache_estado_cambio"
+            // cuando escribir_cache/borrar_cache cambian el estado —
+            // reemplaza el polling que hacía ui_toolbar.ts.
+            cache::inicializar(app.handle().clone());
+
             // Ícono de bandeja de sistema y su menú contextual — mismo
             // ícono ya embebido para las ventanas (icons/icon.ico).
             // Se crea siempre (oculto o visible según "Mostrar en

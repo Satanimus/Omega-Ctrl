@@ -18,6 +18,8 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
+import { listen } from "@tauri-apps/api/event";
+
 import logoUrl from "../assets/logo.svg";
 
 import { alternarPanelLateral } from "../componentes/comp_panel_lateral";
@@ -114,18 +116,14 @@ async function actualizarTooltipAtajoToggle(
 }
 
 // ======================================================
-// 🎚️ POLLING ESTADO PERFIL (atajo global toggle)
+// 🎚️ ESTADO PERFIL (atajo global toggle)
 // ------------------------------------------------------
-// obtener_estado_cache no empuja eventos (mismo motivo que
-// motor_obtener_modo, ver ui_statusbar.ts) — el atajo global
-// Activar/Desactivar (ver entrada.rs) puede cambiar el estado del
-// perfil sin pasar por el botón de esta toolbar, así que se
-// consulta por polling para que el botón no quede desincronizado.
-// Se salta la lectura mientras hay un click propio en curso
-// (botonEstado.disabled) para no pisar ese flujo.
+// El atajo global Activar/Desactivar (ver entrada.rs) puede cambiar
+// el estado del perfil sin pasar por el botón de esta toolbar, así
+// que se escucha el evento "cache_estado_cambio" (emitido desde
+// cache.rs en escribir_cache/borrar_cache) para que el botón no
+// quede desincronizado.
 // ======================================================
-
-const INTERVALO_POLLING_PERFIL_MS = 1000;
 
 export async function refrescarEstadoDesdeBackend(
   toolbar: HTMLElement,
@@ -332,13 +330,17 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
     }
   });
 
-  setInterval(() => {
-    if (botonEstado?.disabled) {
+  void refrescarEstadoDesdeBackend(toolbar);
+
+  void listen<boolean>("cache_estado_cambio", (evento) => {
+    const cacheDot = cacheDotsPorToolbar.get(toolbar);
+
+    if (!cacheDot) {
       return;
     }
 
-    void refrescarEstadoDesdeBackend(toolbar);
-  }, INTERVALO_POLLING_PERFIL_MS);
+    marcarPerfilSegunCache(toolbar, cacheDot, evento.payload);
+  });
 
   // ==================================================
   // 💾 GUARDAR / ↩️ REVERTIR CAMBIOS PENDIENTES

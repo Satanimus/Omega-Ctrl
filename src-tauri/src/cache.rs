@@ -18,6 +18,24 @@ use crate::perfil_cache::{
 };
 use crate::{config, entrada, perfil_ui, runtime};
 use std::collections::HashMap;
+use std::sync::OnceLock;
+use tauri::{AppHandle, Emitter};
+
+// ======================================================
+// 📡 AppHandle para emitir el cambio de estado de cache
+// ======================================================
+
+static APP: OnceLock<AppHandle> = OnceLock::new();
+
+pub fn inicializar(app: AppHandle) {
+    let _ = APP.set(app);
+}
+
+fn emitir_cambio_estado_cache() {
+    if let Some(app) = APP.get() {
+        let _ = app.emit("cache_estado_cambio", !esta_vacia());
+    }
+}
 use std::sync::{LazyLock, Mutex};
 
 // ======================================================
@@ -43,11 +61,13 @@ static COMPILADO: Mutex<EstadoCompilado> = Mutex::new(EstadoCompilado {
 
 pub fn escribir_cache(remapeos: Vec<RemapeoCache>) {
     COMPILADO.lock().unwrap().remapeos = remapeos;
+    emitir_cambio_estado_cache();
 }
 
 pub fn borrar_cache() {
     COMPILADO.lock().unwrap().remapeos.clear();
     detener_repeticiones_rueda();
+    emitir_cambio_estado_cache();
 }
 
 pub fn esta_vacia() -> bool {
