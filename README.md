@@ -1,21 +1,24 @@
 # Omega Ctrl
 
-Omega Ctrl es una aplicación de escritorio para Windows (Tauri + Rust) que permite remapear teclado y mouse, crear macros, menús flotantes y un portapapeles ampliado, todo organizado en **perfiles** que podés activar/desactivar y personalizar por aplicación.
+Omega Ctrl es una eficiente y completa aplicación de escritorio para Windows (Tauri + Rust) que permite remapear teclado y mouse, crear macros, menús flotantes y un portapapeles ampliado, todo organizado en **perfiles**, con **filas** que puedes activar/desactivar y personalizar por aplicación. Todo eso con un mínimo consumo de ram (entre 7MB y 10MB aprox).
 
 ![Captura general de la ventana principal](docs/screenshots/main.png)
 
 ## Características
 
-- **Acciones especiales por fila**: una fila puede disparar:
-- 🔠**Remapeo de teclado y mouse**: reasigná cualquier tecla o botón a otra tecla, combinación, o acción especial, con condición Simple / Mantenido / Turbo.
+**Una fila puede disparar:**
+
+- 🔠**Remapeo de teclado y mouse** (reasigna cualquier tecla o botón a otra tecla o combinación, con condición Simple / Mantenido / Turbo).
 - 🧩**Macro** (grabación y reproducción de secuencias de teclado/mouse).
 - 📂**Abrir archivo o aplicación** (con modo de ventana, instancias, o argumento personalizado).
 - 🎵**Multimedia** (control de reproducción, volumen, etc.), con alcance global o solo dentro de la app activa.
 - ⚡**Menú Express**: un menú flotente radial o en cuadrícula con botones propios, cada uno ejecutando su propia acción.
 - 📋**Portapapeles ampliado**: pool de elementos copiados (texto/imagen), fijables y con límite configurable.
+
+- **Gestor de Coordenadas**: Guarda conjunto de coordenadas en relación a la pantalla, la ventana o el mouse. Para usarlas luego en macros o automatizar clicks.
 - **Perfiles**: cada perfil es un conjunto independiente de remapeos. Se pueden crear, clonar, renombrar, eliminar y activar en cualquier momento desde el panel lateral o la bandeja del sistema.
 - **Restricción por aplicación**: cada fila puede limitarse a una app específica (por ejecutable) o aplicar de forma global.
-- **Apariencia personalizable**: colores, opacidades y tamaños configurables por variable, con soporte de temas guardables/cargables.
+- **Apariencia personalizable**: colores, opacidades y tamaños configurables por variable, con soporte de temas guardables/editables.
 - **Bandeja del sistema**: minimizar a bandeja, mostrar/ocultar ventana, cambiar de perfil desde el menú contextual del ícono.
 - **Dos motores de captura de entrada**:
   - **Interception** (requiere instalar el driver [Interception](http://www.oblita.com/interception)): más bajo nivel.
@@ -72,10 +75,8 @@ npm run tauri build
 
 ## ⚠️ Limitaciones conocidas
 
-1- ⚠️ Modo Simple (Portable): si usás el Administrador de tareas, ejecutá OmegaCtrl como administrador
-
-En Modo Portable, mientras el Administrador de tareas de Windows esté en primer plano, los clicks pueden dejar de responder en cualquier otra ventana (se soluciona haciendo Alt+Tab). Es una limitación de Windows, no un bug
+1- ⚠️ Esto ocurre al usar el Modo Simple (API Windows) sin ejecutar como administrador: Por limitación de Windows (no es un bug), el tener el Administrador de Tareas en primer plano hace que los clicks puedan dejar de responder en cualquier otra ventana. Esto se soluciona haciendo Alt+Tab. Para evitarlo se recomienda ejecutar Omega Ctrl como administrador.
 
 ## Licencia
 
-_(agregar licencia)_
+![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
