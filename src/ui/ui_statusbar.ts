@@ -4,6 +4,8 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
+import { listen } from "@tauri-apps/api/event";
+
 import type { FilaPerfil } from "../core/core_perfil";
 
 import {
@@ -54,59 +56,64 @@ export function crearStatusbar(alCambiarModo?: () => void): HTMLElement {
   boxModoActual = boxModo;
   alCambiarModoMotor = alCambiarModo ?? null;
 
-  iniciarPollingModoMotor();
+  iniciarEstadoModoMotor();
 
   return status;
 }
 
 // ======================================================
-// 🛠️ MODO MOTOR (Driver/Simple) — polling
+// 🛠️ MODO MOTOR (Driver/Simple)
 // ------------------------------------------------------
-// motor_obtener_modo no empuja eventos (ver comandos.rs), así
-// que se consulta por polling, igual que otros datos vivos de
-// la app (ver vent_captura_main.ts). El cambio de modo puede
-// venir desde la Ventana de Configuración mientras esta
-// (ventana principal) sigue abierta — de ahí el intervalo en
-// vez de una sola consulta al iniciar.
+// Al crear el statusbar se hace una consulta única
+// (motor_obtener_modo) para pintar el estado inicial. Los
+// cambios posteriores (por ejemplo desde la Ventana de
+// Configuración, mientras esta ventana principal sigue
+// abierta) llegan por el evento "motor_modo_cambio",
+// emitido desde motor.rs en guardar_modo().
 // ======================================================
 
-const INTERVALO_POLLING_MODO_MS = 2000;
-let pollingModoIniciado = false;
+let modoMotorIniciado = false;
 
-function iniciarPollingModoMotor(): void {
-  if (pollingModoIniciado) {
+function iniciarEstadoModoMotor(): void {
+  if (modoMotorIniciado) {
     return;
   }
 
-  pollingModoIniciado = true;
+  modoMotorIniciado = true;
 
-  actualizarBoxModoMotor();
+  void actualizarBoxModoMotor();
 
-  setInterval(actualizarBoxModoMotor, INTERVALO_POLLING_MODO_MS);
+  void listen<string>("motor_modo_cambio", (evento) => {
+    aplicarModo(evento.payload);
+  });
 }
 
 async function actualizarBoxModoMotor(): Promise<void> {
+  try {
+    const modo = await invoke<string>("motor_obtener_modo");
+
+    aplicarModo(modo);
+  } catch {
+    // Sin datos nuevos, se deja el último valor mostrado.
+  }
+}
+
+function aplicarModo(modo: string): void {
   if (!boxModoActual) {
     return;
   }
 
-  try {
-    const modo = await invoke<string>("motor_obtener_modo");
+  boxModoActual.textContent = modo === "Portable" ? "(S)" : "(D)";
+  boxModoActual.title =
+    modo === "Portable"
+      ? "Modo Simple (API Windows)"
+      : "Modo Driver (Interception)";
 
-    boxModoActual.textContent = modo === "Portable" ? "(S)" : "(D)";
-    boxModoActual.title =
-      modo === "Portable"
-        ? "Modo Simple (API Windows)"
-        : "Modo Driver (Interception)";
-
-    if (modoMotorConocido !== null && modo !== modoMotorConocido) {
-      alCambiarModoMotor?.();
-    }
-
-    modoMotorConocido = modo;
-  } catch {
-    // Sin datos nuevos, se deja el último valor mostrado.
+  if (modoMotorConocido !== null && modo !== modoMotorConocido) {
+    alCambiarModoMotor?.();
   }
+
+  modoMotorConocido = modo;
 }
 
 // ======================================================

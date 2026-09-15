@@ -116,6 +116,11 @@ pub fn run() {
             // reemplaza el polling que hacía ui_toolbar.ts.
             cache::inicializar(app.handle().clone());
 
+            // AppHandle para que motor.rs pueda emitir "motor_modo_cambio"
+            // en guardar_modo() — reemplaza el polling que hacía
+            // ui_statusbar.ts.
+            motor::inicializar(app.handle().clone());
+
             // Ícono de bandeja de sistema y su menú contextual — mismo
             // ícono ya embebido para las ventanas (icons/icon.ico).
             // Se crea siempre (oculto o visible según "Mostrar en

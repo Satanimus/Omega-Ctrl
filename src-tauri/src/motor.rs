@@ -71,9 +71,22 @@
 // ======================================================
 
 use std::sync::atomic::{AtomicU8, Ordering};
+use std::sync::OnceLock;
+
+use tauri::{AppHandle, Emitter};
 
 use crate::eventos::InputEvent;
 use crate::{back_interception, back_windows, configuracion_usuario, perfil};
+
+// ======================================================
+// 📡 AppHandle para emitir el cambio de modo motor
+// ======================================================
+
+static APP: OnceLock<AppHandle> = OnceLock::new();
+
+pub fn inicializar(app: AppHandle) {
+    let _ = APP.set(app);
+}
 
 // ======================================================
 // 🔀 MODO
@@ -122,6 +135,10 @@ pub fn guardar_modo(modo: Modo) {
 
     if let Err(e) = configuracion_usuario::guardar_modo_motor(clave) {
         eprintln!("⚠️ No se pudo guardar el modo de motor: {}", e);
+    }
+
+    if let Some(app) = APP.get() {
+        let _ = app.emit("motor_modo_cambio", clave);
     }
 }
 
