@@ -44,7 +44,7 @@ Omega Ctrl es una eficiente y completa aplicación de escritorio para Windows (T
 - Windows 10/11.
 - [Node.js](https://nodejs.org/) (LTS reciente).
 - [Rust](https://www.rust-lang.org/tools/install) + toolchain de compilación de Tauri (ver [prerrequisitos de Tauri](https://tauri.app/start/prerequisites/)).
-- Opcional: driver [Interception](http://www.oblita.com/interception) si querés usar el motor Interception en vez del modo Portable.
+- Opcional: driver [Interception](http://www.oblita.com/interception) si querés usar el motor Interception en vez del modo Simple.
 
 ## Desarrollo
 
