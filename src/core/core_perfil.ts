@@ -48,6 +48,15 @@ export interface Perfil {
 export interface AppPerfil {
   programa: string | null;
 
+  // Ruta del ejecutable del programa elegido (columna App),
+  // capturada al seleccionarlo desde el popup mientras el proceso
+  // está corriendo (ver comp_popup_app.ts) - permite pedir el
+  // ícono con obtener_icono_ruta() aunque el programa ya esté
+  // cerrado, en vez de depender de que siga corriendo para
+  // resolverla de nuevo (bug: sin esto, el ícono desaparecía al
+  // cerrar la app).
+  programaRuta: string | null;
+
   segundoPlano: boolean;
 }
 
@@ -169,6 +178,8 @@ export function crearFila(): FilaPerfil {
 
     app: {
       programa: null,
+
+      programaRuta: null,
 
       segundoPlano: false,
     },

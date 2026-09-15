@@ -348,7 +348,7 @@ export function crearApp(
     boton.append(indicador);
   }
 
-  if (filaPerfil.app.programa) {
+  if (filaPerfil.app.programa && filaPerfil.app.programaRuta) {
     invoke<{
       ancho: number;
 
@@ -356,10 +356,10 @@ export function crearApp(
 
       pixeles: string;
     } | null>(
-      "obtener_icono_programa",
+      "obtener_icono_ruta",
 
       {
-        nombre: filaPerfil.app.programa,
+        ruta: filaPerfil.app.programaRuta,
       },
     )
       .then((iconoJson) => {

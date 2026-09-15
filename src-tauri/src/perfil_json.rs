@@ -260,6 +260,12 @@ pub enum ItemFilaJson {
 pub struct AppJson {
     pub programa: Option<String>,
 
+    // Ruta del ejecutable resuelta al elegir el programa (cache
+    // para poder pedir el ícono con obtener_icono_ruta() aunque el
+    // proceso ya no esté corriendo - ver AppUI/AppPerfil).
+    #[serde(rename = "programaRuta")]
+    pub programa_ruta: Option<String>,
+
     #[serde(rename = "segundoPlano")]
     pub segundo_plano: bool,
 }

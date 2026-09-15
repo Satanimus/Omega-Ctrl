@@ -43,6 +43,8 @@ interface IconoJson {
 interface ProcesoIconoJson {
   nombre: string;
 
+  ruta: string;
+
   icono: IconoJson | null;
 }
 
@@ -187,6 +189,8 @@ function crearBotonGlobal(
     () => {
       filaPerfil.app.programa = null;
 
+      filaPerfil.app.programaRuta = null;
+
       // Si esta fila era Multimedia con alcance "En App", vaciar la
       // columna App le quita el programa al que apuntaba — se
       // resetea sola a "global" (regla acordada, ver
@@ -328,6 +332,8 @@ function crearListadoProgramas(
 
           () => {
             filaPerfil.app.programa = proceso.nombre;
+
+            filaPerfil.app.programaRuta = proceso.ruta;
 
             reconstruirFila(contexto.id);
 

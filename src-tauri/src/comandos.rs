@@ -121,9 +121,10 @@
 //
 //     Entrega procesos disponibles para selector UI.
 //
-// obtener_icono_programa()
+// obtener_icono_ruta()
 //
-//     Entrega icono de programa.
+//     Entrega icono de programa a partir de su ruta (no depende
+//     de que esté corriendo).
 //
 // ======================================================
 
@@ -759,6 +760,8 @@ pub struct IconoJson {
 pub struct ProcesoIconoJson {
     pub nombre: String,
 
+    pub ruta: String,
+
     pub icono: Option<IconoJson>,
 }
 
@@ -790,6 +793,8 @@ pub fn listar_procesos_ventana() -> Vec<ProcesoIconoJson> {
             ProcesoIconoJson {
                 nombre: proceso.nombre,
 
+                ruta: proceso.ruta,
+
                 icono,
             }
         })
@@ -797,26 +802,16 @@ pub fn listar_procesos_ventana() -> Vec<ProcesoIconoJson> {
 }
 
 // ======================================================
-// 🎨 OBTENER ICONO PROGRAMA
-// ======================================================
-
-#[tauri::command]
-pub fn obtener_icono_programa(nombre: String) -> Option<IconoJson> {
-    let proceso = back_app::enumerar_procesos_ventana()
-        .into_iter()
-        .find(|proceso| proceso.nombre.eq_ignore_ascii_case(&nombre))?;
-
-    back_app::extraer_icono(&proceso.ruta).map(convertir_icono)
-}
-
-// ======================================================
 // 🎨 OBTENER ICONO POR RUTA
 // ------------------------------------------------------
-// A diferencia de obtener_icono_programa (busca por nombre entre
-// los procesos corriendo), esta recibe una ruta directa — usada por
-// el tipo "Abrir Archivo/App" para mostrar el ícono de lo que se
-// eligió con "Seleccionar..." (archivo, carpeta o programa), sin
-// depender de que esté corriendo ahora mismo.
+// A diferencia del anterior obtener_icono_programa (eliminado -
+// buscaba el proceso entre los corriendo, así que dejaba de
+// funcionar apenas se cerraba la app; ver bug ícono de columna
+// App), esta recibe la ruta ya cacheada en el perfil (columna
+// App guarda programaRuta desde que se elige el programa) y no
+// depende de que esté corriendo ahora mismo - usada también por
+// el tipo "Abrir Archivo/App" para el ícono de lo elegido con
+// "Seleccionar...".
 // ======================================================
 
 #[tauri::command]

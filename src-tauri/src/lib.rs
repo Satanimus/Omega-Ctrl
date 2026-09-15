@@ -230,7 +230,6 @@ pub fn run() {
             comandos::macro_renombrar,
             comandos::macro_eliminar,
             comandos::listar_procesos_ventana,
-            comandos::obtener_icono_programa,
             comandos::obtener_icono_ruta,
             comandos::seleccionar_archivo,
             comandos::seleccionar_carpeta,

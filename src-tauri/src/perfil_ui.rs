@@ -137,6 +137,9 @@ use crate::perfil_json::{
 pub struct AppUI {
     pub programa: Option<String>,
 
+    #[serde(rename = "programaRuta")]
+    pub programa_ruta: Option<String>,
+
     #[serde(rename = "segundoPlano")]
     pub segundo_plano: bool,
 }
@@ -441,6 +444,8 @@ fn convertir_fila(fila: FilaUI) -> RemapeoJson {
 fn convertir_app(app: AppUI) -> AppJson {
     AppJson {
         programa: app.programa,
+
+        programa_ruta: app.programa_ruta,
 
         segundo_plano: app.segundo_plano,
     }

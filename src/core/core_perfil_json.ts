@@ -80,6 +80,12 @@ export type ItemFilaJson =
 interface AppJson {
   programa: string | null;
 
+  // Ruta del ejecutable resuelta al momento de elegir el programa
+  // (ver AppPerfil.programaRuta en core_perfil.ts) - viaja igual
+  // por el JSON persistido para no perder el cache de ícono al
+  // recargar el perfil.
+  programaRuta: string | null;
+
   segundoPlano: boolean;
 }
 
