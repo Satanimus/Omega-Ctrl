@@ -15,6 +15,7 @@ Omega Ctrl es una eficiente y completa aplicación de escritorio para Windows (T
 - ⚡**Menú Express**: un menú flotente radial o en cuadrícula con botones propios, cada uno ejecutando su propia acción.
 - 📋**Portapapeles ampliado**: pool de elementos copiados (texto/imagen), fijables y con límite configurable.
 
+- **Barra lateral de ayuda**: Al abrirla, luego al poner brevemente el mouse sobre un objeto, se mostrará en ella una descripción del elemento y sus opciones configurables.
 - **Gestor de Coordenadas**: Guarda conjunto de coordenadas en relación a la pantalla, la ventana o el mouse. Para usarlas luego en macros o automatizar clicks.
 - **Perfiles**: cada perfil es un conjunto independiente de remapeos. Se pueden crear, clonar, renombrar, eliminar y activar en cualquier momento desde el panel lateral o la bandeja del sistema.
 - **Restricción por aplicación**: cada fila puede limitarse a una app específica (por ejecutable) o aplicar de forma global.
