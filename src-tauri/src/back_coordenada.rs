@@ -205,7 +205,7 @@ pub fn calcular_destino(ubicacion: &UbicacionCache) -> (i32, i32) {
 // modo_ventana/punto_referencia, mismo que ConfigCaptura) y
 // UbicacionCache — reutilizado por compilador.rs::
 // convertir_coordenada() (perfil real) y por el modo
-// previsualización de captura_coordenada.rs (Etapa E), para
+// previsualización de captura_coordenada.rs, para
 // no duplicar el match en los dos lugares.
 // ======================================================
 

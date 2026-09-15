@@ -288,8 +288,8 @@ fn manejar_evento_icono(tray: &tauri::tray::TrayIcon, evento: TrayIconEvent) {
     }
 }
 
-/// Pide al frontend que cambie de perfil. [Etapa C] Ya NO fuerza
-/// mostrar la ventana en cada click: la ventana solo debe aparecer
+/// Pide al frontend que cambie de perfil. No fuerza mostrar la
+/// ventana en cada click: la ventana solo debe aparecer
 /// si el frontend encuentra ediciones sin guardar y necesita mostrar
 /// el popup de confirmación (el propio frontend llama al comando
 /// mostrar_ventana_principal en ese caso puntual, ver
@@ -328,14 +328,14 @@ fn manejar_evento_menu(app: &AppHandle, evento: tauri::menu::MenuEvent) {
 }
 
 /// Solo muestra/enfoca la ventana principal, sin avisar al frontend.
-/// [Etapa C] Ahora también se usa desde comandos::mostrar_ventana_principal,
+/// También se usa desde comandos::mostrar_ventana_principal,
 /// llamado por el frontend cuando el cambio de perfil (origen bandeja)
 /// encuentra ediciones sin guardar y va a mostrar el popup de
 /// confirmación — recién ahí se justifica robar foco/mostrar ventana.
 pub(crate) fn solo_mostrar_ventana(app: &AppHandle) {
     if let Some(ventana) = app.get_webview_window("main") {
         // Revierte el set_skip_taskbar(true) aplicado al minimizar a
-        // bandeja (Etapa M) — si nunca se aplicó, no tiene efecto.
+        // bandeja — si nunca se aplicó, no tiene efecto.
         let _ = ventana.set_skip_taskbar(false);
         let _ = ventana.show();
         let _ = ventana.unminimize();

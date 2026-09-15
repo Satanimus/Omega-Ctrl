@@ -68,7 +68,7 @@
 //     el resultado cuando está listo. Se limpia al leerla.
 // guardar_seleccion_banco(coordenada) / obtener_seleccion_banco(destino)
 //     Mismo mecanismo que guardar_resultado()/obtener_resultado(),
-//     pero para la ventana "Coordenadas guardadas" (Etapa C/D):
+//     pero para la ventana "Coordenadas guardadas":
 //     deja/retira la CoordenadaBanco elegida (existente o recién
 //     creada) para que el popup que la pidió la aplique. Con
 //     `destino` (fijar_destino_activo/DESTINO_ACTIVO) para que dos
@@ -80,7 +80,7 @@
 // activar_preview(id, ubicacion, modo_ventana, punto_referencia, x, y) /
 // desactivar_preview(id) / actualizar_xy_preview(id, x, y) /
 // obtener_config_preview(id) / desactivar_todas_las_previews()
-//     Previsualización por fila (Etapa F): cada fila con el toggle
+//     Previsualización por fila: cada fila con el toggle
 //     ⊙️ encendido tiene su propia entrada en CONFIG_PREVIEWS, key =
 //     id de CoordenadaBanco — puede haber cualquier cantidad activas
 //     a la vez, cada una en su propia ventana overlay. Mutuamente
@@ -155,12 +155,10 @@ pub struct ConfigPreview {
 }
 
 /// Previsualizaciones activas, una entrada por fila con el toggle
-/// ⊙️ encendido (Etapa F) — key = id de CoordenadaBanco. Reemplaza
-/// el par CONFIG_PREVIEW (individual, Etapa E) + CONFIG_PREVIEW_GRUPO
-/// (indexado por posición, Etapa G) — ya no hace falta distinguir
-/// "una" de "un grupo fijo": cada fila abre/cierra su propia entrada
-/// de forma independiente y puede haber cualquier cantidad activas
-/// a la vez.
+/// ⊙️ encendido — key = id de CoordenadaBanco. No hace falta
+/// distinguir "una" de "un grupo fijo": cada fila abre/cierra su
+/// propia entrada de forma independiente y puede haber cualquier
+/// cantidad activas a la vez.
 static CONFIG_PREVIEWS: std::sync::LazyLock<std::sync::Mutex<HashMap<String, ConfigPreview>>> =
     std::sync::LazyLock::new(|| std::sync::Mutex::new(HashMap::new()));
 
@@ -196,7 +194,7 @@ pub fn desactivar() {
 }
 
 /// Llamada al abrir la ventana overlay de previsualización de una
-/// fila (Etapa F) — mutuamente excluyente con el modo captura de
+/// fila — mutuamente excluyente con el modo captura de
 /// arriba, no con las demás previsualizaciones activas.
 pub fn activar_preview(
     id: String,

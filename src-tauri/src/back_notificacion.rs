@@ -141,7 +141,7 @@ fn abrir_ventana_notificacion_interno(app: &AppHandle, url: String) -> Result<()
 // app_handle().
 // ======================================================
 
-// [Etapa G] Reemplazo en ráfaga: esta función se llama directo desde
+// Reemplazo en ráfaga: esta función se llama directo desde
 // el hilo que lee el input físico (entrada.rs), no desde el hilo
 // principal — igual que runt_macro::abrir_overlay_indicador_play,
 // WebviewWindowBuilder::build()/WebviewWindow::eval() (dentro de

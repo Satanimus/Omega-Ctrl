@@ -11,11 +11,10 @@
 // back_multimedia) — nada de bajo nivel se reimplementa acá.
 //
 // Reemplaza al viejo ejecutor de macro de texto plano
-// (ejecutar_macro_en_hilo, eliminado de runtime.rs en esta
-// misma etapa). No usa ejecutar_lineas/ejecutar_linea — esas
-// siguen siendo el intérprete del Idioma Runtime de
-// runt_extra (Turbo/Normal/Mantener), un camino paralelo que
-// esta etapa no toca.
+// (ejecutar_macro_en_hilo, ya eliminado de runtime.rs). No usa
+// ejecutar_lineas/ejecutar_linea — esas siguen siendo el
+// intérprete del Idioma Runtime de runt_extra (Turbo/Normal/
+// Mantener), un camino paralelo que este módulo no toca.
 // ------------------------------------------------------
 // 2. ¿Quién llama este archivo?
 // runtime.rs — únicamente desde ejecutar_accion(), rama
@@ -24,7 +23,7 @@
 // ------------------------------------------------------
 // 3. ¿Qué información recibe?
 // iniciar(id_fila, nombre, programa, comportamiento) — todo
-// ya resuelto por compilador.rs (Etapa 8A): id de la fila,
+// ya resuelto por compilador.rs: id de la fila,
 // nombre de la macro, programa del Filtro de App de la fila
 // (para el paso Multimedia "En App") y el Comportamiento ya
 // convertido a enum.
@@ -133,19 +132,18 @@
 //     ya existentes en runtime.rs/back_*.rs.
 // esperar_interrumpible(ms, debe_detenerse)
 // notificar_todas()
-//     Mecanismo de espera/notificación compartido (ver B). Desde la
-//     Etapa 8C, notificar_todas() también es pub(crate): runtime::
+//     Mecanismo de espera/notificación compartido (ver B).
+//     notificar_todas() también es pub(crate): runtime::
 //     detener_todo() la llama para la red de seguridad global.
 // detener_todas_las_activas()
-//     Etapa 8C: llamada por runtime::detener_todo() — marca detenida
+//     Llamada por runtime::detener_todo() — marca detenida
 //     y vacía el registro ACTIVAS (Una ejecución/Toggle).
 // convertir_* (varias)
 //     Equivalentes locales, paralelos a los de compilador.rs
 //     (privados ahí) — traducen los campos String sueltos de
 //     PasoMacroJson a los enums de perfil_cache, en tiempo de
 //     EJECUCIÓN (compilador.rs solo resuelve esto para
-//     RemapeoJson, nunca para el contenido de una macro, ver
-//     decisión de la Etapa 7/8A).
+//     RemapeoJson, nunca para el contenido de una macro).
 // ======================================================
 
 use crate::back_coordenada;
@@ -190,7 +188,7 @@ static ACTIVAS: LazyLock<Mutex<HashMap<String, Arc<AtomicBool>>>> =
 // paso_actual cuenta ejecuciones reales de esos pasos, así que
 // con un bucle activo puede seguir subiendo más allá de
 // total_pasos (el contador no se "resetea" ni se recorta en
-// cada vuelta; el indicador visual, Etapa E/F, decide cómo
+// cada vuelta; el indicador visual decide cómo
 // mostrar eso si ocurre). Solo una ejecución de macro puede
 // estar "en curso" para el overlay a la vez — coincide con que
 // solo puede haber una ventana Indicador_Macro abierta (mismo
@@ -241,7 +239,7 @@ fn app_handle() -> Option<&'static AppHandle> {
 static NOTIFICADOR: LazyLock<(Mutex<()>, Condvar)> =
     LazyLock::new(|| (Mutex::new(()), Condvar::new()));
 
-// pub(crate) desde la Etapa 8C: runtime::detener_todo() la llama
+// pub(crate) porque runtime::detener_todo() la llama
 // para despertar cualquier hilo de Macro dormido (cualquiera de los
 // tres Comportamientos) apenas les toca revisar su propia bandera de
 // detener — ver runtime.rs.
@@ -250,7 +248,7 @@ pub(crate) fn notificar_todas() {
 }
 
 // ======================================================
-// 🛑 DETENER TODAS LAS ACTIVAS (Etapa 8C)
+// 🛑 DETENER TODAS LAS ACTIVAS
 // ------------------------------------------------------
 // Llamada por runtime::detener_todo(). Marca la bandera de cada
 // ejecución Una ejecución/Toggle en curso (el hilo la nota en su
@@ -423,7 +421,7 @@ fn ejecutar_macro_completa(
     // Ver decisión E) — posición capturada UNA vez, antes del primer paso.
     let posicion_inicial = back_coordenada::obtener_cursor();
 
-    // Etapa F: teclas retenidas por un paso "Solo Down" que todavía
+    // Teclas retenidas por un paso "Solo Down" que todavía
     // no recibieron su "Solo Up" — se libera cualquier resto al
     // terminar la macro (red de seguridad si se detiene a mitad de
     // un Down sin Up, ver Regla 16 para la validación que evita esto
@@ -457,9 +455,9 @@ fn ejecutar_macro_completa(
 // ------------------------------------------------------
 // abrir_overlay_indicador_play calcula total_pasos (pasos NO-bucle
 // del array), arranca el contador en 0 (iniciar_progreso_indicador_
-// macro, Etapa D) y abre la ventana Indicador_Macro en modo play
+// macro) y abre la ventana Indicador_Macro en modo play
 // vía comandos::abrir_ventana_indicador_macro_interno (misma función
-// interna que ya usa el modo grabación, Etapa B) — corriendo en el
+// interna que ya usa el modo grabación) — corriendo en el
 // hilo principal de la UI (AppHandle::run_on_main_thread), porque
 // WebviewWindowBuilder::build() lo exige en Windows y esta función
 // se llama desde el hilo propio de la macro (thread::spawn en
@@ -609,7 +607,7 @@ fn ejecutar_paso_tecla_mouse(
 
     let gatillo = convertir_input(gatillo_json);
 
-    // Etapa F: arrastre diferido. "down" retiene mods+gatillo abajo
+    // Arrastre diferido. "down" retiene mods+gatillo abajo
     // (mismo orden que el tramo Down de Mantenido) hasta que un paso
     // "up" posterior los libere (mismo orden que el tramo Up de
     // Mantenido: gatillo primero, mods en reversa) — sin pasar por

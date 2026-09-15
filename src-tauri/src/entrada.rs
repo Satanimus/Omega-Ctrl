@@ -405,8 +405,8 @@ pub fn procesar_evento(evento: InputEvent) {
     // normal.
     captura_coordenada::observar_evento(&evento);
 
-    // Tap pasivo para la captura cruda del Grabador de Macro (Etapa
-    // D, ver grabacion_macro.rs): mismo criterio que el de arriba,
+    // Tap pasivo para la captura cruda del Grabador de Macro (ver
+    // grabacion_macro.rs): mismo criterio que el de arriba,
     // nunca decide nada sobre el evento.
     grabacion_macro::observar_evento(&evento);
 

@@ -4,7 +4,7 @@
 // Gestiona archivos de Macro almacenados en /Macros.
 //
 // macros NO:
-// - Ejecuta macros (eso es runtime.rs / Etapa 8).
+// - Ejecuta macros (eso es runtime.rs).
 // - Conoce Cache ni AccionCache::Macro.
 // - Sabe qué fila del perfil referencia qué macro.
 //
@@ -13,8 +13,8 @@
 // - Crear una macro nueva (vacía).
 // - Abrir (cargar) una macro.
 // - Guardar una macro editada.
-// - Renombrar una macro (Etapa 8A).
-// - Eliminar una macro (Etapa 8A).
+// - Renombrar una macro.
+// - Eliminar una macro.
 //
 // Flujo:
 // UI
@@ -117,9 +117,8 @@ pub fn abrir_macro_a_cache(nombre: String) -> Result<MacroArchivoJson, String> {
 // ======================================================
 // 💾 GUARDAR MACRO
 // ------------------------------------------------------
-// Guarda bajo macro_archivo.nombre tal cual viene — sin
-// manejo de "renombrar mientras se edita" todavía (queda para
-// la Etapa 6, el editor completo).
+// Guarda bajo macro_archivo.nombre tal cual viene — el renombrado
+// se maneja aparte, en renombrar_macro().
 // ======================================================
 
 pub fn guardar_macro(macro_archivo: MacroArchivoJson) -> Result<(), String> {
@@ -151,7 +150,7 @@ pub fn descartar_cache_macro(nombre: &str) {
 }
 
 // ======================================================
-// ✏️ RENOMBRAR MACRO — Etapa 8A
+// ✏️ RENOMBRAR MACRO
 // ------------------------------------------------------
 // Mismo patrón que perfil.rs::renombrar_perfil (nombre_disponible +
 // fs::rename), pero SIN el chequeo de "¿alguna fila la referencia?"
@@ -196,7 +195,7 @@ pub fn renombrar_macro(nombre_actual: String, nombre_nuevo: String) -> Result<St
 }
 
 // ======================================================
-// 🗑️ ELIMINAR MACRO — Etapa 8A
+// 🗑️ ELIMINAR MACRO
 // ------------------------------------------------------
 // Mismo criterio "no bloquear" que renombrar_macro — ver comentario
 // arriba. Borra el archivo sin comprobar si alguna fila del perfil

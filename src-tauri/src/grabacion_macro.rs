@@ -1,7 +1,7 @@
 // ======================================================
 // 🔴 Grabacion_Macro
 // ------------------------------------------------------
-// Captura cruda de la Etapa D del Grabador de Macro. Tap
+// Captura cruda del Grabador de Macro. Tap
 // pasivo sobre entrada.rs (mismo patrón que
 // captura_coordenada.rs): mientras está activa, registra
 // cada evento físico tal cual llega, sin retenerlo ni
@@ -49,10 +49,10 @@ static EVENTOS: Mutex<Vec<EventoGrabado>> = Mutex::new(Vec::new());
 static TECLAS_ABAJO: Mutex<Vec<InputId>> = Mutex::new(Vec::new());
 
 // ======================================================
-// 🟡🔴 ESTADO (Etapa G, revisado — botón "Grabar Macro" ya
-// no arranca la captura directo: solo arma la escucha de la
-// tecla toggle. La propia tecla física decide cuándo pasa de
-// Armada a Activa, y de Activa de vuelta a Inactiva).
+// 🟡🔴 ESTADO — el botón "Grabar Macro" no arranca la
+// captura directo: solo arma la escucha de la tecla toggle.
+// La propia tecla física decide cuándo pasa de Armada a
+// Activa, y de Activa de vuelta a Inactiva.
 // ======================================================
 
 #[derive(Clone, Copy, PartialEq, Eq, serde::Serialize)]
@@ -104,7 +104,7 @@ fn desactivar_interna() {
     *ACTIVA.lock().unwrap() = false;
 }
 
-/// Corte forzado desde la UI (Etapa G): el editor lo llama si se
+/// Corte forzado desde la UI: el editor lo llama si se
 /// cierra (Cancelar/Guardar) mientras el panel de inicio seguía
 /// Armada o ya estaba Activa — sin esto, el hook (observar_evento)
 /// seguiría escuchando la tecla toggle indefinidamente sin que

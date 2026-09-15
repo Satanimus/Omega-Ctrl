@@ -65,7 +65,7 @@ impl MacroArchivoJson {
 //
 // bucle_marcador_destino / bucle_veces: solo cuando tipo ==
 //   "bucle". Un solo algoritmo (sin distinción con_fin/
-//   sin_fin, ver Etapa 8B): resta 1 en cada visita; al llegar
+//   sin_fin): resta 1 en cada visita; al llegar
 //   a 0, resetea al valor programado y sigue de largo — listo
 //   para una próxima visita si está anidado dentro de otro
 //   bucle (bucles anidados).
@@ -135,7 +135,7 @@ pub struct PasoMacroJson {
     #[serde(default)]
     pub tecla_duracion_ms: Option<u64>,
 
-    // Etapa F: arrastre diferido. "down" retiene mods+gatillo abajo
+    // Arrastre diferido. "down" retiene mods+gatillo abajo
     // hasta que llegue un paso "up" posterior con la misma
     // secuencia; "up" libera. None = comportamiento normal (sin
     // retención), sin cambios respecto a lo existente.

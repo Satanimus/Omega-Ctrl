@@ -139,8 +139,8 @@ pub(crate) fn leer_override() -> Option<PathBuf> {
 // ------------------------------------------------------
 // guardar_override()/quitar_override() son los únicos
 // puntos de escritura de ubicacion.txt (Regla 3/4). No
-// migran nada — eso es responsabilidad de la Etapa C,
-// que llama a estas funciones recién después de migrar.
+// migran nada — eso lo hace antes el código que llama a
+// estas funciones, recién después de migrar.
 // ======================================================
 
 pub(crate) fn guardar_override(destino: &Path) -> Result<(), String> {
@@ -206,9 +206,9 @@ pub(crate) fn es_carpeta_sistema(carpeta: &Path) -> bool {
 // 🚚 MIGRACIÓN DE CARPETA USUARIO (Regla 10/11)
 // ------------------------------------------------------
 // Puro backend: no decide qué hacer ante un conflicto ni
-// ante la carpeta antigua, solo ejecuta lo que la Etapa E
-// (comandos) le indique tras la respuesta del usuario en
-// los popups de la Etapa H.
+// ante la carpeta antigua, solo ejecuta lo que el comando le
+// indique tras la respuesta del usuario en los popups
+// correspondientes.
 // ======================================================
 
 // ¿El destino ya tiene una carpeta "Usuario" con contenido? (Regla 11)

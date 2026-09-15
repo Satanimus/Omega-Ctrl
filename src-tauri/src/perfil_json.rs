@@ -185,9 +185,9 @@ pub struct RemapeoJson {
     // abrir_accion/menu_accion no hay struct propia para la columna
     // Acción: el nombre de la macro asignada sigue viajando en
     // accion_referencia (mismo campo genérico que ya usa Multimedia),
-    // sin duplicarlo acá. macro_extra es la columna Extra — desde la
-    // Etapa 8A deja de ser la puerta al editor y pasa a guardar
-    // únicamente el Comportamiento de disparo (Una ejecución/Toggle/
+    // sin duplicarlo acá. macro_extra es la columna Extra — ya no es
+    // la puerta al editor, guarda únicamente el Comportamiento de
+    // disparo (Una ejecución/Toggle/
     // Tecla mantenida). #[serde(default)] mismo criterio que
     // abrir_accion/abrir_extra, para que perfiles guardados antes de
     // esta feature sigan cargando sin romper. Ver MacroExtraJson más
@@ -422,7 +422,7 @@ impl Default for MenuExpressExtraJson {
 // que MenuExpress. A diferencia de MenuExpress, la fila NO es dueña
 // de ningún contenido propio: es solo un VISUALIZADOR de un pool de
 // elementos rotatorios compartido por todo OmegaCtrl (ver
-// back_portapapeles.rs, etapas E/F). Los fijados sí son exclusivos
+// back_portapapeles.rs). Los fijados sí son exclusivos
 // de cada fila (prefijo {id}_ en el nombre de archivo), pero no
 // viajan acá — viven directamente en la carpeta del pool.
 //
@@ -443,7 +443,7 @@ impl Default for MenuExpressExtraJson {
 //     mantener en modo Registro (los fijados no cuentan). El límite
 //     REAL que aplica el pool compartido es el mayor límite
 //     configurado entre todos los Portapapeles actualmente en modo
-//     Registro (ver back_portapapeles.rs, etapa F) — este campo es
+//     Registro (ver back_portapapeles.rs) — este campo es
 //     solo lo que la fila "pide", no lo que termina rigiendo.
 // ======================================================
 
@@ -544,7 +544,7 @@ impl Default for AbrirExtraJson {
 //
 // comportamiento: "una_ejecucion" (default) | "toggle" |
 //   "tecla_mantenida". Decide en Runtime cómo arranca/corta la
-//   ejecución de la macro (ver runt_macro.rs, Etapa 8B):
+//   ejecución de la macro (ver runt_macro.rs):
 //   • "una_ejecucion" y "toggle" comparten mecanismo (registro
 //     fila → ejecución activa) — la diferencia entre ambos es solo
 //     de etiqueta/UX, no de código.

@@ -1,8 +1,6 @@
 // ======================================================
 // 🖥️ back_app
 // ======================================================
-// ETAPA X DEL FLUJO
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 // Backend encargado de comunicarse con Windows para
 // obtener información relacionada con procesos y aplicaciones.
@@ -332,7 +330,7 @@ pub fn extraer_icono(ruta: &str) -> Option<IconoRaw> {
 // ícono que Windows ya le asocia (el mismo que se ve en el
 // Explorador). Usada por el botón "Seleccionar..." del tipo "Abrir
 // Archivo/App" (comandos.rs::obtener_icono_ruta) y por el listado de
-// "Abrir con" (Etapa 7B). No requiere que la ruta exista en un
+// "Abrir con". No requiere que la ruta exista en un
 // proceso corriendo, a diferencia de extraer_icono().
 // ======================================================
 

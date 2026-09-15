@@ -1,6 +1,6 @@
 # Omega Ctrl
 
-Omega Ctrl es una eficiente y completa aplicación de escritorio para Windows (Tauri + Rust) que permite remapear teclado y mouse, crear macros, menús flotantes y un portapapeles ampliado, todo organizado en **perfiles**, con **filas** que puedes activar/desactivar y personalizar por aplicación. Todo eso con un mínimo consumo de ram (entre 7MB y 10MB aprox).
+Omega Ctrl es una eficiente y completa aplicación de escritorio para Windows (Tauri + Rust) que permite remapear teclado y mouse, crear macros, menús flotantes y un portapapeles ampliado, todo organizado en **perfiles**, con **filas** que puedes activar/desactivar y personalizar por aplicación. Todo eso con un mínimo consumo de ram (entre 5MB y 8MB aprox).
 
 ![Captura general de la ventana principal](docs/screenshots/main.png)
 

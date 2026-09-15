@@ -448,7 +448,7 @@ fn traducir(stroke: &Stroke) -> Option<InputEvent> {
 // 🛑 DETENER
 // ------------------------------------------------------
 // Mecanismo de parada limpia para el cambio de modo en
-// caliente (Etapa D). solicitar_detener() pone la bandera;
+// caliente. solicitar_detener() pone la bandera;
 // el loop de iniciar() la revisa tras cada recibir() y
 // sale limpiamente sin matar el hilo a la fuerza.
 // La dirección Interception→Portable necesita este

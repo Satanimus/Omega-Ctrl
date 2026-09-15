@@ -1,8 +1,6 @@
 // ======================================================
 // 📋 back_portapapeles_captura
 // ======================================================
-// ETAPA D DEL PLAN "PORTAPAPELES"
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
 // Backend AISLADO encargado de avisar cuándo cambió el
@@ -25,13 +23,13 @@
 // en modo Registro, y NO conoce ACTIVOS directamente — sigue sin
 // saber nada de eso. Lo único que hace ante cada aviso es leer el
 // contenido y pasárselo tal cual a
-// back_portapapeles::en_cambio_del_sistema() (ETAPA F), que es
+// back_portapapeles::en_cambio_del_sistema(), que es
 // quien decide si hay que guardarlo o no (según ACTIVOS) y aplica
 // el límite. Ese único punto de contacto mantiene la separación:
 // este archivo solo sabe "detectar y leer", back_portapapeles.rs
 // solo sabe "decidir y guardar".
 // El módulo también sabe ESCRIBIR al portapapeles del sistema
-// (escribir_portapapeles(), ETAPA H) — lo usa back_portapapeles::
+// (escribir_portapapeles()) — lo usa back_portapapeles::
 // pegar() para el click en un elemento (spec: "se pega el contenido
 // del archivo al portapapeles"). Sigue siendo el único lugar del
 // proyecto que toca arboard directamente, por simetría con
@@ -48,14 +46,14 @@
 // ------------------------------------------------------
 // 2. ¿Quién llama este archivo?
 //
-// asegurar_listener() / detener_listener() (ETAPA J.1) las llama
+// asegurar_listener() / detener_listener() las llama
 // back_portapapeles.rs en cada uno de sus puntos donde cambia si
 // "debe existir" el listener (abrir/cerrar ventana, activar/
 // desactivar Registro) — ver debe_existir_listener() ahí. Ninguno
 // de los dos hace nada si el estado ya es el pedido (arrancar
 // estando ya arrancado, o detener estando ya detenido).
 // escribir_portapapeles() la llama back_portapapeles::pegar()
-// (ETAPA H) cada vez que el usuario clickea un elemento.
+// cada vez que el usuario clickea un elemento.
 // ------------------------------------------------------
 // 3. ¿Qué información recibe?
 //
@@ -66,7 +64,7 @@
 //
 // leer_portapapeles() -> Option<ContenidoPortapapeles>: el
 // contenido actual del portapapeles del sistema, bajo demanda
-// (lo va a usar el modo Simple, ver back_portapapeles.rs etapa G,
+// (lo va a usar el modo Simple, ver back_portapapeles.rs,
 // para leer sin esperar el próximo cambio).
 // ------------------------------------------------------
 // 5. Reglas / decisiones
@@ -76,9 +74,9 @@
 //   "vista previa" junto al texto), se prioriza la IMAGEN. Es lo
 //   más común de los dos casos reales del spec (Ctrl+C de texto
 //   vs. captura de pantalla) y no debería ser ambiguo en la
-//   práctica — si en Etapa E/G aparece un caso real donde esto
+//   práctica — si aparece un caso real donde esto
 //   da un resultado no deseado, se ajusta el orden ahí.
-// • ETAPA J.1 — el hilo YA NO corre de por vida: arranca con
+// • El hilo YA NO corre de por vida: arranca con
 //   asegurar_listener() y se detiene con detener_listener(). La
 //   CLASE de ventana (RegisterClassExW) sí se registra una única
 //   vez por proceso (una clase registrada dos veces falla) — un

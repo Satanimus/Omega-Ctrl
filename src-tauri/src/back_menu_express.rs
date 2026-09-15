@@ -1,8 +1,6 @@
 // ======================================================
 // ⚡🪟 Back_Menu_Express
 // ======================================================
-// ETAPAS 5, 6 y 7 DEL FLUJO MenuExpress
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
 // Dueño de las ventanas flotantes nativas de MenuExpress.
@@ -11,17 +9,16 @@
 // "menu_express_<id>", donde <id> es el mismo RemapeoJson::id
 // de la fila (ver perfil_json.rs). Pueden existir varias
 // ventanas MenuExpress abiertas a la vez, cada una
-// independiente (confirmado por el usuario, ver plan por
-// etapas).
+// independiente (confirmado por el usuario).
 //
 // Este archivo NO dibuja el layout en sí (radial/cuadrícula es
 // 100% TS dentro de la ventana, ver menu_express_main.ts). Sí
 // calcula el TAMAÑO de ventana según forma/cantidad de botones/
-// tamaño de botón (calcular_tamano_ventana, etapa 6) — con el
+// tamaño de botón (calcular_tamano_ventana) — con el
 // mismo criterio geométrico que el TS usa para posicionar cada
 // botón adentro, para que la ventana entre justo sin recorte ni
 // scroll. También resuelve la EJECUCIÓN de un botón de adentro
-// (etapa 7: boton_down/boton_up) — busca la fila referenciada
+// (boton_down/boton_up) — busca la fila referenciada
 // en la caché ya compilada (cache::obtener_remapeo) y llama a
 // runtime::ejecutar directo, EXACTAMENTE la misma función que ya
 // usa cache.rs (iniciar_solamente/iniciar_y_finalizar) para un
@@ -66,7 +63,7 @@
 //     cargar (ver menu_express_main.ts).
 // boton_down(fila_id) / boton_up(id_menu, fila_id) — la propia
 //     ventana, en cada mousedown/mouseup sobre un botón de
-//     adentro (ver menu_express_main.ts, etapa 7).
+//     adentro (ver menu_express_main.ts).
 // ------------------------------------------------------
 // 4. ¿Qué información entrega?
 //
@@ -78,7 +75,7 @@
 //     es Efímero (debe cerrarse tras este clic). La ventana NO
 //     se cierra sola acá — es responsabilidad del TS reproducir
 //     el fade-out y recién ahí invocar cerrar_menu_express (ver
-//     menu_express_main.ts, etapa 8).
+//     menu_express_main.ts).
 // ------------------------------------------------------
 // 5. Funciones del archivo
 //
@@ -121,7 +118,7 @@
 //     resuelve Comportamiento: si el menú es Efímero, devuelve
 //     true para que la propia ventana (menu_express_main.ts)
 //     juegue su animación de fade-out y recién después invoque
-//     cerrar_menu_express (etapa 8 — el cierre real NO ocurre
+//     cerrar_menu_express (el cierre real NO ocurre
 //     acá, para darle tiempo a la animación antes de que la
 //     ventana se destruya). Si es Toggle, no hace nada más — el
 //     menú se queda abierto hasta el [x] o el mismo trigger de
@@ -137,7 +134,7 @@
 //   (back_coordenada::obtener_cursor()), igual que "Relativa a
 //   cursor" en Click en coordenada.
 // • Persistente → última posición real en memoria para ese id
-//   (ULTIMA_POSICION, etapa 8), guardada al cerrar la ventana
+//   (ULTIMA_POSICION), guardada al cerrar la ventana
 //   anterior (CloseRequested, ver crear_ventana). Si nunca se
 //   cerró una en esta sesión, no hay "última" — se deja sin
 //   posición explícita y Tauri usa su default.
@@ -329,7 +326,7 @@ fn label_de(id: &str) -> String {
 }
 
 // ======================================================
-// 📍 ÚLTIMA POSICIÓN (ubicacion = Persistente) — ETAPA 8
+// 📍 ÚLTIMA POSICIÓN (ubicacion = Persistente)
 // ------------------------------------------------------
 // id de la fila -> última posición (x, y) en la que se cerró esa
 // ventana. Solo en memoria (vive y muere con el proceso, como el
@@ -582,7 +579,7 @@ fn ubicar_en_monitor(
 // Único punto de entrada llamado desde runtime.rs. Alternar es
 // A NIVEL DE TRIGGER (ver header) — independiente del
 // Comportamiento Toggle/Efímero de la fila, que solo aplica al
-// hacer clic en un botón de adentro (etapa 7).
+// hacer clic en un botón de adentro.
 // ======================================================
 
 pub fn abrir_o_alternar(id: String, paquete: MenuExpressPaquete) {
@@ -619,7 +616,7 @@ pub fn abrir_o_alternar(id: String, paquete: MenuExpressPaquete) {
 // scroll ni recorte); el posicionamiento de cada botón adentro
 // lo resuelve el TS con ese mismo espacio disponible.
 //
-// Etapa 8: los px de cada tamaño ya no están fijos acá — se leen
+// Los px de cada tamaño ya no están fijos acá — se leen
 // de config.rs (única fuente de verdad real, configurable), lo
 // mismo que hace menu_express_main.ts vía el comando
 // obtener_tamanos_menu_express (ver comandos.rs).
@@ -649,7 +646,7 @@ fn calcular_tamano_ventana(paquete: &MenuExpressPaquete) -> (f64, f64) {
         FormaMenu::Radial => {
             // Espejo exacto de calcularRadiosRadial() en
             // menu_express_main.ts — si uno cambia, cambiar el otro.
-            // Etapa 9: anillo continuo de gajos, sin header (Radial ya
+            // Anillo continuo de gajos, sin header (Radial ya
             // no lo tiene). El radio NO depende de `n`: los gajos
             // cubren el anillo completo y nunca se solapan entre sí,
             // más botones solo angostan cada gajo.
@@ -765,7 +762,7 @@ fn crear_ventana(app: AppHandle, id: String, paquete: MenuExpressPaquete) {
             let cursor = crate::back_coordenada::obtener_cursor();
             Some(ubicar_en_monitor(&app, cursor, tamano_ventana, es_radial))
         }
-        // Etapa 8 (+ pulido): recordar la última posición real en
+        // Recuerda la última posición real en
         // memoria (por id, ver ULTIMA_POSICION arriba) — ahora se
         // guarda tanto al mover la ventana como al cerrarla (ver
         // on_window_event más abajo), no solo al cerrar, así que
@@ -991,7 +988,7 @@ pub fn boton_down(fila_id: &str) {
 // Mantenido llegaran a soltar de verdad.
 //
 // Devuelve true si el menú es Efímero (debe cerrarse tras este
-// clic) — a propósito NO cierra la ventana acá (etapa 8): eso
+// clic) — a propósito NO cierra la ventana acá: eso
 // dejaría cero tiempo para la animación de fade-out, porque la
 // ventana se destruiría antes de que el TS pudiera reproducirla.
 // El cierre real queda en manos del TS (ver menu_express_main.ts,

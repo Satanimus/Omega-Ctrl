@@ -1,8 +1,6 @@
 // ======================================================
 // 🔨 COMPILADOR
 // ======================================================
-// ETAPA X DEL FLUJO
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
 // Convierte un perfil editable (perfil_json)
@@ -154,16 +152,16 @@
 //     .json ya no existe (se borró/renombró desde afuera). A
 //     diferencia de AbrirArchivo, AccionCache::Macro solo guarda el
 //     NOMBRE (no el contenido/pasos ya resueltos) — el JSON de la
-//     macro se lee y se interpreta recién en Runtime, al ejecutarse
-//     (Etapa 8), no acá. Motivo: la macro es un archivo propio,
+//     macro se lee y se interpreta recién en Runtime, al ejecutarse,
+//     no acá. Motivo: la macro es un archivo propio,
 //     editable en cualquier momento desde su propio popup (guardado
 //     directo, ver comp_popup_macro_editor.ts) sin pasar por
 //     "recompilar el perfil" — si el compilador incrustara el
 //     contenido en la cache, cualquier edición de la macro quedaría
 //     vieja hasta la próxima recompilación del perfil que la usa.
 //     Compilar solo confirma que la referencia sigue siendo válida,
-//     igual que Abrir confirma que la ruta sigue existiendo. Desde
-//     la Etapa 8A también resuelve el programa del Filtro de App de
+//     igual que Abrir confirma que la ruta sigue existiendo. También
+//     resuelve el programa del Filtro de App de
 //     la fila (para el paso Multimedia "En App" dentro de la macro)
 //     y el Comportamiento (remapeo.macro_extra.comportamiento, ya
 //     convertido a enum vía convertir_comportamiento_macro()).
@@ -822,7 +820,7 @@ fn convertir_tamano_menu(valor: &str) -> TamanoMenu {
 // perfil (no hay "botones" que puedan quedar huérfanos), así que no
 // hay ningún dato requerido que pueda faltar. nombre vacío es un
 // estado válido — significa que la ventana usa su título por
-// defecto (decisión de back_portapapeles.rs, etapa G), no que la
+// defecto (decisión de back_portapapeles.rs), no que la
 // fila esté incompleta.
 // ======================================================
 

@@ -1,5 +1,5 @@
 // ======================================================
-// ⚙️ Config ETAPA 0 DEL FLUJO
+// ⚙️ Config
 // ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
@@ -643,7 +643,6 @@ pub fn establecer_delta_volumen(valor: u64) {
 // dos lugares los LEEN por comando/consulta en vez de tener su
 // propia copia fija (ver obtener_tamanos_menu_express en
 // comandos.rs y calcular_tamano_ventana en back_menu_express.rs).
-// Valores por defecto: los mismos que ya venían de la etapa 5/6.
 // ======================================================
 
 static MENU_BOTON_PEQUENO_ANCHO: AtomicU64 = AtomicU64::new(60);
@@ -737,8 +736,8 @@ pub fn establecer_menu_texto_grande(valor: u64) {
 // — mismo criterio de "única fuente de verdad configurable" que ya
 // aplica ahí (ver comentario de MENU EXPRESS — TAMAÑOS DE BOTÓN más
 // arriba); portapapeles.css / portapapeles_main.ts /
-// back_portapapeles.rs (etapas D en adelante) los van a LEER por
-// comando/consulta en vez de tener su propia copia fija.
+// back_portapapeles.rs los van a LEER por comando/consulta en vez
+// de tener su propia copia fija.
 //
 // El tamaño de TEXTO de Portapapeles no tiene su propia sección acá
 // — reusa menu_texto_pequeno/mediano/grande tal cual (ver

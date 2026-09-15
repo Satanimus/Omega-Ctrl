@@ -23,7 +23,7 @@
 // entrada.rs / Runtime llaman motor::emitir_evento() en
 // vez de llamar directo a back_interception::emitir_evento()
 // o back_windows::emitir_evento().
-// El flujo de cambio de modo (Etapas D/G) llama
+// El flujo de cambio de modo llama
 // motor::solicitar_cambio_modo().
 // lib.rs llama motor::cargar_modo_desde_config() al
 // arrancar, antes del hilo de entrada.
@@ -92,7 +92,7 @@ pub fn inicializar(app: AppHandle) {
 // 🔀 MODO
 // ------------------------------------------------------
 // Interception = 0, Portable = 1. Portable es el valor por
-// defecto (arranque en frío, antes de que Etapa C cargue el
+// defecto (arranque en frío, antes de que se cargue el
 // modo guardado en Configuracion_Usuario.txt) — no requiere
 // el driver Interception instalado.
 // ======================================================

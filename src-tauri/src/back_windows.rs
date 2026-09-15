@@ -20,7 +20,7 @@
 // Cache ni AnalizadorTrigger.
 // ------------------------------------------------------
 // 2. ¿Quién llama este archivo?
-// lib.rs (o el punto de despacho unificado, Etapa B)
+// lib.rs (o el punto de despacho unificado, motor.rs)
 // llama iniciar() una sola vez, pasándole el callback
 // de procesamiento y el predicado debe_tragar_no_traducible,
 // con la misma firma que usa back_interception.rs.
@@ -519,8 +519,8 @@ unsafe extern "system" fn hook_mouse(codigo: i32, wparam: WPARAM, lparam: LPARAM
 // esa API no respeta el layout activo para teclas OEM en
 // layouts no-US (confirmado con logs: layout español detectado
 // bien, VK devuelto correspondía a la posición equivalente en
-// layout US) — ver Etapa A/B de pulsadores.tsv/pulsadores.rs
-// para el detalle de las columnas scancode/extendida.
+// layout US) — ver pulsadores.tsv/pulsadores.rs para el
+// detalle de las columnas scancode/extendida.
 // ======================================================
 
 fn traducir_teclado(scan_code: u32, es_extendida: bool, presionado: bool) -> Option<InputEvent> {
@@ -634,8 +634,8 @@ fn scancode_desde_interno(evento: &InputEvent) -> Option<(u16, bool)> {
 // traduzca ese VK a carácter usando el layout activo EN ESE
 // MOMENTO en la ventana de destino: es la misma traducción
 // dependiente de layout que ya vimos con MapVirtualKeyExW en
-// la entrada (Etapa C), solo que ahora en la dirección
-// contraria. Como "nativo"/"ui" en pulsadores.tsv están
+// la entrada, solo que ahora en la dirección contraria. Como
+// "nativo"/"ui" en pulsadores.tsv están
 // calibrados para el layout "Español (Latinoamérica)", un
 // layout activo distinto (ej. Español de España) traduce ese
 // mismo VK a otro carácter (confirmado: interno "Grado", VK

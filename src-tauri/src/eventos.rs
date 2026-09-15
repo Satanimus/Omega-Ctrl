@@ -1,8 +1,6 @@
 // ======================================================
 // 📦 EVENTOS
 // ======================================================
-// ETAPA 1 DEL FLUJO
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 // Recibe información proveniente del backend de captura y la estructura en un formato estándar
 // (InputEvent) que será utilizado por todo el motor.

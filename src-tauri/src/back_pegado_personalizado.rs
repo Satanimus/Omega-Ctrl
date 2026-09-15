@@ -1,8 +1,6 @@
 // ======================================================
 // 🎨 back_pegado_personalizado
 // ======================================================
-// ETAPA 1 DEL PLAN "PEGADO PERSONALIZADO"
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 // Módulo aislado: decide si la app activa necesita un camino de
 // pegado distinto al genérico (Ctrl+V simulado) y, si corresponde,

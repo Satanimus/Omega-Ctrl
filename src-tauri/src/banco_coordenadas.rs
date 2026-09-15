@@ -215,7 +215,7 @@ pub fn editar(id: &str, coordenada: CoordenadaBanco) -> Result<(), String> {
 }
 
 // ======================================================
-// 🖱️ ACTUALIZAR X,Y — Etapa F
+// 🖱️ ACTUALIZAR X,Y
 // ------------------------------------------------------
 // Pisa solo x/y (arrastre del marcador de previsualización),
 // sin tocar el resto de los campos — a diferencia de editar(),

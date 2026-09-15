@@ -92,9 +92,9 @@ pub fn run() {
             // termina de inicializar.
             back_menu_express::inicializar(app.handle().clone());
 
-            // Mismo motivo/momento que arriba, para back_portapapeles.rs
-            // (Etapa G/H) — abrir_o_alternar() también va a llegar
-            // desde el hilo de entrada física (Etapa I), no desde un
+            // Mismo motivo/momento que arriba, para
+            // back_portapapeles.rs — abrir_o_alternar() también va a
+            // llegar desde el hilo de entrada física, no desde un
             // comando Tauri.
             back_portapapeles::inicializar(app.handle().clone());
 
@@ -140,7 +140,7 @@ pub fn run() {
             // ninguna ventana — se hace apenas arranca.
             configuracion_usuario::cargar_al_iniciar(app.handle());
 
-            // Etapa G: si "Iniciar con perfil" apunta a un perfil
+            // Si "Iniciar con perfil" apunta a un perfil
             // específico que ya no existe o falla al cargar, resetea
             // a "El último usado" sin avisar (Regla 19). No bloquea
             // el arranque si falla.
@@ -363,8 +363,8 @@ pub fn run() {
         ])
         .build(tauri::generate_context!())
         .expect("error al construir Tauri")
-        // Etapa 8C: enganche al cierre del programa (antes no había
-        // ninguno) — ExitRequested se dispara apenas el programa
+        // Enganche al cierre del programa — ExitRequested se dispara
+        // apenas el programa
         // empieza a cerrarse (con el proceso todavía completo), antes
         // de que Tauri termine de desmontar nada, así que es el punto
         // seguro para runtime::detener_todo() (soltar teclas que

@@ -1,8 +1,6 @@
 // ======================================================
 // 🗂️ Configuración de Usuario
 // ======================================================
-// ETAPA 2 DEL FLUJO — VENTANA DE CONFIGURACIÓN
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
 // Dueño de Configuracion_Usuario.txt: un único archivo
@@ -47,14 +45,14 @@
 // ventanas para que vuelvan a pedirlos.
 //
 // No valida en la UI. No arma la tabla que ve el usuario
-// (eso es Etapa 3/4, en comandos.rs y configuracion.ts).
+// (eso es comandos.rs y configuracion.ts).
 //
 // ------------------------------------------------------
 // 2. ¿Quién llama este archivo?
 //
 // • lib.rs, una sola vez al arrancar (cargar_al_iniciar).
 // • comandos.rs, desde los comandos Tauri de la pestaña
-//   General (Etapa 3).
+//   General.
 //
 // ------------------------------------------------------
 // 3. ¿Qué información recibe?
@@ -617,7 +615,7 @@ pub fn leer_iniciar_con_perfil() -> Result<Option<String>, String> {
 }
 
 // ======================================================
-// ✅ VALIDAR "INICIAR CON PERFIL" (Etapa G)
+// ✅ VALIDAR "INICIAR CON PERFIL"
 // ------------------------------------------------------
 // Si el valor guardado es un perfil específico que ya no existe
 // o falla al cargar, resetea a "ultimo" sin avisar al usuario
@@ -728,7 +726,7 @@ pub fn primer_inicio() -> bool {
 }
 
 // ======================================================
-// 🎨 ESTADO DE TEMA APLICADO (Etapa A)
+// 🎨 ESTADO DE TEMA APLICADO
 // ======================================================
 
 const CLAVE_TEMA_NOMBRE: &str = "tema.nombre";
@@ -1020,7 +1018,7 @@ fn validar_segun_tipo(tipo: &TipoValor, valor: &str) -> Result<(), String> {
 // mostrar_notificaciones/duracion_notificacion_ms (Regla 13) no son
 // una fila más de configuracion.tsv — si lo fueran, aparecerían
 // también como fila genérica en la tabla de Configuración → General,
-// duplicando la fila combinada propia (Etapa F). Pero SÍ deben pasar
+// duplicando la fila combinada propia. Pero SÍ deben pasar
 // por el mismo flujo de validación/aplicación/persistencia que
 // guardar_lote() usa para el resto de las claves (aplicar_valor ya
 // las conoce), así que guardar_lote() las valida acá aparte, sin
@@ -1125,7 +1123,7 @@ pub fn restablecer_seccion(prefijo: Option<&str>) -> Result<(), String> {
 
     // Solo General tiene "aplicar en caliente" acá: Apariencia se
     // resuelve leyendo CSS y Teclas leyendo pulsadores.tsv en el
-    // momento (Etapas 5/6), no a través de config.rs.
+    // momento, no a través de config.rs.
     if prefijo.is_none() {
         for entrada in cargar_catalogo() {
             let _ = aplicar_valor(&entrada.clave, &entrada.valor_defecto);
@@ -1203,7 +1201,7 @@ pub fn cargar_al_iniciar(app: &tauri::AppHandle) {
 }
 
 // ======================================================
-// ⌨️ TECLAS (Etapa 5) — prefijo "pulsador."
+// ⌨️ TECLAS — prefijo "pulsador."
 // ------------------------------------------------------
 // El catálogo de claves válidas ("interno") lo posee
 // pulsadores.rs, no este archivo — por eso se lo consulta
@@ -1281,7 +1279,7 @@ pub fn guardar_lote_pulsadores(cambios: &[(String, String)]) -> Result<(), Vec<(
 }
 
 // ======================================================
-// 🎨 APARIENCIA (Etapa 6) — prefijo "css."
+// 🎨 APARIENCIA — prefijo "css."
 // ------------------------------------------------------
 // Mismo espíritu que el catálogo de General (cargar_catalogo/
 // EntradaCatalogo), pero para las variables de
@@ -1807,7 +1805,7 @@ pub fn cargar_tema_por_nombre(
 }
 
 // ======================================================
-// 🖼️ SESIÓN DE APARIENCIA (Etapa C)
+// 🖼️ SESIÓN DE APARIENCIA
 // ------------------------------------------------------
 // Estado en memoria (no persistido) de la ventana de
 // Configuración: qué tema está de base para la columna

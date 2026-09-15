@@ -1,8 +1,6 @@
 // ======================================================
 // 🎛️ Pulsadores
 // ======================================================
-// ETAPA 0 DEL FLUJO
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
 // Mantiene el diccionario único de todos
@@ -94,8 +92,8 @@
 //
 // nombre_ui_efectivo()
 //     Devuelve el nombre visible EFECTIVO: el override de
-//     usuario (Etapa 5 de la Ventana de Configuración,
-//     pestaña Teclas) si existe, si no el de fábrica.
+//     usuario (pestaña Teclas de la Ventana de Configuración)
+//     si existe, si no el de fábrica.
 // ------------------------------------------------------
 // Transformación:
 //
@@ -418,8 +416,7 @@ pub fn nombre_ui_efectivo(interno: &str) -> String {
 // La columna "usuario" (nombre personalizado del usuario)
 // no es un campo propio de Pulsador: como destino, resuelve
 // a nombre_ui_efectivo() (override de Configuracion_Usuario.txt
-// si existe, si no cae al "ui" de fábrica — ver Etapa 5 de la
-// Ventana de Configuración). Como origen se sigue tratando
+// si existe, si no cae al "ui" de fábrica). Como origen se sigue tratando
 // igual que "interno" (no hay necesidad de buscar por nombre
 // personalizado hasta ahora).
 // ======================================================

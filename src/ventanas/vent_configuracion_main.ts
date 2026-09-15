@@ -2918,7 +2918,7 @@ function actualizarVisibilidadGuardarGlobal(): void {
   grupoAccionesDerecha.classList.toggle("oculto", !hayCambios);
 }
 
-setInterval(actualizarVisibilidadGuardarGlobal, 250);
+setInterval(actualizarVisibilidadGuardarGlobal, 500);
 actualizarVisibilidadGuardarGlobal();
 
 // ======================================================
