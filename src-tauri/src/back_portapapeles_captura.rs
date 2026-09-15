@@ -143,7 +143,7 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
 // Solo texto e imagen — mismo alcance que el spec ("Solo se
 // guarda texto e imágenes copiadas o guardadas"). pixeles ya
 // viene en RGBA8 (mismo formato que entrega arboard::ImageData),
-// lista para que Etapa E la guarde como .png sin conversión
+// lista para guardarse como .png sin conversión
 // adicional.
 // ======================================================
 
@@ -182,7 +182,7 @@ pub fn leer_portapapeles() -> Option<ContenidoPortapapeles> {
 }
 
 // ======================================================
-// 📤 ESCRIBIR PORTAPAPELES — ETAPA H (+ FIX CF_DIB/CF_DIBV5)
+// 📤 ESCRIBIR PORTAPAPELES (+ FIX CF_DIB/CF_DIBV5)
 // ------------------------------------------------------
 // Usado por back_portapapeles::pegar() al clickear un elemento.
 //
@@ -197,7 +197,7 @@ pub fn leer_portapapeles() -> Option<ContenidoPortapapeles> {
 // verificado en docs.rs) — CreateDIBitmap + SOLO CF_BITMAP, con
 // EmptyClipboard llamado DESPUÉS de crear el bitmap, no antes.
 //
-// Por qué esto no rompe el bloqueo anti-duplicado (Etapa H, ver
+// Por qué esto no rompe el bloqueo anti-duplicado (ver
 // back_portapapeles.rs::marcar_ignorar_proximo_cambio()): sigue
 // siendo UNA sola apertura/cierre del portapapeles → UN solo
 // WM_CLIPBOARDUPDATE, exactamente como antes.
@@ -545,7 +545,7 @@ fn rgba8_a_bgra8_bottom_up(ancho: usize, alto: usize, pixeles: &[u8]) -> Vec<u8>
 }
 
 // ======================================================
-// 👁️ MONITOR DE PORTAPAPELES — arranque/parada real (ETAPA J.1)
+// 👁️ MONITOR DE PORTAPAPELES — arranque/parada real
 // ------------------------------------------------------
 // LISTENER_CORRIENDO: true mientras el hilo/ventana/listener están
 // activos ahora mismo. HWND_ACTUAL: handle de la ventana mensaje-
@@ -746,7 +746,7 @@ unsafe extern "system" fn wndproc_portapapeles(
         return 0;
     }
 
-    // ETAPA J.1: WM_DESTROY llega como consecuencia del WM_CLOSE que
+    // WM_DESTROY llega como consecuencia del WM_CLOSE que
     // manda detener_listener() (vía DefWindowProcW, más abajo).
     // PostQuitMessage(0) es lo que hace que GetMessageW() del loop en
     // asegurar_listener() devuelva 0 y el hilo termine.
@@ -765,7 +765,7 @@ unsafe extern "system" fn wndproc_portapapeles(
 // Delega en back_portapapeles::en_cambio_del_sistema() — ese
 // archivo decide qué hacer según el estado (algún Registro activo,
 // o solo alguna ventana Simple abierta) y notifica a las ventanas
-// abiertas (ETAPA J.1). Si el portapapeles cambió a algo no legible
+// abiertas. Si el portapapeles cambió a algo no legible
 // (None — un formato que no es ni texto ni imagen, ej. copiar un
 // archivo del explorador), no se llama a nada más: el spec solo
 // pide guardar texto e imágenes.

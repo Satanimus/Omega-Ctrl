@@ -1,8 +1,6 @@
 // ======================================================
 // 🎮 Comandos Tauri
 // ======================================================
-// ETAPA UI DEL FLUJO
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
 // Punto de entrada entre TypeScript y el backend.
@@ -175,7 +173,7 @@ pub fn activar_perfil() -> Result<ResultadoCompilacion, String> {
 
     // Mantiene el menú de bandeja al día cuando la activación se
     // dispara desde el botón de la ventana principal, no desde el
-    // propio menú (Regla 13).
+    // propio menú.
     back_tray::refrescar_si_existe();
 
     resultado
@@ -311,7 +309,7 @@ pub struct ResultadoCambioCarpetaUsuarioJson {
 // requiere_renombrar_si_mantiene: true si la ruta antigua era la
 // portable junto al exe — en ese caso, "Mantener" debe en realidad
 // renombrarla a "Usuario_old" (ver renombrar_carpeta_usuario_antigua),
-// o la Regla 1 la vuelve a tomar en el próximo arranque.
+// o la app la vuelve a tomar en el próximo arranque.
 #[tauri::command]
 pub fn confirmar_cambio_carpeta_usuario(
     ruta: String,
@@ -415,7 +413,7 @@ pub fn crear_perfil_nuevo() -> Result<ResultadoPerfil, String> {
 // vez de dejarlos correr en paralelo.
 static CAMBIANDO_PERFIL: AtomicBool = AtomicBool::new(false);
 
-// [Etapa B] `notificar`: true solo cuando el origen es la bandeja de
+// `notificar`: true solo cuando el origen es la bandeja de
 // sistema (ver comp_panel_lateral::cambiarPerfilDesde) — la barra
 // lateral NO debe disparar la notificación de cambio de perfil, ya
 // que el propio panel abierto ya es la confirmación visual.
@@ -427,7 +425,7 @@ static CAMBIANDO_PERFIL: AtomicBool = AtomicBool::new(false);
 // (único origen que pasa notificar=true) colgaba el hilo principal
 // apenas se activaban las notificaciones, dejando además de responder
 // cualquier otra ventana/comando de la app (todo lo demás depende del
-// mismo hilo). La corrección previa ("Etapa A", ver comentario viejo
+// mismo hilo). La corrección previa (ver comentario viejo
 // de back_notificacion::notificar_estado_perfil_directo) asumía que
 // este comando síncrono ya corría en el hilo principal — premisa
 // falsa, la misma que documenta el comentario de
@@ -454,7 +452,7 @@ pub async fn seleccionar_perfil(nombre: String, notificar: bool) -> Result<Resul
 
     // Mismo motivo que activar_perfil/desactivar_perfil: el cambio
     // de perfil desde la ventana también debe reflejarse en el menú
-    // de bandeja (Regla 13).
+    // de bandeja.
     back_tray::refrescar_si_existe();
 
     CAMBIANDO_PERFIL.store(false, Ordering::SeqCst);
@@ -462,7 +460,7 @@ pub async fn seleccionar_perfil(nombre: String, notificar: bool) -> Result<Resul
     resultado
 }
 
-// [Etapa C] Solo se invoca desde el frontend cuando el cambio de
+// Solo se invoca desde el frontend cuando el cambio de
 // perfil pedido desde la bandeja encuentra ediciones sin guardar y va
 // a mostrar el popup de confirmación — ver
 // comp_panel_lateral::cambiarPerfilDesde. No dispara ningún refresco
@@ -492,11 +490,11 @@ pub fn eliminar_perfil_actual() -> Result<ResultadoPerfil, String> {
 }
 
 // ======================================================
-// 🧩 COMANDOS MACRO — Etapa 2
+// 🧩 COMANDOS MACRO
 // ------------------------------------------------------
 // Solo listar/crear/clonar/abrir/guardar el archivo (carpeta
 // /Macros) — nada de compilar ni de ejecutar todavía. El
-// editor (Etapa 5/6) reusa macro_guardar tal cual.
+// editor reusa macro_guardar tal cual.
 // ======================================================
 
 #[tauri::command]
@@ -514,7 +512,7 @@ pub fn macro_abrir(nombre: String) -> Result<MacroArchivoJson, String> {
     macros::abrir_macro_a_cache(nombre)
 }
 
-// Etapa "Importar Macro" (editor): trae los pasos de OTRA macro
+// Importar Macro (editor): trae los pasos de OTRA macro
 // para copiarlos dentro de la que se está editando. A diferencia
 // de macro_abrir, NO escribe en CACHE_MACROS — la macro de origen
 // solo se lee, nunca se abre para editarse, así que cachearla
@@ -568,7 +566,7 @@ pub fn macro_guardar_como(
 }
 
 // ======================================================
-// 🧩 COMANDOS MACRO — Etapa 8A
+// 🧩 COMANDOS MACRO — RENOMBRAR / ELIMINAR
 // ------------------------------------------------------
 // Renombrar/eliminar el archivo — sin chequear filas del perfil que
 // la referencien (ver macros.rs::renombrar_macro/eliminar_macro).
@@ -616,7 +614,7 @@ pub fn establecer_tiempo_doble(valor: u64) {
 }
 
 // ======================================================
-// ⟫🖱️ ARRASTRE DE FILAS — Etapa 4
+// ⟫🖱️ ARRASTRE DE FILAS
 // ------------------------------------------------------
 // El umbral de "clic mantenido" que activa el modo "Mover"
 // (ver util_arrastrable.ts) reusa la misma variable global
@@ -825,9 +823,9 @@ pub fn obtener_icono_ruta(ruta: String) -> Option<IconoJson> {
 // Usados por el tipo "Abrir Archivo/App": seleccionar_archivo() para
 // el botón "Seleccionar..." de la columna Acción (sin filtro) y para
 // la opción "Examinar..." del listado de "Abrir con" (filtrada a
-// .exe, ver Etapa 11); seleccionar_carpeta() para cuando el ítem
+// .exe); seleccionar_carpeta() para cuando el ítem
 // elegido es una carpeta. rfd no ofrece un diálogo nativo que
-// combine archivo+carpeta en una sola ventana — la UI (Etapa 10)
+// combine archivo+carpeta en una sola ventana — la UI
 // decide cómo ofrecer ambas opciones.
 // ======================================================
 
@@ -856,7 +854,7 @@ pub fn seleccionar_carpeta() -> Option<String> {
 // ======================================================
 // 🗂️ ABRIR CON — PROGRAMAS DEL REGISTRO
 // ------------------------------------------------------
-// Usado por el popup "Abrir con..." (Etapa 11): combina los
+// Usado por el popup "Abrir con...": combina los
 // programas recientes de Windows para esa extensión (usados primero
 // desde el propio Explorador) con el listado general de programas
 // instalados, sin duplicar rutas — recientes primero. El ícono de
@@ -1054,14 +1052,14 @@ pub fn cerrar_ventana_captura_coordenada(app: tauri::AppHandle) {
 }
 
 // ======================================================
-// 👁️ PREVISUALIZACIÓN DE COORDENADA — Etapa F
+// 👁️ PREVISUALIZACIÓN DE COORDENADA
 // ------------------------------------------------------
 // A diferencia de abrir_ventana_captura_coordenada (una sola
 // ventana con label fijo, VENTANA_CAPTURA_COORDENADA), cada fila
 // con el toggle ⊙️ encendido tiene su propia ventana overlay
 // independiente — label "captura_coordenada_preview_{id}" (id =
 // CoordenadaBanco::id) — así puede haber cualquier cantidad
-// abiertas a la vez (Regla 16), cada una posicionada en su propia
+// abiertas a la vez, cada una posicionada en su propia
 // coordenada. captura.html distingue el modo previsualización
 // leyendo ?id= de la URL (ver vent_captura_main.ts) — ya no
 // comparte label/URL con la ventana de captura real.
@@ -1168,7 +1166,7 @@ pub async fn abrir_ventana_preview_coordenada(
     .skip_taskbar(true)
     // A diferencia de la ventana de captura real (una sola a la vez),
     // acá puede haber varias previsualizaciones abiertas al mismo
-    // tiempo (Regla 16) — con focused(true) cada toggle nuevo le
+    // tiempo — con focused(true) cada toggle nuevo le
     // robaría el foco a la ventana "Coordenadas guardadas" apenas se
     // abriera (mismo motivo por el que abrir_ventana_preview_grupo
     // usaba focused(false)).
@@ -1340,11 +1338,11 @@ pub fn obtener_destino_preview_coordenada(id: String) -> Option<(i32, i32)> {
 // Ventana overlay fija (label único "indicador_macro", no
 // glob) — soporta dos modos:
 // • "grabacion": punto rojo/amarillo + el nombre de la tecla
-//   toggle de Grabar Macro (config::tecla_grabar_macro /
-//   Etapa A). Abierta/cerrada por el editor (TypeScript).
+//   toggle de Grabar Macro (config::tecla_grabar_macro).
+//   Abierta/cerrada por el editor (TypeScript).
 // • "play": punto verde + contador de paso actual/total.
 //   Abierta/actualizada/cerrada por runt_macro.rs durante la
-//   ejecución real de una macro (Etapa E).
+//   ejecución real de una macro.
 // Mismo patrón de creación (decorations/transparent/always_on_top/
 // skip_taskbar/focused(false)) que abrir_ventana_preview_
 // coordenada. Ambos modos comparten label — no pueden estar
@@ -1377,7 +1375,7 @@ fn codificar_query(texto: &str) -> String {
     salida
 }
 
-/// Modo Grabación. La posición SIEMPRE se calcula (Etapa C agrega
+/// Modo Grabación. La posición SIEMPRE se calcula (incluida
 /// la lectura de la última posición guardada) — este comando sigue
 /// siendo invocado desde el editor (TypeScript), como hoy.
 ///
@@ -1415,11 +1413,11 @@ pub async fn abrir_ventana_indicador_macro_ubicacion(app: tauri::AppHandle) -> R
     abrir_ventana_indicador_macro_interno(&app, "indicador_macro.html?modo=ubicar".to_string())
 }
 
-// pub(crate), sin #[tauri::command]: la Etapa E la invoca
-// directamente desde runt_macro.rs para el modo "play" (que no
+// pub(crate), sin #[tauri::command]: runt_macro.rs la invoca
+// directamente para el modo "play" (que no
 // tiene el parámetro `tecla`, específico de grabación).
 //
-// [Corrección Etapa E] Síncrona, no async: no tiene ningún .await
+// Síncrona, no async: no tiene ningún .await
 // real en su cuerpo (usa std::thread::sleep bloqueante, no async).
 // Se mantiene sync para que runt_macro.rs pueda invocarla directo
 // dentro de AppHandle::run_on_main_thread (que toma un closure
@@ -1613,7 +1611,7 @@ pub fn guardar_mostrar_en_bandeja(app: tauri::AppHandle, activo: bool) -> Result
 
     if !activo {
         // Sin ícono de bandeja no hay ninguna otra vía para recuperar
-        // la ventana principal (Regla 8) — si estaba oculta/minimizada
+        // la ventana principal — si estaba oculta/minimizada
         // a bandeja, se restaura acá para no dejar el programa
         // inaccesible.
         back_tray::solo_mostrar_ventana(&app);
@@ -1660,11 +1658,11 @@ pub fn obtener_progreso_indicador_macro() -> ProgresoIndicadorMacroUI {
 }
 
 // ======================================================
-// 🔴 GRABACIÓN DE MACRO — CONTROL (Etapa G)
+// 🔴 GRABACIÓN DE MACRO — CONTROL
 // ------------------------------------------------------
 // Arranque/consulta de estado de grabacion_macro.rs. El cierre
 // (tomar_eventos_grabacion_macro) ya se expone en el bloque de
-// Etapa E más abajo.
+// ANÁLISIS más abajo.
 // ------------------------------------------------------
 // Revisado: "Grabar Macro" ya no arranca la captura directo —
 // solo arma la escucha de la tecla toggle (Armada). Es la propia
@@ -1684,8 +1682,7 @@ pub fn obtener_estado_grabacion_macro() -> grabacion_macro::EstadoGrabacion {
     grabacion_macro::estado_grabacion()
 }
 
-/// Corte forzado desde la UI (Etapa G, agregado sobre el plan
-/// original): el editor lo invoca si Cancelar/Guardar cierran el
+/// Corte forzado desde la UI: el editor lo invoca si Cancelar/Guardar cierran el
 /// popup mientras el panel de inicio seguía Armada o ya estaba
 /// Activa — ver grabacion_macro::detener_grabacion().
 #[tauri::command]
@@ -1694,7 +1691,7 @@ pub fn detener_grabacion_macro() {
 }
 
 // ======================================================
-// 🔴 GRABACIÓN DE MACRO — ANÁLISIS (Etapa E)
+// 🔴 GRABACIÓN DE MACRO — ANÁLISIS
 // ------------------------------------------------------
 // Espejo UI de EventoGrabado (grabacion_macro.rs), con
 // InputId ya traducido a EntradaCapturaUI (mismo patrón que
@@ -1777,15 +1774,13 @@ pub fn actualizar_xy_preview_en_vivo(id: String, x: f64, y: f64) {
 }
 
 // ======================================================
-// 🖱️💾 GUARDAR POSICIÓN DE PREVIEW ARRASTRADO — Regla 17
+// 🖱️💾 GUARDAR POSICIÓN DE PREVIEW ARRASTRADO
 // ------------------------------------------------------
-// Llamada al SOLTAR el mouse tras arrastrar el marcador ⊙. A
-// diferencia de la versión anterior (que recibía destino_x/
-// destino_y y hacía la inversa acá), el x/y crudo ya viene
-// calculado desde el frontend con las mismas fórmulas del modo
-// captura normal (ver actualizar_xy_preview_en_vivo, llamado en
-// cada mousemove del arrastre) — acá solo falta persistirlo a
-// Coordenadas.tsv.
+// Llamada al SOLTAR el mouse tras arrastrar el marcador ⊙. El
+// x/y crudo ya viene calculado desde el frontend con las mismas
+// fórmulas del modo captura normal (ver actualizar_xy_preview_en_vivo,
+// llamado en cada mousemove del arrastre) — acá solo falta
+// persistirlo a Coordenadas.tsv.
 // ======================================================
 
 #[tauri::command]
@@ -1904,7 +1899,7 @@ pub fn establecer_tecla_grabar_macro(valor: String) -> Result<(), String> {
 }
 
 // ======================================================
-// 📍 VENTANA "SELECCIONAR COORDENADA" — Etapa C
+// 📍 VENTANA "SELECCIONAR COORDENADA"
 // ------------------------------------------------------
 // abrir_ventana_coordenadas()
 //     Crea la ventana bajo demanda. Ventana NORMAL: con
@@ -1958,7 +1953,7 @@ pub fn obtener_intervalo_captura_coordenada() -> u64 {
 }
 
 // ======================================================
-// 📍 COMANDOS BANCO DE COORDENADAS — Etapa A
+// 📍 COMANDOS BANCO DE COORDENADAS
 // ------------------------------------------------------
 // CRUD directo sobre banco_coordenadas.rs — sin traducción
 // intermedia (CoordenadaBanco ya es serializable).
@@ -2023,7 +2018,7 @@ pub fn coordenadas_reordenar(orden: Vec<String>) -> Result<(), String> {
 // física, no desde JS). Acá solo lo que la propia ventana
 // necesita invocar: leer sus datos una vez al cargar, pedir su
 // propio cierre (botón [x]), y ejecutar/detener un botón de
-// adentro en cada mousedown/mouseup (etapa 7) — la lógica real
+// adentro en cada mousedown/mouseup — la lógica real
 // de esto último vive en back_menu_express.rs (incluida la
 // llamada a runtime::ejecutar), nunca acá, para no romper la
 // regla de este archivo (ver header: "Comandos NO: ejecuta
@@ -2056,7 +2051,7 @@ pub fn menu_express_boton_up(id_menu: String, fila_id: String) -> bool {
 // 📋 PORTAPAPELES — VENTANA FLOTANTE
 // ------------------------------------------------------
 // Igual criterio que MenuExpress: abrir_o_alternar() NO es un
-// comando Tauri (runtime.rs la llama directo, Etapa I). Acá solo lo
+// comando Tauri (runtime.rs la llama directo). Acá solo lo
 // que la propia ventana necesita invocar. Los comandos de mutación
 // (fijar/desfijar/renombrar/editar/eliminar/limpiar_todo/toggle
 // Registro/pegar) devuelven Option<PortapapelesDatosUI> — el mismo
@@ -2174,7 +2169,7 @@ pub fn portapapeles_limpiar_todo(
 ) -> Result<Option<crate::back_portapapeles::PortapapelesDatosUI>, String> {
     // "Limpiar todo" borra los ROTATIVOS (spec: "Botón 'Limpiar
     // todo' Borra todos los rotativos") — los fijados de esta fila
-    // no se tocan, son un pool aparte (Etapa E). Con Registro OFF
+    // no se tocan, son un pool aparte. Con Registro OFF
     // en todos lados, además suprime la auto-regeneración del modo
     // Simple hasta el próximo cambio de estado de Registro (Cambio
     // 1 — ver back_portapapeles::limpiar_todo).
@@ -2184,7 +2179,7 @@ pub fn portapapeles_limpiar_todo(
 }
 
 // ======================================================
-// 🆔📌 VER FIJADOS DE OTROS PORTAPAPELES — Cambio 2
+// 🆔📌 VER FIJADOS DE OTROS PORTAPAPELES
 // ------------------------------------------------------
 // portapapeles_listar_otros: arma el popup — IDs distintas a la
 // propia que tengan fijados en el pool, con su nombre resuelto
@@ -2199,9 +2194,7 @@ pub fn portapapeles_limpiar_todo(
 // portapapeles_fijar_como: fija bajo una ID DISTINTA a la de la
 // ventana que llama — mientras se está viendo el pool de otro
 // Portapapeles, fijar un rotativo debe quedar guardado bajo esa ID
-// mostrada, no la propia de la ventana (spec: "Si se fija otro
-// rotatorio, debe hacerse con la nueva ID, la que está mostrando
-// ahora"). `id_ventana` sigue sirviendo para refrescar_datos
+// mostrada, no la propia de la ventana. `id_ventana` sigue sirviendo para refrescar_datos
 // (registro/rotativos de la ventana real, sin relación con qué ID
 // se está fijando); `id_destino` es la que se usa como prefijo del
 // archivo fijado.
@@ -2250,7 +2243,7 @@ pub fn portapapeles_pegar(ruta: String) -> Result<(), String> {
 // 📋 PORTAPAPELES — TAMAÑOS CONFIGURABLES
 // ------------------------------------------------------
 // Solo tamaño de BOTÓN tiene funciones propias (portapapeles_boton_
-// pequeno/mediano/grande en config.rs, Etapa C) — el tamaño de TEXTO
+// pequeno/mediano/grande en config.rs) — el tamaño de TEXTO
 // reusa menu_texto_pequeno/mediano/grande tal cual (ver config.rs),
 // así que ya están cubiertos por establecer_menu_texto_pequeno/
 // mediano/grande, comandos existentes de MenuExpress, sin duplicar
@@ -2310,8 +2303,8 @@ const VENTANA_CONFIGURACION: &str = "configuracion";
 
 #[tauri::command]
 pub async fn abrir_ventana_configuracion(app: tauri::AppHandle) -> Result<(), String> {
-    // Etapa G: revalida "Iniciar con perfil" cada vez que se abre
-    // Configuración (Regla 19).
+    // Revalida "Iniciar con perfil" cada vez que se abre
+    // Configuración.
     let _ = crate::configuracion_usuario::validar_iniciar_con_perfil();
 
     // Mismo motivo que abrir_ventana_captura_coordenada(): tiene que
@@ -2342,7 +2335,7 @@ pub async fn abrir_ventana_configuracion(app: tauri::AppHandle) -> Result<(), St
 }
 
 // ======================================================
-// ⚙️ CONFIGURACIÓN — PESTAÑA GENERAL (Etapa 3)
+// ⚙️ CONFIGURACIÓN — PESTAÑA GENERAL
 // ------------------------------------------------------
 // Comandos de la pestaña "General" de la Ventana de
 // Configuración. Toda la lógica de catálogo/overrides vive
@@ -2466,7 +2459,7 @@ pub async fn configuracion_restablecer_claves(claves: Vec<String>) -> Result<(),
 }
 
 // ======================================================
-// ⌨️ CONFIGURACIÓN — PESTAÑA TECLAS (Etapa 5)
+// ⌨️ CONFIGURACIÓN — PESTAÑA TECLAS
 // ------------------------------------------------------
 // El catálogo (108 pulsadores, ver pulsadores.tsv) lo
 // entrega tal cual pulsadores::todos() — la agrupación por
@@ -2533,7 +2526,7 @@ pub async fn configuracion_guardar_lote_teclas(
 }
 
 // ======================================================
-// 🎨 CONFIGURACIÓN — PESTAÑA APARIENCIA (Etapa 6)
+// 🎨 CONFIGURACIÓN — PESTAÑA APARIENCIA
 // ------------------------------------------------------
 // Mismo patrón que General/Teclas: el catálogo (colores y
 // tamaños expuestos, ver apariencia.tsv) y los overrides
@@ -2848,7 +2841,7 @@ pub fn configuracion_refrescar_ventanas_apariencia(app: tauri::AppHandle) {
 }
 
 // ======================================================
-// 🛠️ MOTOR — MODO PORTABLE / INTERCEPTION (Etapa F)
+// 🛠️ MOTOR — MODO PORTABLE / INTERCEPTION
 // ======================================================
 
 #[tauri::command]

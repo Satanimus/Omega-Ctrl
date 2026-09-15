@@ -1,8 +1,6 @@
 // ======================================================
 // 📋 back_portapapeles
 // ======================================================
-// ETAPAS E, F Y G DEL PLAN "PORTAPAPELES"
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
 // Dueño de la carpeta física del pool compartido de Portapapeles:
@@ -12,28 +10,28 @@
 //   ├── Imagen_13.45.55.png              (rotativo)
 //   └── la ciudad es.txt                 (rotativo)
 //
-// (Etapa E) Funciones PURAS de manejo de archivos: nombrar, guardar
-// un elemento nuevo como rotativo, listar (rotativos / fijados de un
+// Funciones PURAS de manejo de archivos: nombrar, guardar un
+// elemento nuevo como rotativo, listar (rotativos / fijados de un
 // id), aplicar el límite del pool, fijar/desfijar, renombrar, editar
 // contenido de texto, eliminar. Estas funciones no saben qué filas
 // están en modo Registro ni escuchan el portapapeles del sistema —
 // solo entienden la carpeta y sus archivos.
 //
-// (Etapa F) Dueño también del estado ACTIVOS (qué ids de fila están
-// en modo Registro ahora mismo y con qué límite cada uno), del
-// límite EFECTIVO entre todos ellos, y del arranque (una sola vez
-// por proceso) del listener real de back_portapapeles_captura.rs.
+// Dueño también del estado ACTIVOS (qué ids de fila están en modo
+// Registro ahora mismo y con qué límite cada uno), del límite
+// EFECTIVO entre todos ellos, y del arranque (una sola vez por
+// proceso) del listener real de back_portapapeles_captura.rs.
 // en_cambio_del_sistema() es el punto donde un aviso real de cambio
 // del portapapeles termina convirtiéndose (o no, según ACTIVOS) en
 // un archivo nuevo del pool.
 //
-// (Etapa G) Dueño también de las ventanas flotantes nativas de
-// Portapapeles — mismo patrón que back_menu_express.rs (registro
-// ABIERTOS_VENTANAS + AppHandle global + posicionamiento Persistente/
-// Cursor + WS_EX_NOACTIVATE). abrir_o_alternar() aplica las reglas
-// de apertura del plan (según ACTIVOS, ver construir_datos) para
-// decidir si la ventana abre en modo Registro (mostrando todo el
-// pool) o en Simple (mostrando/generando un solo rotativo actual).
+// Dueño también de las ventanas flotantes nativas de Portapapeles —
+// mismo patrón que back_menu_express.rs (registro ABIERTOS_VENTANAS
+// + AppHandle global + posicionamiento Persistente/Cursor +
+// WS_EX_NOACTIVATE). abrir_o_alternar() aplica las reglas de
+// apertura (según ACTIVOS, ver construir_datos) para decidir si la
+// ventana abre en modo Registro (mostrando todo el pool) o en
+// Simple (mostrando/generando un solo rotativo actual).
 //
 // Testeable con datos de prueba (ver tests al final), sin ventana
 // real de Windows detrás (crear_ventana() sí la necesita, pero el
@@ -57,30 +55,23 @@
 // ------------------------------------------------------
 // 2. ¿Quién llama este archivo?
 //
-// back_portapapeles_captura::en_cambio_portapapeles() (Etapa D) ya
-// llama a en_cambio_del_sistema() acá abajo cada vez que Windows
-// avisa un cambio real del portapapeles — es la única conexión entre
-// el listener y el pool de archivos.
+// back_portapapeles_captura::en_cambio_portapapeles() ya llama a
+// en_cambio_del_sistema() acá abajo cada vez que Windows avisa un
+// cambio real del portapapeles — es la única conexión entre el
+// listener y el pool de archivos.
 //
-// ETAPA G: todavía nadie más llama a abrir_o_alternar()/inicializar()/
-// cerrar()/cerrar_todas()/obtener_datos() — Etapa I conecta
-// abrir_o_alternar() con el brazo AccionCache::Portapapeles de
-// runtime.rs (mismo criterio que back_menu_express.rs), lib.rs/
-// setup() llama inicializar() recién cuando se agregue ahí, y Etapa H
-// expone el resto (toggle Registro, fijar, etc.) como comandos Tauri
-// finos que delegan acá. Hasta entonces, el compilador va a avisar
-// con warnings de "función/struct nunca usada" para varias de las
-// funciones públicas de esta etapa (abrir_o_alternar, inicializar,
-// cerrar_todas, obtener_datos) — es esperable, mismo caso que pasó
-// con back_portapapeles_captura.rs en la Etapa D, y desaparece solo
-// a medida que Etapas H/I las conecten.
+// abrir_o_alternar() se conecta desde el brazo
+// AccionCache::Portapapeles de runtime.rs (mismo criterio que
+// back_menu_express.rs); lib.rs/setup() llama inicializar(); el
+// resto (toggle Registro, fijar, etc.) se expone como comandos Tauri
+// finos que delegan acá.
 // ------------------------------------------------------
 // 3. ¿Qué información recibe?
 //
 // Contenido de portapapeles (ContenidoPortapapeles, de
 // back_portapapeles_captura.rs), rutas de archivos ya existentes en
 // el pool, ids de Portapapeles (String, el mismo RemapeoCache::id de
-// la fila), y — Etapa G — un PortapapelesPaquete (espejo de
+// la fila), y un PortapapelesPaquete (espejo de
 // AccionCache::Portapapeles) para abrir_o_alternar()/inicializar(app)
 // para fijar el AppHandle global.
 // ------------------------------------------------------
@@ -90,12 +81,11 @@
 // id dueño si aplica, fecha de modificación) — listas de estos para
 // listar_rotativos()/listar_fijados(), o una ruta sola para las
 // operaciones de escritura (guardar_rotativo, fijar, desfijar,
-// renombrar). Etapa F agrega: esta_activo()/hay_algun_activo() (bool)
-// y limite_efectivo() (u32) que Etapa G ya usa para decidir cómo
-// abrir cada ventana según las reglas del plan. Etapa G agrega:
-// PortapapelesDatosUI (paquete completo ya serializable para la
-// ventana — nombre/comportamiento/ubicacion/tamaños/límite/color +
-// fijados/rotativos en vocabulario UI) vía obtener_datos(id).
+// renombrar). También esta_activo()/hay_algun_activo() (bool) y
+// limite_efectivo() (u32), que se usan para decidir cómo abrir cada
+// ventana; y PortapapelesDatosUI (paquete completo ya serializable
+// para la ventana — nombre/comportamiento/ubicacion/tamaños/límite/
+// color + fijados/rotativos en vocabulario UI) vía obtener_datos(id).
 // ------------------------------------------------------
 // 5. Reglas / decisiones
 //
@@ -135,11 +125,11 @@
 //   nombre con el id pedido — no hace falta una función aparte.
 // • aplicar_limite() opera sobre el pool global de rotativos (no por
 //   fila) — el límite EFECTIVO entre varios Portapapeles activos a
-//   la vez lo calcula Etapa F (ver limite_efectivo() más abajo);
+//   la vez lo calcula (ver limite_efectivo() más abajo);
 //   aplicar_limite() en sí solo aplica el número que llega.
 // • editar_texto() rechaza archivos que no sean .txt.
 //
-// ETAPA F — ACTIVOS, arranque/parada de la captura real:
+// ACTIVOS, arranque/parada de la captura real:
 // • ACTIVOS es el conjunto de ids de fila en modo Registro en este
 //   momento, con el límite que CADA una pidió (plan: "El número de
 //   cada Portapapeles indica solo el número que muestra, es
@@ -153,7 +143,7 @@
 //   define en 0 para ese caso.
 // • activar_registro() es idempotente por id: si el id ya estaba en
 //   ACTIVOS, solo actualiza su límite pedido (no reinicia nada).
-// • ETAPA J.1 (reemplaza el diseño original "el listener arranca una
+// • (Reemplaza el diseño original "el listener arranca una
 //   vez y nunca se detiene"): ahora hay UN SOLO listener nativo
 //   (back_portapapeles_captura::asegurar_listener() / detener_
 //   listener()) cuya existencia sigue a debe_existir_listener() —
@@ -178,7 +168,7 @@
 //   recalculados — así ninguna necesita cerrarse/reabrirse para
 //   verse actualizada.
 //
-// ETAPA G — ventana real:
+// Ventana real:
 // • Reglas de apertura (según ACTIVOS), ver construir_datos():
 //   1) id ya en ACTIVOS → modo Registro: se listan TODOS los
 //      rotativos del pool (ya recortados al límite por
@@ -207,8 +197,8 @@
 //   ubicar_en_monitor() acá no recibe es_radial (siempre cuadrícula/
 //   esquina).
 // • comportamiento (Toggle/Efímero) viaja en PortapapelesPaquete
-//   porque así compila AccionCache::Portapapeles, pero esta etapa no
-//   le da ningún efecto propio todavía (Portapapeles no tiene
+//   porque así compila AccionCache::Portapapeles, pero todavía no le
+//   da ningún efecto propio (Portapapeles no tiene
 //   botones ejecutables adentro como MenuExpress — click en un
 //   elemento pega, no dispara un remapeo con down/up propio).
 // ------------------------------------------------------
@@ -234,44 +224,39 @@
 //     Borra un elemento del pool.
 // activar_registro() / desactivar_registro()
 //     Agregan/sacan un id de ACTIVOS y aseguran/revisan el listener
-//     según haga falta (Etapa F, arranque/parada real en Etapa J.1).
+//     según haga falta.
 // esta_activo() / hay_algun_activo()
-//     Consultas de ACTIVOS para que Etapa G decida cómo abrir la
-//     ventana (Etapa F).
+//     Consultas de ACTIVOS para decidir cómo abrir la ventana.
 // limite_efectivo()
-//     El mayor límite pedido entre los ids activos ahora (Etapa F).
+//     El mayor límite pedido entre los ids activos ahora.
 // hay_alguna_ventana_abierta() / debe_existir_listener() /
 // debe_procesar_cambio() / detener_listener_si_no_hace_falta()
-//     Condición y helpers de arranque/parada del listener único
-//     (Etapa J.1).
+//     Condición y helpers de arranque/parada del listener único.
 // en_cambio_del_sistema()
 //     Reacciona a un cambio real del portapapeles: guarda/reusa el
 //     rotativo según haya Registro activo o solo ventana Simple
-//     abierta, y notifica a las ventanas abiertas (Etapa F, ETAPA
-//     J.1).
+//     abierta, y notifica a las ventanas abiertas.
 // notificar_ventanas_abiertas()
 //     Recalcula y emite (Tauri event) los datos de cada ventana de
-//     Portapapeles abierta (Etapa J.1).
+//     Portapapeles abierta.
 // inicializar(app)
 //     Guarda el AppHandle global — llamado una sola vez desde
-//     setup() de tauri::Builder, cuando lib.rs lo agregue (Etapa G,
-//     conexión real en Etapa I).
+//     setup() de tauri::Builder (lib.rs).
 // abrir_o_alternar(id, paquete)
 //     Si ya hay ventana abierta para ese id, la cierra (toggle a
 //     nivel de trigger); si no, arma los datos según ACTIVOS y crea
-//     la ventana (Etapa G).
+//     la ventana.
 // crear_ventana(app, id, paquete)
-//     Arma y muestra la ventana nativa real, en el hilo principal
-//     (Etapa G).
+//     Arma y muestra la ventana nativa real, en el hilo principal.
 // cerrar(id) / cerrar_todas()
-//     Cierran una ventana puntual, o todas (para Etapa L) (Etapa G).
+//     Cierran una ventana puntual, o todas.
 // obtener_datos(id)
 //     Consulta de sólo lectura del registro de ventanas abiertas —
-//     la propia ventana la llama al cargar (Etapa G).
+//     la propia ventana la llama al cargar.
 // construir_datos(id, paquete) / resolver_elemento_simple() /
 // mismo_contenido()
 //     Lógica interna de armado de datos según ACTIVOS y de
-//     reuso/generación del rotativo en modo Simple (Etapa G).
+//     reuso/generación del rotativo en modo Simple.
 // ======================================================
 
 use std::collections::HashMap;
@@ -465,9 +450,9 @@ pub fn listar_fijados(id_portapapeles: &str) -> Result<Vec<ElementoPortapapeles>
 // ------------------------------------------------------
 // Envoltorio de listar_fijados() + elemento_a_ui() para comandos.rs
 // — usado tanto para los fijados normales de una ventana como para
-// el popup "Ver Fijados de Otros Portapapeles" (Cambio 2, Etapa
-// 2C/2G): mismo dato, dos consumidores (fijados propios al abrir/
-// refrescar la ventana vía construir_datos, fijados de una ID
+// el popup "Ver Fijados de Otros Portapapeles": mismo
+// dato, dos consumidores (fijados propios al abrir/refrescar la
+// ventana vía construir_datos, fijados de una ID
 // AJENA vía el comando portapapeles_listar_fijados_de). Evita subir
 // la visibilidad de elemento_a_ui (queda privada, solo se usa acá
 // dentro del módulo).
@@ -481,7 +466,7 @@ pub fn listar_fijados_ui(id_portapapeles: &str) -> Result<Vec<ElementoPortapapel
 }
 
 // ======================================================
-// 🆔📌 LISTAR OTRAS IDS CON FIJADOS — Cambio 2
+// 🆔📌 LISTAR OTRAS IDS CON FIJADOS
 // ------------------------------------------------------
 // Todas las IDs distintas a `propio_id` que tengan al menos un
 // archivo fijado en el pool — incluye IDs de Portapapeles que ya no
@@ -820,7 +805,7 @@ pub fn editar_texto(ruta: &Path, contenido: &str) -> Result<(), String> {
 }
 
 // ======================================================
-// 🕒 MARCAR RECIENTE (silencioso) — ETAPA J.2
+// 🕒 MARCAR RECIENTE (silencioso)
 // ------------------------------------------------------
 // spec: al entrar a editar un archivo de texto, antes de abrir el
 // popup se le actualiza la fecha de modificación a "ahora" para que
@@ -853,7 +838,7 @@ pub fn eliminar(ruta: &Path) -> Result<(), String> {
 // siquiera `id_portapapeles`, el que pidió limpiar), activa la
 // supresión de auto-lectura para que el modo Simple no regenere un
 // rotativo nuevo hasta el próximo cambio de estado de Registro (ver
-// SUPRIMIR_AUTO_LECTURA más abajo — spec Cambio 1).
+// SUPRIMIR_AUTO_LECTURA más abajo).
 // ======================================================
 
 pub fn limpiar_todo(id_portapapeles: &str) -> Result<(), String> {
@@ -869,7 +854,7 @@ pub fn limpiar_todo(id_portapapeles: &str) -> Result<(), String> {
 }
 
 // ======================================================
-// 🟢 ACTIVOS (ids en modo Registro) — ETAPA F
+// 🟢 ACTIVOS (ids en modo Registro)
 // ------------------------------------------------------
 // id de fila -> límite que ESA fila pidió (columna Extra,
 // AccionCache::Portapapeles::limite). La presencia de un id acá ES
@@ -928,9 +913,8 @@ fn debe_suprimir_auto_lectura() -> bool {
 }
 
 /// Agrega (o actualiza el límite de) un id en modo Registro y se
-/// asegura de que el listener esté corriendo (ETAPA J.1 — ya no
-/// "una sola vez para siempre": asegurar_listener() es idempotente,
-/// así que llamarla de más no tiene costo).
+/// asegura de que el listener esté corriendo (asegurar_listener() es
+/// idempotente, así que llamarla de más no tiene costo).
 pub fn activar_registro(id_portapapeles: &str, limite: u32) {
     limpiar_supresion_auto_lectura();
 
@@ -960,7 +944,7 @@ pub fn esta_activo(id_portapapeles: &str) -> bool {
 }
 
 /// ¿Hay ALGÚN Portapapeles en modo Registro ahora mismo (de
-/// cualquier id)? — lo usa Etapa G para decidir si una ventana que
+/// cualquier id)? — se usa para decidir si una ventana que
 /// se abre para un id distinto al activo debe mostrarse en Simple
 /// sin generar un rotativo nuevo (regla de apertura del plan).
 pub fn hay_algun_activo() -> bool {
@@ -976,7 +960,7 @@ pub fn limite_efectivo() -> u32 {
 }
 
 // ======================================================
-// 👁️ CONDICIÓN DEL LISTENER — ETAPA J.1
+// 👁️ CONDICIÓN DEL LISTENER
 // ------------------------------------------------------
 // "Debe existir" el listener nativo mientras haya algún motivo para
 // mirar el portapapeles del sistema: algún Registro activo (de
@@ -1013,7 +997,7 @@ fn detener_listener_si_no_hace_falta() {
 }
 
 // ======================================================
-// 🔔 EN CAMBIO DEL SISTEMA — ETAPA F, reescrita en ETAPA J.1
+// 🔔 EN CAMBIO DEL SISTEMA
 // ------------------------------------------------------
 // Llamado por back_portapapeles_captura::en_cambio_portapapeles()
 // en cada aviso real de Windows (WM_CLIPBOARDUPDATE).
@@ -1242,12 +1226,12 @@ fn marcar_imagen_guardada_ahora(contenido: &ContenidoPortapapeles) {
 }
 
 // ======================================================
-// 📣 NOTIFICAR VENTANAS ABIERTAS — ETAPA J.1
+// 📣 NOTIFICAR VENTANAS ABIERTAS
 // ------------------------------------------------------
 // Recalcula PortapapelesDatosUI para cada ventana de Portapapeles
-// abierta (mismo camino que refrescar_datos(), Etapa H, que ya usan
+// abierta (mismo camino que refrescar_datos(), que ya usan
 // los comandos de mutación manual) y le emite un evento Tauri con
-// esos datos — la propia ventana (Etapa J.2) escucha ese evento y se
+// esos datos — la propia ventana escucha ese evento y se
 // vuelve a pintar sola, sin que el usuario tenga que hacer nada.
 // emit_to() por label (no un emit() global) para no forzar a cada
 // ventana a filtrar eventos ajenos a su propio id.
@@ -1268,7 +1252,7 @@ fn notificar_ventanas_abiertas() {
 }
 
 // ======================================================
-// 🔒 BLOQUEO ANTI-DUPLICADO (tras pegar) — ETAPA H
+// 🔒 BLOQUEO ANTI-DUPLICADO (tras pegar)
 // ------------------------------------------------------
 // spec: "Al clickear en [el nombre de un elemento] se pega el
 // contenido del archivo al portapapeles y a la ventana activa. Hacer
@@ -1287,15 +1271,12 @@ fn notificar_ventanas_abiertas() {
 // nuevo del usuario y generarían un rotativo duplicado del mismo
 // contenido que ya existía.
 //
-// IGNORAR_PROXIMO_CAMBIO_MS subió de 400 a 600: pegar() ahora espera
-// 500ms (ver el Sleep justo antes de emitir_ctrl_v(), necesario para
-// que Paint llegue a "asentar" una imagen pesada antes del Ctrl+V
-// automático) DESPUÉS de escribir el portapapeles pero ANTES de que
-// se dispare cualquier lectura/reescritura asociada — con la ventana
-// vieja de 400ms, ese margen ya alcanzaba a vencer antes de que el
-// bloqueo hiciera falta, y una imagen clickeada volvía a aparecer
-// duplicada en el pool. 600ms deja margen sobre los 600ms del Sleep
-// más el tiempo real de escritura + procesamiento del propio evento.
+// pegar() espera 500ms (ver el Sleep justo antes de emitir_ctrl_v(),
+// necesario para que Paint llegue a "asentar" una imagen pesada antes
+// del Ctrl+V automático) DESPUÉS de escribir el portapapeles pero
+// ANTES de que se dispare cualquier lectura/reescritura asociada.
+// IGNORAR_PROXIMO_CAMBIO_MS deja margen sobre ese Sleep más el tiempo
+// real de escritura + procesamiento del propio evento.
 //
 // Se usa un timestamp con expiración corta (no solo un booleano) en
 // vez de "bloqueado hasta que llegue el próximo aviso": si por lo
@@ -1304,7 +1285,7 @@ fn notificar_ventanas_abiertas() {
 // vencimiento dejaría el pool bloqueado para siempre. Con
 // expiración, como mucho se pierde un aviso real dentro de esa
 // ventana muy corta — mismo tipo de trade-off que IGNORAR_MOVED_MS
-// más abajo (Etapa G).
+// más abajo.
 // ======================================================
 
 static IGNORAR_HASTA: Mutex<Option<std::time::Instant>> = Mutex::new(None);
@@ -1333,7 +1314,7 @@ fn ignorar_proximo_cambio() -> bool {
 }
 
 // ======================================================
-// 📌➡️📋 PEGAR — ETAPA H
+// 📌➡️📋 PEGAR
 // ------------------------------------------------------
 // spec: click en el nombre de un elemento → "se pega el contenido
 // del archivo al portapapeles y a la ventana activa". Dos pasos:
@@ -1343,7 +1324,7 @@ fn ignorar_proximo_cambio() -> bool {
 //    escribir_portapapeles) — esto es lo que "pega al portapapeles".
 // 2) Simula Ctrl+V con SendInput — esto es lo que "pega a la ventana
 //    activa". La ventana de Portapapeles nunca tiene foco (creada
-//    con WS_EX_NOACTIVATE, Etapa G) así que Ctrl+V le llega a la
+//    con WS_EX_NOACTIVATE) así que Ctrl+V le llega a la
 //    ventana que el usuario tenía activa antes de abrir el
 //    Portapapeles, que sigue siéndolo.
 //
@@ -1722,14 +1703,14 @@ fn input_teclado(vk: VIRTUAL_KEY, soltar: bool) -> INPUT {
 }
 
 // ======================================================
-// 🪟 VENTANA DE PORTAPAPELES — ETAPA G
+// 🪟 VENTANA DE PORTAPAPELES
 // ------------------------------------------------------
 // Ciclo de vida de la ventana real, paralelo a
 // back_menu_express.rs (mismo registro ABIERTOS + AppHandle global,
 // mismo criterio de posicionamiento Persistente/Cursor y
 // WS_EX_NOACTIVATE). A diferencia de MenuExpress, acá no hay
 // "botones" que compilar de antemano: el contenido (fijados/
-// rotativos) se lee del pool de archivos (Etapa E) recién al armar
+// rotativos) se lee del pool de archivos recién al armar
 // los datos de la ventana, según el modo que le toque abrir según
 // ACTIVOS (reglas del plan, ver más abajo).
 // ======================================================
@@ -1855,11 +1836,11 @@ pub struct PortapapelesDatosUI {
 }
 
 // ======================================================
-// 🆔📌 OTRO PORTAPAPELES (con fijados) — Cambio 2
+// 🆔📌 OTRO PORTAPAPELES (con fijados)
 // ------------------------------------------------------
 // Una entrada del popup "Ver Fijados de Otros Portapapeles": la ID
 // encontrada en el pool + su nombre resuelto contra los perfiles
-// guardados (perfil::buscar_nombres_portapapeles, Etapa 2B). `nombre`
+// guardados (perfil::buscar_nombres_portapapeles). `nombre`
 // en None cuando esa ID no está en ningún perfil (portapapeles ya
 // eliminado de la fila que lo creó, pero sus fijados sobreviven) —
 // el frontend debe mostrar la ID cruda en ese caso.
@@ -2365,7 +2346,7 @@ fn construir_datos(id: &str, paquete: &PortapapelesPaquete) -> PortapapelesDatos
         // se lista tal cual, sin generar nada nuevo. Solo cuando el
         // pool está realmente vacío entra a jugar la supresión: ahí
         // sí hay que decidir si se permite leer el portapapeles del
-        // sistema (resolver_elemento_simple) o no (spec Cambio 1).
+        // sistema (resolver_elemento_simple) o no.
         let existentes = listar_rotativos().unwrap_or_default();
 
         if !existentes.is_empty() {

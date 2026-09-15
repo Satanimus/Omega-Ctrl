@@ -1,14 +1,10 @@
 // ======================================================
-// 🗃️ Cache — ETAPAS 1 a 5 / 6 (ver DISENO_CACHE_V2.md)
+// 🗃️ Cache (ver DISENO_CACHE_V2.md)
 // ======================================================
-// Este archivo fusiona lo que antes eran cache.rs + analizador_
-// trigger.rs (BORRADO, ver Etapa 5): Etapa 1 (datos compilados),
-// Etapa 2 (motor de sesiones Runtime), Etapa 3 (motor de Captura) y
-// Etapa 4 (filtro de repeats + ruteo). Desde la Etapa 5,
-// lib.rs/entrada.rs/perfil_ui.rs ya apuntan acá (cache::) en vez de
-// al archivo viejo — el proyecto compila de punta a punta.
-// Queda pendiente la Etapa 6 (verificación funcional en la app real,
-// checklist maestro).
+// Este archivo fusiona lo que antes eran cache.rs y
+// analizador_trigger.rs (ya no existe) en 4 bloques: datos
+// compilados, motor de sesiones Runtime, motor de Captura, y
+// filtro de repeats + ruteo.
 // ======================================================
 
 use crate::eventos::{InputEvent, InputId, InputState};
@@ -39,7 +35,7 @@ fn emitir_cambio_estado_cache() {
 use std::sync::{LazyLock, Mutex};
 
 // ======================================================
-// ============ ETAPA 1 — DATOS COMPILADOS ==============
+// ============ DATOS COMPILADOS ==============
 // ======================================================
 // (sin cambios respecto a la entrega anterior)
 
@@ -151,12 +147,12 @@ fn compilado_actual() -> EstadoCompilado {
 }
 
 // ======================================================
-// ======= ETAPA 2 — MOTOR DE SESIONES RUNTIME ==========
+// ======= MOTOR DE SESIONES RUNTIME ==========
 // ======================================================
 // 1. ¿Qué hace esta parte?
 //
 // Matching de cada Down/Up real contra los remapeos
-// compilados (Etapa 1), con timers de 3 fases + rueda, e
+// compilados (bloque anterior), con timers de 3 fases + rueda, e
 // instancias activas esperando su Up real (Turbo/Mantener/
 // Click Sostenido/Normal).
 //
@@ -167,10 +163,9 @@ fn compilado_actual() -> EstadoCompilado {
 // número uno del bug que motivó esta reescritura).
 // ------------------------------------------------------
 // 2. ¿Quién llama esta parte?
-// La Etapa 4 (filtro de repeats + ruteo, se agrega después a
-//     este mismo archivo) — único punto de entrada real:
-//     recibir_down_rt() / recibir_up_rt(). Hasta que esa etapa
-//     no esté, estas dos funciones no las llama nadie más.
+// El filtro de repeats + ruteo (más abajo en este mismo
+//     archivo) — único punto de entrada real:
+//     recibir_down_rt() / recibir_up_rt().
 // runtime.rs — recibe OrdenRuntime::Iniciar / Detener.
 // entrada.rs — recibe retener() / pasar() / consumir(), SIN
 //     cambios de contrato respecto a hoy.
@@ -209,8 +204,8 @@ enum FaseSesion {
     /// nuevo — ver recibir_down_rt/recibir_down_captura). `toques`
     /// arranca en 1 (representa el primer toque, ya ocurrido).
     EsperandoTriple { toques: u8 },
-    /// Exclusivo de la rueda del mouse — se completa en la Etapa 4
-    /// (ahí es donde llegan los InputState::Pulse). Queda declarado
+    /// Exclusivo de la rueda del mouse — se completa en el punto de
+    /// entrada único (ahí es donde llegan los InputState::Pulse). Queda declarado
     /// acá porque es parte del mismo enum de fases y del mismo
     /// mecanismo de timers.
     CerrandoRueda { pulsos: u64 },
@@ -229,7 +224,7 @@ struct Sesion {
     /// RETENIDO esperándola. Las sesiones de Captura NUNCA son
     /// fantasma (siempre queda en false).
     fantasma: bool,
-    /// Solo Captura (ver Etapa 3, más abajo). Una condición ya
+    /// Solo Captura (ver Motor de Captura, más abajo). Una condición ya
     /// resuelta pero que no se manda todavía porque sigue quedando
     /// algo físicamente presionado. Runtime nunca la toca — sus
     /// resoluciones siempre se mandan en el acto.
@@ -285,10 +280,10 @@ struct EstadoRuntime {
     /// EsperandoMantenido a EsperandoDoble/EsperandoTriple (ver
     /// objetivo()), porque el timer necesita seguir sabiendo cuál fue
     /// el último Down agregado incluso después de soltarlo. Usar
-    /// `entrada` como filtro de repeats (Etapa 4) confundía un
+    /// `entrada` como filtro de repeats confundía un
     /// segundo/tercer toque real (Doble/Triple, con Up de por medio)
     /// con un auto-repeat de Windows — el bug quedó documentado en la
-    /// nota (b) de la Etapa 4, que resultó incorrecta al confrontarla
+    /// nota (b) del punto de entrada único, más abajo, que resultó incorrecta al confrontarla
     /// con la implementación real. Este campo es la única fuente de
     /// verdad para "¿está la tecla abajo ahora mismo?".
     presionadas: Vec<InputId>,
@@ -311,7 +306,7 @@ fn nuevo_id_sesion(runtime: &mut EstadoRuntime) -> u64 {
 // ------------------------------------------------------
 
 /// Punto de entrada para cada Down REAL (ya filtrado de repeats —
-/// ver Etapa 4). Nunca devuelve nada: avisa directo a entrada.rs
+/// ver más abajo). Nunca devuelve nada: avisa directo a entrada.rs
 /// (pasar/retener/consumir), igual que el diseño viejo.
 pub(crate) fn recibir_down_rt(input: InputId) {
     let mut runtime = RUNTIME.lock().unwrap();
@@ -319,7 +314,7 @@ pub(crate) fn recibir_down_rt(input: InputId) {
     // --- Down interrumpe timer: ¿es un segundo/tercer toque de la
     // MISMA tecla que ya está en fase Doble o Triple? (ver
     // DISENO_CACHE_V2.md, "Down interrumpe timer"). No se confunde
-    // con un repeat (Etapa 4 ya lo dejó pasar como Down real: hubo
+    // con un repeat (el filtro de repeats más abajo ya lo dejó pasar como Down real: hubo
     // un Up de por medio entre toques). ---
     if let Some(idx) = runtime.sesiones.iter().position(|s| {
         matches!(
@@ -716,7 +711,7 @@ fn resolver_match(remapeo: RemapeoCache, entrada: Vec<InputId>, _id: u64, restan
         runtime.presionadas.contains(g)
     });
 
-    // Etapa 8B: una fila Macro nunca tiene ExtraCache propio (Extra
+    // Una fila Macro nunca tiene ExtraCache propio (Extra
     // ahí es Comportamiento, no un molde de Turbo/Mantener), así que
     // requiere_up_real() de arriba nunca la detecta. Comportamiento
     // "Tecla mantenida" necesita el mismo tratamiento diferido
@@ -790,7 +785,7 @@ fn resolver_match(remapeo: RemapeoCache, entrada: Vec<InputId>, _id: u64, restan
 
 /// Reemplaza cualquier sesión fantasma existente por una nueva con
 /// `restantes` (o por ninguna, si `restantes` está vacío). Ver nota
-/// de diseño al principio de la Etapa 2: ya no consulta un tracker
+/// de diseño del Motor de Sesiones Runtime: ya no consulta un tracker
 /// físico global, recibe directo lo que quedó sin soltar de la
 /// sesión que se acaba de resolver.
 fn resembrar_fantasma(restantes: Vec<InputId>) {
@@ -1016,9 +1011,7 @@ fn iniciar_timer_generico(
 }
 
 // ======================================================
-// ============ ETAPA 3 — MOTOR DE CAPTURA ==============
-// ======================================================
-// (sin cambios respecto a la entrega anterior — ver historial)
+// ============ MOTOR DE CAPTURA ==============
 // ======================================================
 
 struct EstadoCaptura {
@@ -1420,7 +1413,7 @@ fn iniciar_timer_rueda_captura(generacion: u64) {
 }
 
 // ======================================================
-// ===== ETAPA 4 — PUNTO DE ENTRADA ÚNICO ===============
+// ===== PUNTO DE ENTRADA ÚNICO (filtro de repeats + ruteo) =====
 // ======================================================
 
 pub fn captura_activa() -> bool {

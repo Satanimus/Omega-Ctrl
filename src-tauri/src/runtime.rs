@@ -230,7 +230,7 @@
 //     el usuario. Usado por back_portapapeles::pegar() para el
 //     pegado automático.
 // ejecutar_macro_en_hilo(id, ruta)
-//     [Etapa 8B] Eliminada — el ejecutor de macro de texto plano
+//     Eliminada — el ejecutor de macro de texto plano
 //     (basado en split_whitespace, sin soporte de rutas/argumentos)
 //     se reemplazó por runt_macro.rs, que interpreta el JSON de
 //     pasos directo. ejecutar_lineas/ejecutar_linea NO se tocaron
@@ -465,7 +465,7 @@ static SIGUIENTE_GENERACION: std::sync::LazyLock<Mutex<u64>> =
 /// que cuelga de ahí). Encola la generación en GENERACIONES para que
 /// detener(id_fila) sepa, más adelante, a cuál apuntar.
 ///
-/// pub(crate) desde la Etapa 8B: runt_macro.rs necesita el mismo
+/// pub(crate) porque runt_macro.rs necesita el mismo
 /// mecanismo de id único por ejecución para sus propias instancias
 /// (Una ejecución/Toggle registra su propio id de ejecución; Tecla
 /// mantenida se anota en GENERACIONES para que el Up físico real la
@@ -602,7 +602,7 @@ fn ejecutar_accion(
             let _ = COLA_SALIDA.lock().unwrap().send((inputs, condicion));
         }
 
-        // Etapa 8B: el ejecutor real vive en runt_macro.rs — arma
+        // El ejecutor real vive en runt_macro.rs — arma
         // los pasos, Bucle/Marcador y decide qué hacer según
         // Comportamiento. Runtime solo despacha. A diferencia del
         // resto de las variantes de este match, acá NO se genera
@@ -638,7 +638,7 @@ fn ejecutar_accion(
             crate::back_multimedia::ejecutar(&comando, &alcance);
         }
 
-        // Alternar la ventana flotante del menú (etapa 5) — abrir_o_
+        // Alternar la ventana flotante del menú — abrir_o_
         // alternar() decide sola si toca crear la ventana o cerrar la
         // que ya estaba abierta para este id (mismo trigger = toggle,
         // ver back_menu_express.rs). El id de la ORDEN (no de la
@@ -853,7 +853,7 @@ fn ejecutar_click_coordenada(
 // para .exe/abrir_con.
 // ======================================================
 
-// pub(crate) desde la Etapa 8B: runt_macro.rs reusa esta misma
+// pub(crate) porque runt_macro.rs reusa esta misma
 // función para el paso "Abrir Archivo/Programa" — mismo criterio que
 // AccionCache::AbrirArchivo, sin reimplementar nada de bajo nivel.
 // Sigue spawneando su propio hilo interno (ver comentario largo más
@@ -1253,7 +1253,7 @@ pub(crate) fn emitir_mods_abajo(mods: &[InputId]) {
     }
 }
 
-// pub(crate) desde la Etapa 8B: runt_macro.rs las usa directo para
+// pub(crate) porque runt_macro.rs las usa directo para
 // el paso "Simular teclas" (Simple/Doble/Triple ya cubiertos por
 // estas dos; Mantenido y Normal/Turbo se arman a mano en
 // runt_macro.rs con emitir_down_input/emitir_up_input/esperar, ver
@@ -1425,7 +1425,7 @@ fn emitir_combo_arriba(inputs: &[InputId]) {
 }
 
 // ======================================================
-// 🛟 SALIDAS ABAJO (Etapa 8C — red de seguridad global)
+// 🛟 SALIDAS ABAJO (red de seguridad global)
 // ------------------------------------------------------
 // Qué salidas están físicamente abajo AHORA MISMO por acción del
 // motor. Se llena/vacía en los mismos dos puntos donde ya se emite
@@ -1439,8 +1439,8 @@ fn emitir_combo_arriba(inputs: &[InputId]) {
 static SALIDAS_ABAJO: std::sync::LazyLock<Mutex<HashSet<InputId>>> =
     std::sync::LazyLock::new(|| Mutex::new(HashSet::new()));
 
-// pub(crate) desde la Etapa 8B — ver nota en emitir_un_toque() más
-// arriba. Desde la Etapa 8C también registra la salida en
+// pub(crate) — ver nota en emitir_un_toque() más
+// arriba. También registra la salida en
 // SALIDAS_ABAJO (ver arriba) — insert() ANTES de emitir_evento(),
 // para que quede registrada incluso si el evento tarda en salir.
 pub(crate) fn emitir_down_input(input: InputId) {
@@ -1451,7 +1451,7 @@ pub(crate) fn emitir_down_input(input: InputId) {
     emitir_evento(evento);
 }
 
-// Desde la Etapa 8C: saca la salida de SALIDAS_ABAJO — un Up real,
+// Saca la salida de SALIDAS_ABAJO — un Up real,
 // sea el normal del flujo o el forzado por detener_todo(), siempre
 // pasa por acá.
 pub(crate) fn emitir_up_input(input: InputId) {
@@ -1466,7 +1466,7 @@ pub(crate) fn emitir_up_input(input: InputId) {
 // ⏱️ ESPERAR
 // ======================================================
 
-// pub(crate) desde la Etapa 8B: runt_macro.rs la usa para el paso
+// pub(crate) porque runt_macro.rs la usa para el paso
 // "Tiempo de espera" y para las duraciones fijas de "Simular teclas"
 // (Mantenido con Extra Ninguno, Normal/Turbo) — ver comentario largo
 // de espera interrumpible en runt_macro.rs, que NO usa esta función
@@ -1831,7 +1831,7 @@ fn detener_ejecucion(id_ejecucion: &str) {
 // limpió), se considera que debe detenerse — nunca se
 // entra a un ciclo sin garantía de poder pararlo.
 //
-// pub(crate) desde la Etapa 8B: runt_macro.rs la consulta antes de
+// pub(crate) porque runt_macro.rs la consulta antes de
 // cada paso (esté esperando o no), mismo criterio que
 // ejecutar_lineas() antes de cada REPETIR.
 // ======================================================
@@ -1841,7 +1841,7 @@ pub(crate) fn debe_detenerse(id: &str) -> bool {
 }
 
 // ======================================================
-// 🛑 DETENER TODO (Etapa 8C — red de seguridad global)
+// 🛑 DETENER TODO (red de seguridad global)
 // ------------------------------------------------------
 // Llamada por perfil.rs (junto a cada punto donde ya se llama
 // cache::borrar_cache() — activar/desactivar/guardar/clonar/
@@ -1853,11 +1853,11 @@ pub(crate) fn debe_detenerse(id: &str) -> bool {
 // 1) Marca como detenida cualquier ejecución activa del mecanismo
 //    general (INSTANCIAS) — Turbo/Normal/Mantener/ClickSostenido
 //    (vía runt_extra) y Macro con Comportamiento Tecla mantenida
-//    (Etapa 8B, que se anota acá mismo).
+//    (que se anota acá mismo).
 // 2) Limpia el registro propio de runt_macro.rs de ejecuciones Una
-//    ejecución/Toggle (Etapa 8B) — independiente de INSTANCIAS.
+//    ejecución/Toggle — independiente de INSTANCIAS.
 // 3) Despierta el mecanismo de espera interrumpible de runt_macro.rs
-//    (Etapa 8B) — para que cualquier hilo de Macro dormido (con
+//    — para que cualquier hilo de Macro dormido (con
 //    cualquiera de los tres Comportamientos) se entere YA de las
 //    banderas puestas en 1) y 2), en vez de esperar a que venza su
 //    propio plazo.
@@ -1902,23 +1902,12 @@ fn soltar_salidas_pendientes() {
 }
 
 // ======================================================
-// 📜 (Etapa 8B) El viejo ejecutor de macro de texto plano
-//     (ejecutar_macro_en_hilo, basado en split_whitespace) se
-//     eliminó acá — reemplazado por runt_macro.rs, que interpreta
-//     el JSON de pasos y no depende de este intérprete de líneas.
-//     ejecutar_lineas/ejecutar_linea NO se tocan: el resto de la
-//     app los sigue usando para Turbo/Normal/Mantener vía
-//     runt_extra (ver comentario en el header de este archivo).
-// ======================================================
-
-// ======================================================
 // 📝 REGISTRAR INSTANCIA
 // ------------------------------------------------------
-// Extraída de ejecutar_lineas() en la Etapa 8B para que
-// runt_macro.rs pueda registrar sus propias ejecuciones en
+// Permite que runt_macro.rs registre sus propias ejecuciones en
 // INSTANCIAS con la misma protección — ver el comentario "[FIX]"
-// original más abajo (ejecutar_lineas ahora llama a esta función en
-// vez de hacer el insert a mano).
+// original más abajo (ejecutar_lineas llama a esta función en vez
+// de hacer el insert a mano).
 // ======================================================
 
 pub(crate) fn registrar_instancia(id: &str) {
@@ -1960,7 +1949,7 @@ fn ejecutar_lineas(id: String, lineas: Vec<String>) {
     // `entry().or_insert(false)` solo escribe `false` si la entrada
     // TODAVÍA NO existía; si ya existía (pre-registrada en `true`
     // por un Detener que llegó primero), la deja tal cual está. Ver
-    // registrar_instancia() más arriba (extraída en la Etapa 8B).
+    // registrar_instancia() más arriba.
     registrar_instancia(&id);
 
     let inicio_bucle = lineas
@@ -2079,9 +2068,9 @@ fn ejecutar_linea(id: &str, linea: &str) {
 // ======================================================
 // 🧹 LIMPIAR INSTANCIA
 // ------------------------------------------------------
-// pub(crate) desde la Etapa 8B: runt_macro.rs la llama al terminar
-// una ejecución (natural o cortada), mismo criterio que
-// ejecutar_lineas() al final de su loop.
+// runt_macro.rs la llama al terminar una ejecución (natural o
+// cortada), mismo criterio que ejecutar_lineas() al final de su
+// loop.
 // ======================================================
 
 pub(crate) fn limpiar_instancia(id: String) {
