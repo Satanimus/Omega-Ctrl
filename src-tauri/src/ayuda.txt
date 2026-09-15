@@ -92,7 +92,7 @@ Usos del botón `⁝` de una fila (para cualquier tabla del programa):
 *Shift+click*: Selección grupal entre dos filas.
 ---
 
-**Color**
+🎨 **Color**
 
 Sirve de identificador visual en tabla.
 
