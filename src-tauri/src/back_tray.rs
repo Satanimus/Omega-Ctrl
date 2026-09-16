@@ -103,8 +103,6 @@ fn reconstruir_menu(app: &AppHandle) -> Menu<tauri::Wry> {
         .expect("No se pudo crear el separador del menú de bandeja");
     let separador_2 = PredefinedMenuItem::separator(app)
         .expect("No se pudo crear el separador del menú de bandeja");
-    let separador_3 = PredefinedMenuItem::separator(app)
-        .expect("No se pudo crear el separador del menú de bandeja");
 
     let nombres_perfiles = perfil::obtener_perfiles().unwrap_or_default();
     let nombre_actual = perfil::obtener_nombre_actual().ok();
@@ -129,7 +127,6 @@ fn reconstruir_menu(app: &AppHandle) -> Menu<tauri::Wry> {
     }
 
     items.push(&separador_2);
-    items.push(&separador_3);
     items.push(&item_salir);
 
     Menu::with_items(app, &items).expect("No se pudo armar el menú de bandeja")
@@ -170,7 +167,10 @@ fn texto_toggle_perfil() -> String {
         "Desactivar Perfil"
     };
 
-    format!("{accion} ({})", formatear_atajo(&config::tecla_toggle_perfil()))
+    format!(
+        "{accion} ({})",
+        formatear_atajo(&config::tecla_toggle_perfil())
+    )
 }
 
 /// Arma el texto legible de un AtajoSimple, ej. "Ctrl+F1" — mismos
