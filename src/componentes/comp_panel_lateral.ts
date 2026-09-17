@@ -14,6 +14,8 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
+import { listen } from "@tauri-apps/api/event";
+
 import { crearBoton } from "./comp_boton";
 
 import { confirmarPopup } from "./comp_popup_confirmar";
@@ -68,6 +70,13 @@ let alCambiarPerfilActual:
   | ((resultado: ResultadoPerfil) => void | Promise<void>)
   | null = null;
 
+// Indicador (circulito) del perfil actual dentro de la lista — se
+// actualiza en vivo con "cache_estado_cambio" sin reconstruir todo
+// el panel (ver listener más abajo).
+let indicadorPerfilActual: HTMLElement | null = null;
+
+let escuchaCacheRegistrada = false;
+
 // ======================================================
 // CREAR PANEL
 // ======================================================
@@ -92,6 +101,18 @@ export function crearPanelLateral(
   panel.append(cuerpoPanel);
 
   panelElemento = panel;
+
+  if (!escuchaCacheRegistrada) {
+    escuchaCacheRegistrada = true;
+
+    void listen<boolean>("cache_estado_cambio", (evento) => {
+      if (indicadorPerfilActual) {
+        indicadorPerfilActual.dataset.estado = evento.payload
+          ? "activo"
+          : "inactivo";
+      }
+    });
+  }
 
   return panel;
 }
@@ -148,10 +169,18 @@ async function recargarContenidoPanel(): Promise<void> {
     return;
   }
 
+  let activoActual = false;
+
+  try {
+    activoActual = await invoke<boolean>("obtener_estado_cache");
+  } catch (error) {
+    console.error("❌ No se pudo obtener el estado de la caché:", error);
+  }
+
   cuerpoPanel.replaceChildren(
     crearSubtitulo("Perfiles"),
 
-    crearListaPerfiles(perfiles, nombreActual),
+    crearListaPerfiles(perfiles, nombreActual, activoActual),
 
     crearSeparador(),
 
@@ -247,12 +276,15 @@ export async function cambiarPerfilDesde(
 function crearListaPerfiles(
   perfiles: string[],
   nombreActual: string,
+  activoActual: boolean,
 ): HTMLElement {
   const lista = document.createElement("div");
 
   lista.className = "panel-lateral-lista";
 
   lista.setAttribute(ATRIBUTO_AYUDA_ID, "panel-lateral-lista");
+
+  indicadorPerfilActual = null;
 
   perfiles.forEach((nombre) => {
     const esActual = nombre === nombreActual;
@@ -275,7 +307,17 @@ function crearListaPerfiles(
 
     nombreElemento.textContent = nombre;
 
-    boton.replaceChildren(nombreElemento);
+    const indicador = document.createElement("span");
+
+    indicador.className = "panel-lateral-indicador";
+
+    indicador.dataset.estado = esActual && activoActual ? "activo" : "inactivo";
+
+    if (esActual) {
+      indicadorPerfilActual = indicador;
+    }
+
+    boton.replaceChildren(nombreElemento, indicador);
 
     // ==================================================
     // 🔄 CLICK

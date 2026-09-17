@@ -51,6 +51,8 @@
     max-width: 260px;
 
     height: 100%;
+
+    overflow-y: auto;
 }
 
 .panel-lateral-espacio {
@@ -58,6 +60,8 @@
 }
 
 .panel-lateral-subtitulo {
+    flex-shrink: 0;
+
     color: var(--text-disabled);
 
     font-size: var(--fs11);
@@ -78,11 +82,9 @@
 
     flex-direction: column;
 
+    flex-shrink: 0;
+
     gap: 0;
-
-    max-height: 240px;
-
-    overflow-y: auto;
 }
 
 .panel-lateral-item {
@@ -91,6 +93,8 @@
     align-items: center;
 
     justify-content: flex-start;
+
+    flex-shrink: 0;
 
     width: 100%;
 
@@ -129,11 +133,37 @@
     text-overflow: ellipsis;
 }
 
+.panel-lateral-indicador {
+    flex-shrink: 0;
+
+    width: 10px;
+
+    min-width: 10px;
+
+    height: 10px;
+
+    margin-left: var(--gap8);
+
+    border-radius: 50%;
+
+    border: 1px solid var(--red-dark);
+
+    background: color-mix(in srgb, var(--red-dark) var(--perfil-estado-opacidad), transparent);
+}
+
+.panel-lateral-indicador[data-estado="activo"] {
+    border-color: var(--green-dark);
+
+    background: color-mix(in srgb, var(--green-dark) var(--perfil-estado-opacidad), transparent);
+}
+
 /* ======================================================
    SEPARADOR
    ====================================================== */
 
 .panel-lateral-separador {
+    flex-shrink: 0;
+
     height: 1px;
 
     background: var(--border);
@@ -150,10 +180,14 @@
 
     flex-direction: column;
 
+    flex-shrink: 0;
+
     gap: 0;
 }
 
 .panel-lateral-acciones .ui-btn {
+    flex-shrink: 0;
+
     justify-content: flex-start;
 
     text-align: left;
@@ -190,6 +224,8 @@
    ====================================================== */
 
 .panel-lateral-configuracion {
+    flex-shrink: 0;
+
     justify-content: flex-start;
 
     text-align: left;
