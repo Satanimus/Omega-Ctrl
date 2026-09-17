@@ -115,15 +115,7 @@
 }
 
 /* ======================================================
-   🟢🔴 INDICADOR DEL PERFIL
-   ====================================================== */
-
-.perfil-estado .indicador {
-  margin-left: 0;
-}
-
-/* ======================================================
-   🟢🟡🔴 ESTADO DEL PERFIL
+   🟢🟡🔴 ESTADO DEL PERFIL — cápsula con círculo + nombre/estado
    ====================================================== */
 
 .perfil-estado {
@@ -135,19 +127,17 @@
 
   gap: var(--gap8);
 
-  height: 28px;
+  width: 150px;
 
-  padding: 0 var(--gap12);
+  height: 36px;
 
-  color: var(--text);
+  padding: 0 var(--gap16);
 
   border: 1px solid transparent;
 
-  border-radius: var(--r4);
+  border-radius: 999px;
 
   font-family: var(--font);
-
-  font-size: var(--fs13);
 
   white-space: nowrap;
 
@@ -159,36 +149,72 @@
     color 0.12s ease;
 }
 
+.perfil-estado-circulo {
+  width: 17px;
+
+  min-width: 17px;
+
+  height: 17px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.perfil-estado-textos {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  flex: 1;
+
+  min-width: 0;
+
+  line-height: 1.15;
+}
+
+.perfil-estado-textos .perfil-selector-nombre {
+  font-size: var(--fs16);
+
+  font-weight: 700;
+}
+
 .perfil-estado-texto {
   white-space: nowrap;
+
+  font-size: calc(var(--fs13) - 3px);
+
+  font-weight: 500;
 }
 
 .perfil-estado[data-estado="activo"] {
-  background: var(--green-dark);
+  color: var(--green-dark);
 
-  border-color: var(--tag-green);
+  border-color: currentColor;
 
-  color: var(--text);
-
-  font-weight: 600;
+  background: color-mix(in srgb, var(--green-dark) var(--perfil-estado-opacidad), transparent);
 }
 
 .perfil-estado[data-estado="activo"]:hover {
-  filter: brightness(1.15);
+  filter: brightness(1.25);
+
+  box-shadow: 0 0 8px 0px var(--green-dark);
 }
 
 .perfil-estado[data-estado="inactivo"] {
-  background: var(--red-dark);
+  color: var(--red-dark);
 
-  border-color: var(--tag-red);
+  border-color: currentColor;
 
-  color: var(--text);
-
-  font-weight: 600;
+  background: color-mix(in srgb, var(--red-dark) var(--perfil-estado-opacidad), transparent);
 }
 
 .perfil-estado[data-estado="inactivo"]:hover {
-  filter: brightness(1.15);
+  filter: brightness(1.25);
+
+  box-shadow: 0 0 8px 0px var(--red-dark);
 }
 
 /* ======================================================

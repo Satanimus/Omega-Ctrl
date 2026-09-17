@@ -144,55 +144,6 @@
 }
 
 /* ======================================================
-   🟢🟡🔴 ESTADO DEL PERFIL
-   ------------------------------------------------------
-   ÚNICA EXCEPCIÓN AL ESTILO GENERAL.
-   ====================================================== */
-
-.ui-btn.estado {
-
-    border-color: transparent;
-
-    color: var(--text);
-}
-
-/* ------------------------------
-   ACTIVO
-   ------------------------------ */
-
-.ui-btn.estado[data-estado="activo"] {
-
-    background: color-mix(in srgb, var(--green-dark) var(--perfil-activo-opacidad), transparent);
-
-    border-color: var(--green-dark);
-}
-
-.ui-btn.estado[data-estado="activo"]:hover {
-
-    background: var(--green);
-
-    border-color: var(--green);
-}
-
-/* ------------------------------
-   INACTIVO
-   ------------------------------ */
-
-.ui-btn.estado[data-estado="inactivo"] {
-
-    background: color-mix(in srgb, var(--red-dark) var(--perfil-inactivo-opacidad), transparent);
-
-    border-color: var(--red-dark);
-}
-
-.ui-btn.estado[data-estado="inactivo"]:hover {
-
-    background: color-mix(in srgb, var(--highlight-red) 10%, transparent);
-
-    border-color: var(--highlight-red);
-}
-
-/* ======================================================
    🔘 EFECTO PRESS / CLICK EN BARRA SUPERIOR
    ====================================================== */
 
@@ -210,11 +161,7 @@
     filter: brightness(0.95);
 }
 
-/* 3. Selector de Perfil y Estados (Activo / Inactivo) */
-
-.ui-btn.estado:active {
-    transform: translateY(1px) !important;
-}
+/* 3. Selector de Perfil (Contenedor principal + texto) */
 
 /* Selector/Desplegable del Perfil (Contenedor principal + texto) */
 .perfil-selector:active,
@@ -416,30 +363,6 @@
     text-overflow: ellipsis;
 
     white-space: nowrap;
-}
-
-/* ======================================================
-   ● INDICADORES
-   ====================================================== */
-
-.indicador {
-
-    display: inline-block;
-
-    width: 10px;
-
-    min-width: 10px;
-
-    height: 10px;
-
-    border-radius: 50%;
-
-    background: var(--highlight-red);
-}
-
-.indicador[data-estado="activo"] {
-
-    background: var(--green);
 }
 
 /* ======================================================

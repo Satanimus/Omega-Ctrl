@@ -48,11 +48,6 @@ import { agregarSeparadores } from "../core/core_perfil_acciones";
 
 import { esSeparador } from "../core/core_separadores";
 
-import {
-  crearIndicador,
-  actualizarIndicador,
-} from "../componentes/comp_indicador";
-
 // ======================================================
 // 🔄 REFRESCAR ESTADO DESDE BACKEND (cambio de modo motor)
 // ------------------------------------------------------
@@ -62,8 +57,6 @@ import {
 // polling de ui_statusbar.ts detecta que el modo motor cambió
 // (posiblemente desde la Ventana de Configuración).
 // ======================================================
-
-const cacheDotsPorToolbar = new WeakMap<HTMLElement, HTMLElement>();
 
 const nombresPorToolbar = new WeakMap<HTMLElement, HTMLElement>();
 
@@ -128,16 +121,10 @@ async function actualizarTooltipAtajoToggle(
 export async function refrescarEstadoDesdeBackend(
   toolbar: HTMLElement,
 ): Promise<void> {
-  const cacheDot = cacheDotsPorToolbar.get(toolbar);
-
-  if (!cacheDot) {
-    return;
-  }
-
   try {
     const activo = await invoke<boolean>("obtener_estado_cache");
 
-    marcarPerfilSegunCache(toolbar, cacheDot, activo);
+    marcarPerfilSegunCache(toolbar, activo);
   } catch (error) {
     console.error("❌ No se pudo refrescar el estado del perfil:", error);
   }
@@ -193,7 +180,10 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
                     class="perfil-estado"
                     type="button"
                     data-ayuda-id="perfil-estado"
-                ></button>
+                >
+                    <span class="perfil-estado-circulo"></span>
+                    <span class="perfil-estado-textos"></span>
+                </button>
 
             </div>
 
@@ -237,12 +227,8 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
     `;
 
   // ==================================================
-  // 🟢🔴 INDICADOR DE CACHE
+  // 📄 NOMBRE PERFIL + TEXTO ESTADO
   // ==================================================
-
-  const cacheDot = crearIndicador("cache-dot");
-
-  cacheDotsPorToolbar.set(toolbar, cacheDot);
 
   const nombrePerfil = document.createElement("span");
 
@@ -254,11 +240,11 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
 
   textoEstado.className = "perfil-estado-texto";
 
-  const botonEstadoInicial = toolbar.querySelector(
-    ".perfil-estado",
-  ) as HTMLButtonElement | null;
+  const contenedorTextosEstado = toolbar.querySelector(
+    ".perfil-estado-textos",
+  ) as HTMLElement | null;
 
-  botonEstadoInicial?.append(nombrePerfil, textoEstado);
+  contenedorTextosEstado?.append(nombrePerfil, textoEstado);
 
   actualizarTooltipAtajoToggle(toolbar);
 
@@ -284,7 +270,7 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
 
   invoke<boolean>("obtener_estado_cache")
     .then((activo) => {
-      marcarPerfilSegunCache(toolbar, cacheDot, activo);
+      marcarPerfilSegunCache(toolbar, activo);
     })
     .catch((error) => {
       console.error("❌ No se pudo obtener el estado de la caché:", error);
@@ -307,7 +293,7 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
       if (estadoActual === "activo") {
         await invoke("desactivar_perfil");
 
-        marcarPerfilSegunCache(toolbar, cacheDot, false);
+        marcarPerfilSegunCache(toolbar, false);
       } else if (estadoActual === "inactivo") {
         const resultado = await invoke<ResultadoCompilacion>("activar_perfil");
 
@@ -315,7 +301,7 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
 
         reconstruirTabla();
 
-        marcarPerfilSegunCache(toolbar, cacheDot, resultado.activo);
+        marcarPerfilSegunCache(toolbar, resultado.activo);
       }
     } catch (error) {
       console.error(
@@ -333,13 +319,7 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
   void refrescarEstadoDesdeBackend(toolbar);
 
   void listen<boolean>("cache_estado_cambio", (evento) => {
-    const cacheDot = cacheDotsPorToolbar.get(toolbar);
-
-    if (!cacheDot) {
-      return;
-    }
-
-    marcarPerfilSegunCache(toolbar, cacheDot, evento.payload);
+    marcarPerfilSegunCache(toolbar, evento.payload);
   });
 
   // ==================================================
@@ -362,7 +342,7 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
 
       const activo = await invoke<boolean>("obtener_estado_cache");
 
-      marcarPerfilSegunCache(toolbar, cacheDot, activo);
+      marcarPerfilSegunCache(toolbar, activo);
 
       toolbar.querySelector(".cambios-pendientes")?.classList.remove("visible");
     } catch (error) {
@@ -475,18 +455,12 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
 // MARCAR PERFIL SEGÚN CACHE
 // ======================================================
 
-function marcarPerfilSegunCache(
-  toolbar: HTMLElement,
-  cacheDot: HTMLElement,
-  activo: boolean,
-): void {
+function marcarPerfilSegunCache(toolbar: HTMLElement, activo: boolean): void {
   if (activo) {
     marcarPerfilActivo(toolbar);
   } else {
     marcarPerfilInactivo(toolbar);
   }
-
-  actualizarIndicador(cacheDot, activo);
 }
 
 // ======================================================
@@ -572,8 +546,6 @@ export async function aplicarResultadoPerfilEnToolbar(
 ): Promise<void> {
   const nombrePerfil = nombresPorToolbar.get(toolbar);
 
-  const cacheDot = cacheDotsPorToolbar.get(toolbar);
-
   const perfil = await convertirperfil_json(resultado.perfil);
 
   establecerPerfilUi(perfil);
@@ -590,7 +562,5 @@ export async function aplicarResultadoPerfilEnToolbar(
     nombrePerfil.textContent = resultado.nombre;
   }
 
-  if (cacheDot) {
-    marcarPerfilSegunCache(toolbar, cacheDot, resultado.cache_activo);
-  }
+  marcarPerfilSegunCache(toolbar, resultado.cache_activo);
 }
