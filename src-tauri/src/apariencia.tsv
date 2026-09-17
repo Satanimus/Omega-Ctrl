@@ -105,7 +105,7 @@ nivel	id	nombre_ui	valor_defecto	tipo
 0	barra-inferior-color	Color	#14141e	color
 0	barra-inferior-opacidad	Opacidad	60%	porcentaje
 2	perfil-estado	Opacidad btn Perfil Activo/Inactivo		
-0	perfil-estado-opacidad	Opacidad	50%	porcentaje
+0	perfil-estado-opacidad	Opacidad	20%	porcentaje
 2	botones-ghost	Botones generales hover highlight		
 0	botones-ghost-opacidad-hover	Opacidad hover	8%	porcentaje
 2	ventana	Ventanas/Indicadores		

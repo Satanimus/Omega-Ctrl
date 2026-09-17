@@ -38,6 +38,7 @@ barra-lateral-color=#100a18
 barra-lateral-opacidad=60%
 barra-inferior-color=#100a18
 barra-inferior-opacidad=60%
+perfil-estado-opacidad=20%
 botones-ghost-opacidad-hover=12%
 fondo-configuracion-color=#08040c
 fondo-configuracion-opacidad=50%
