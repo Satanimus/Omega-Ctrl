@@ -768,6 +768,7 @@ button.familia-highdark.familia-highdark:hover {
 .btn-menu-lateral:hover img {
 
     filter: drop-shadow(0 0 6px var(--highlight));
+    transform: scale(1.02)
 }
 
 .btn-menu-lateral:hover,
