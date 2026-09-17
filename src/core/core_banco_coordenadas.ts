@@ -249,7 +249,7 @@ export const PUNTO_REFERENCIA_STRING_A_NUMERO: Record<
 };
 
 // ======================================================
-// 🔄 BANCO → PERFIL (Etapa D)
+// 🔄 BANCO → PERFIL
 // ------------------------------------------------------
 // Traduce una CoordenadaBanco (elegida o recién creada en la
 // ventana "Coordenadas guardadas") al formato que usa

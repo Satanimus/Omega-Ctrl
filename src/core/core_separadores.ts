@@ -5,7 +5,7 @@
 // No toca el DOM ni el estado global: recibe datos, devuelve datos.
 // En el nuevo modelo, los separadores son elementos del array
 // `perfil.filas` (tipo "separador"). La pertenencia se deriva
-// por posición en cada render (Regla 3).
+// por posición en cada render.
 // ======================================================
 
 import type {
@@ -66,7 +66,7 @@ export function construirPlanVisual(perfil: Perfil): ItemVisualTabla[] {
 
     const indiceAbsoluto = i;
 
-    // Regla 7: si el separador activo está contraído, la fila no
+    // Si el separador activo está contraído, la fila no
     // entra al plan visual.
     if (separadorActivo && !separadorActivo.expandido) {
       continue;
@@ -83,7 +83,7 @@ export function construirPlanVisual(perfil: Perfil): ItemVisualTabla[] {
 
     const esUltima = siguienteEsSeparador || finDeArray;
 
-    // Regla 4: filas antes del primer separador no pertenecen a
+    // Filas antes del primer separador no pertenecen a
     // ninguno, por eso solo se agrega la info si hay separador activo.
     const infoSeparador = separadorActivo
       ? {
@@ -156,7 +156,7 @@ export function obtenerTramoDeSeparador(
 // ======================================================
 // ⬇️ CASCADA DESCENDENTE
 // ------------------------------------------------------
-// Regla 14: al cambiar manualmente el estado ON/OFF de un
+// Al cambiar manualmente el estado ON/OFF de un
 // separador, sobrescribe el estado de todas las filas de
 // su tramo (hasta el siguiente separador o fin de array).
 // ======================================================
@@ -178,7 +178,7 @@ export function aplicarCascadaDescendente(
 // ======================================================
 // ⬆️ CASCADA ASCENDENTE (RECOMPUTACIÓN)
 // ------------------------------------------------------
-// Regla 15/16: recorre todo el array por tramos y recalcula
+// Recorre todo el array por tramos y recalcula
 // `estadoVisual` de cada separador según el estado real de
 // las filas de su tramo. No toca `estado` (último ON/OFF
 // explícito del separador, usado por la cascada descendente).

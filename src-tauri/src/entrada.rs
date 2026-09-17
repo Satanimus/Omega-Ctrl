@@ -372,7 +372,7 @@ fn ejecutar_toggle_perfil() {
     back_notificacion::notificar_estado_perfil(!cache::esta_vacia());
 
     // Mantiene el menú de bandeja al día cuando el toggle se dispara
-    // por el atajo global, no por el propio menú (Regla 13: reflejar
+    // por el atajo global, no por el propio menú (reflejar
     // el estado real, sin importar el origen del cambio).
     back_tray::refrescar_si_existe();
 }
@@ -386,7 +386,7 @@ pub fn procesar_evento(evento: InputEvent) {
     // dispara si hay Modo Captura en curso (cache::captura_activa()):
     // mientras se está grabando un combo nuevo desde el Botón
     // Capturador (incluida la captura del propio atajo o de
-    // tecla_guardar_coordenada — Regla 7), tocar ese combo debe
+    // tecla_guardar_coordenada), tocar ese combo debe
     // quedar registrado por la captura, no disparar el toggle. En
     // ese caso el evento NO se consume acá; sigue el flujo normal y
     // cae en la excepción de Modo Captura de abajo, que sí lo

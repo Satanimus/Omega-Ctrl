@@ -113,11 +113,11 @@ impl MacroArchivoJson {
 // macros.rs::guardar_en_disco -> macro_json::json_para_disco()) sobre
 // un serde_json::Value ya serializado, sin tocar esta struct.
 //
-// Los campos que ahora pueden faltar en un archivo *leído* de disco
-// (uno ya trimeado por una versión anterior de OmegaCtrl, o uno viejo
-// donde no aplica) llevan #[serde(default)] (o
-// #[serde(default = "...")] para tecla_accion, que no tiene Default
-// propio) para no fallar el Deserialize si no están.
+// Los campos que faltan en un archivo *leído* de disco (recortados
+// por json_para_disco() al guardar, según el `tipo` de cada paso)
+// llevan #[serde(default)] (o #[serde(default = "...")] para
+// tecla_accion, que no tiene Default propio) para no fallar el
+// Deserialize si no están.
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PasoMacroJson {

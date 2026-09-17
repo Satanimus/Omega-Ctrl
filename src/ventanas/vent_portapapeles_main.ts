@@ -15,8 +15,8 @@
 // llamar a crear_ventana), sin carrera posible. Cada operación
 // de mutación (fijar/renombrar/editar/eliminar/limpiar/toggle
 // Registro) recibe de vuelta el PortapapelesDatosUI ya
-// actualizado (back_portapapeles::refrescar_datos, Etapa H) —
-// no hace falta un segundo viaje para refrescar la lista.
+// actualizado (back_portapapeles::refrescar_datos) — no hace
+// falta un segundo viaje para refrescar la lista.
 //
 // Siempre lista vertical (Portapapeles nunca es Radial, a
 // diferencia de MenuExpress) — layout único, sin variante.
@@ -74,9 +74,9 @@ interface PortapapelesDatos {
   rotativos: ElementoDatos[];
 }
 
-// Espejo de OtroPortapapelesUI en back_portapapeles.rs (Cambio 2,
-// Etapa 2.A) — nombre null significa que la ID no se encontró en
-// ningún perfil guardado y el frontend debe mostrar la ID cruda.
+// Espejo de OtroPortapapelesUI en back_portapapeles.rs — nombre
+// null significa que la ID no se encontró en ningún perfil
+// guardado y el frontend debe mostrar la ID cruda.
 interface OtroPortapapeles {
   id: string;
 
@@ -101,7 +101,7 @@ let ultimosDatos: PortapapelesDatos | null = null;
 
 // ID que se está MOSTRANDO ahora mismo (fijados + nombre en la
 // barra). Igual a `id` (el de la URL/ventana) salvo mientras se
-// está viendo el pool de otro Portapapeles (Cambio 2) — en ese
+// está viendo el pool de otro Portapapeles — en ese
 // caso se usa para: listar fijados alternativos, decidir bajo
 // qué ID se fija un rotativo nuevo, y qué nombre mostrar. Se
 // resetea solo al recargar la página (cerrar+reabrir la
@@ -117,7 +117,7 @@ let nombreMostrado: string | null = null; // null = usar datos.nombre normal
 let fijadosAltActuales: ElementoDatos[] = [];
 
 // Referencias a nodos que una actualización EN VIVO (evento
-// "portapapeles-actualizado", ver ETAPA J.2 más abajo) actualiza in-
+// "portapapeles-actualizado", ver más abajo) actualiza in-
 // place, sin pasar por construirEstructura() — así un popup abierto
 // (Renombrar/Editar/Opciones, todos hijos directos de `card`, nunca
 // de `cuerpo`) no se cierra solo porque llegó contenido nuevo desde
@@ -135,7 +135,7 @@ let textoRegistroActual: HTMLSpanElement | null = null;
 // accidental no debe disparar una segunda invocación en simultáneo.
 let operacionEnVuelo = false;
 
-// Desuscripción del listener de eventos (ETAPA J.2) — se guarda acá
+// Desuscripción del listener de eventos — se guarda acá
 // para poder limpiarla al cerrar la ventana (ver cerrar()).
 let detenerEscucha: UnlistenFn | null = null;
 
@@ -315,10 +315,9 @@ function construirEstructura(): {
 // ======================================================
 // 👁️ TOOLTIP DE PREVISUALIZACIÓN (hover sobre el nombre)
 // ------------------------------------------------------
-// spec: "Al pasar el mouse sobre el botón con el nombre del
-// elemento debe mostrarse una versión más extendida de su
-// contenido en un popup. En el caso de las imágenes una
-// miniatura o previsualización."
+// Al pasar el mouse sobre el botón con el nombre del elemento se
+// muestra una versión más extendida de su contenido en un popup
+// (en imágenes, una miniatura/previsualización).
 //
 // El texto completo NO viaja en ElementoDatos (solo el nombre
 // recortado a 20 caracteres, ya resuelto por back_portapapeles.rs)
@@ -480,8 +479,8 @@ async function aplicarResultadoMutacionFijado(
 // ======================================================
 // 📌➡️📋 PEGAR (click en el nombre)
 // ------------------------------------------------------
-// spec: "Al clickear en él se pega el contenido del archivo al
-// portapapeles y a la ventana activa." El bloqueo anti-duplicado
+// Al clickear en el nombre se pega el contenido del archivo al
+// portapapeles y a la ventana activa. El bloqueo anti-duplicado
 // real vive del lado Rust (back_portapapeles::pegar ya marca
 // ignorar_proximo_cambio antes de escribir) — acá solo se evita
 // una segunda invocación en simultáneo mientras la primera sigue
@@ -495,12 +494,8 @@ async function pegar(datos: ElementoDatos): Promise<void> {
 
   try {
     await invoke("portapapeles_pegar", { ruta: datos.ruta });
-  } catch (error) {
-    // DIAGNÓSTICO TEMPORAL: antes esto se tragaba en silencio.
-    // Logueado para ver la causa real en la consola de
-    // `npm run tauri dev` mientras se investiga el problema de
-    // pegado en Paint — sacar una vez resuelto.
-    console.error("portapapeles_pegar falló:", error);
+  } catch {
+    // Sin acción posible del lado del frontend si falla.
   } finally {
     operacionEnVuelo = false;
   }
@@ -523,8 +518,8 @@ function cerrarPopup(): void {
   }
 }
 
-// spec: "Popup editar y renombrar deben tomar el foco al ser creados
-// para poder escribir en ellos." La ventana se crea con
+// Popup editar y renombrar deben tomar el foco al ser creados
+// para poder escribir en ellos. La ventana se crea con
 // WS_EX_NOACTIVATE (ver crear_ventana en back_portapapeles.rs) para
 // no robarle el foco a la app activa — eso también bloquea el tecleo
 // real en cualquier input/textarea de acá, así que antes de enfocar
@@ -647,9 +642,9 @@ async function abrirPopupRenombrar(datos: ElementoDatos): Promise<void> {
 async function abrirPopupEditar(datos: ElementoDatos): Promise<void> {
   cerrarPopup();
 
-  // spec: "antes que se abra se actualiza su fecha para quedar de
-  // los primeros, pero que no se dé la orden de actualizar la ui" —
-  // congela este elemento en el tope del orden mientras el popup está
+  // Antes de abrirse se actualiza su fecha para quedar de los
+  // primeros, sin dar la orden de actualizar la ui — congela este
+  // elemento en el tope del orden mientras el popup está
   // abierto, para que aplicar_limite() (si en paralelo hay Registro
   // activo en otra fila) no lo elimine por ser el rotativo más
   // antiguo. portapapeles_marcar_reciente es silencioso a propósito:
@@ -665,8 +660,8 @@ async function abrirPopupEditar(datos: ElementoDatos): Promise<void> {
   const overlay = document.createElement("div");
   overlay.className = "portapapeles-popup-overlay";
 
-  // spec: "Debe generarse expandido dentro de toda la ventana y
-  // cambiar de tamaño con ella" — a diferencia del resto de popups
+  // Debe generarse expandido dentro de toda la ventana y cambiar
+  // de tamaño con ella — a diferencia del resto de popups
   // (Opciones/Renombrar), que quedan chicos y centrados, Editar usa
   // el ancho/alto completo del overlay (--popup--editar en
   // portapapeles.css), así que sigue ocupando toda la ventana si el
@@ -676,8 +671,8 @@ async function abrirPopupEditar(datos: ElementoDatos): Promise<void> {
 
   const titulo = document.createElement("div");
   titulo.className = "portapapeles-popup-titulo";
-  // spec: "Al lado del texto Editar debe decir el nombre del
-  // elemento que está editando."
+  // Al lado del texto Editar va el nombre del elemento que está
+  // editando.
   titulo.textContent = `Editar — ${datos.nombre || "(sin nombre)"}`;
   popup.append(titulo);
 
@@ -750,7 +745,7 @@ async function eliminarElemento(datos: ElementoDatos): Promise<void> {
 }
 
 // ======================================================
-// 🆔📌 POPUP "OTROS PORTAPAPELES" (Cambio 2)
+// 🆔📌 POPUP "OTROS PORTAPAPELES"
 // ------------------------------------------------------
 // Reutiliza las clases CSS del popup de opciones ya existente
 // (portapapeles-popup-overlay/-popup/-popup-titulo/-popup-opcion)
@@ -763,9 +758,9 @@ async function abrirPopupOtros(): Promise<void> {
 
   // Se consulta con idMostrado (no `id`): si ya estamos viendo un
   // segundo Portapapeles, ese no debe listarse a sí mismo en el
-  // popup (bug: al reabrir el popup desde la vista alternativa,
-  // seguía apareciendo el propio Portapapeles que ya se estaba
-  // mostrando, en vez de quedar oculto/actualizado).
+  // popup: al reabrir el popup desde la vista alternativa, el
+  // propio Portapapeles que ya se estaba mostrando no debe volver
+  // a aparecer, sino quedar oculto/actualizado.
   const idConsulta = idMostrado ?? id;
 
   let otros: OtroPortapapeles[];
@@ -811,7 +806,7 @@ async function abrirPopupOtros(): Promise<void> {
 }
 
 // ======================================================
-// 🔀 CAMBIAR DE VISTA (switch de ID mostrada) — Cambio 2
+// 🔀 CAMBIAR DE VISTA (switch de ID mostrada)
 // ======================================================
 
 async function verFijadosDe(otro: OtroPortapapeles): Promise<void> {
@@ -833,8 +828,8 @@ async function verFijadosDe(otro: OtroPortapapeles): Promise<void> {
 
   fijadosAltActuales = fijadosAlt;
 
-  // Reusa rotativos/registro/color de ultimosDatos — spec: "diseño
-  // y color se mantiene, solo cambian los fijos y el nombre".
+  // Reusa rotativos/registro/color de ultimosDatos — diseño y
+  // color se mantienen, solo cambian los fijos y el nombre.
   renderizar({
     ...ultimosDatos,
     fijados: fijadosAlt,
@@ -1013,9 +1008,9 @@ function crearBarraInferior(datos: PortapapelesDatos): void {
   const barraInferior = document.createElement("div");
   barraInferior.className = "portapapeles-barra-inferior";
 
-  // spec: "Debe tener el estilo del switch 'Coordenada' del popup
-  // extra (Ese boton deslizante gris que pasa a Cyan)" — misma
-  // estructura pista+bolita que crearInterruptor() en
+  // Mismo estilo del switch "Coordenada" del popup extra (botón
+  // deslizante gris que pasa a Cyan) — misma estructura
+  // pista+bolita que crearInterruptor() en
   // comp_popup_grupo.ts (ver estilos espejados en portapapeles.css).
   const botonRegistro = document.createElement("button");
   botonRegistro.className =
@@ -1033,11 +1028,11 @@ function crearBarraInferior(datos: PortapapelesDatos): void {
   botonRegistro.append(pista, textoRegistro);
   botonRegistro.addEventListener("click", alternarRegistro);
 
-  // spec: "Boton Limpiar todo debe tener doble confirmación: Al pasar
-  // el mouse sobre él cambia letras y borde rojo (CSS puro, ver
+  // Botón Limpiar todo con doble confirmación: al pasar el mouse
+  // sobre él cambia letras y borde rojo (CSS puro, ver
   // .portapapeles-boton-limpiar:hover), al hacer click dice
-  // '⚠️ Confirmar limpieza' con letras rojas, siguiente click limpia
-  // rotatorios."
+  // "⚠️ Confirmar limpieza" con letras rojas, el siguiente click
+  // limpia rotatorios.
   const botonLimpiar = document.createElement("button");
   botonLimpiar.className =
     "portapapeles-boton-barra portapapeles-boton-limpiar";
@@ -1100,11 +1095,10 @@ function renderizar(datos: PortapapelesDatos): void {
 }
 
 // ======================================================
-// 🔴 ACTUALIZAR EN VIVO (evento "portapapeles-actualizado") — J.2
+// 🔴 ACTUALIZAR EN VIVO (evento "portapapeles-actualizado")
 // ------------------------------------------------------
-// spec: "Cuando se llama a actualizar la ventana solo debe
-// actualizarse los listados de elementos Fijos y rotativos. Si llega
-// a haber abierto un popup de editar o renombrar no debe cerrarse."
+// Solo debe actualizar los listados de elementos Fijos y rotativos.
+// Si hay abierto un popup de editar o renombrar no debe cerrarse.
 // A diferencia de renderizar(), NUNCA llama a construirEstructura()
 // — no toca el popup (hijo de `card`, no de `cuerpo`).
 // ======================================================

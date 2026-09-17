@@ -21,12 +21,12 @@ export const ANCHOS_DEFAULT: Record<string, number> = {
 
 export const ANCHO_MINIMO = 52;
 
-// E1: generalizada para recibir columnas/anchosDefault por parámetro
-// en vez de importar COLUMNAS/ANCHOS_DEFAULT fijos (permite reusar el
-// mecanismo de arrastre en la tabla en árbol de Configuración, cuyas
-// columnas son otras). selectorCelda: la tabla principal usa
-// ".cabecera-celda"; la tabla en árbol usa ".configuracion-arbol-celda"
-// (ver E4) — sin este parámetro, el querySelectorAll de abajo no
+// Recibe columnas/anchosDefault por parámetro en vez de importar
+// COLUMNAS/ANCHOS_DEFAULT fijos, para poder reusar el mecanismo de
+// arrastre en la tabla en árbol de Configuración, cuyas columnas son
+// otras. selectorCelda: la tabla principal usa ".cabecera-celda";
+// la tabla en árbol usa ".configuracion-arbol-celda" — sin este
+// parámetro, el querySelectorAll de abajo no
 // encontraría celdas en la tabla en árbol y activarRedimensionColumnas
 // quedaría sin efecto ahí.
 export function activarRedimensionColumnas(

@@ -77,8 +77,8 @@ export function crearFila(
       // "en-separador-fin" da la esquina redondeada del lado
       // derecho y el borde de acento (color real, o border-light
       // como fallback si no tiene color — igual que en-separador-
-      // inicio del otro lado). Ahora cae en Nota, la última
-      // columna de la fila.
+      // inicio del otro lado). Cae en Nota, la última columna
+      // de la fila.
       if (col.id === "nota") {
         celda.classList.add("en-separador-fin");
       }

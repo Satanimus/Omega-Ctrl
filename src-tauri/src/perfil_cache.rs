@@ -1,8 +1,6 @@
 // ======================================================
 // 📦 perfil_cache
 // ======================================================
-// ETAPA 4 DEL FLUJO
-// ------------------------------------------------------
 // 1. ¿Qué hace este archivo?
 //
 // Modelo interno compilado utilizado por Cache y Runtime.
@@ -218,19 +216,19 @@ pub enum AccionCache {
     // core_macro.ts). nombre es el NOMBRE de la macro (existencia ya
     // verificada en compilador.rs::convertir_macro, mismo criterio
     // que AbrirArchivo::ruta) — no el contenido/pasos ya resueltos.
-    // Decisión tomada en la Etapa 7: el archivo /Macros/<nombre>.json
-    // se lee y se interpreta recién acá en Runtime, al ejecutarse
-    // (Etapa 8), nunca en compilador.rs — una macro es un archivo
-    // propio editable en cualquier momento desde su popup (guardado
-    // directo, sin pasar por "recompilar el perfil"), así que
-    // incrustar su contenido en la cache la dejaría vieja hasta la
-    // próxima recompilación de cada perfil que la usa.
+    // El archivo /Macros/<nombre>.json se lee y se interpreta recién
+    // acá en Runtime, al ejecutarse, nunca en compilador.rs — una
+    // macro es un archivo propio editable en cualquier momento desde
+    // su popup (guardado directo, sin pasar por "recompilar el
+    // perfil"), así que incrustar su contenido en la cache la
+    // dejaría vieja hasta la próxima recompilación de cada perfil
+    // que la usa.
     //
-    // Ampliado en la Etapa 8A con dos campos más, ya resueltos en
-    // compilación (compilador.rs::convertir_macro):
+    // Dos campos más, ya resueltos en compilación
+    // (compilador.rs::convertir_macro):
     // • programa: el programa del Filtro de App de ESTA FILA (no de
     //   la macro), para que el paso Multimedia "En App" dentro de la
-    //   macro (Etapa 8B, runt_macro.rs) tenga de dónde sacarlo sin
+    //   macro (runt_macro.rs) tenga de dónde sacarlo sin
     //   volver a mirar TriggerCache — mismo criterio que
     //   AlcanceMultimedia::EnApp::programa. None si la fila es
     //   global (sin Filtro de App).
@@ -360,7 +358,7 @@ pub enum AccionCache {
 pub struct MenuBotonCache {
     // Id interno de la fila referenciada (no su número de orden en
     // la tabla) — con esto Runtime/back_menu_express.rs buscan la
-    // fila en la caché ya compilada al ejecutar el botón (etapa 7).
+    // fila en la caché ya compilada al ejecutar el botón.
     pub fila_id: String,
 
     pub renombrar: String,
@@ -465,7 +463,7 @@ impl TamanoMenu {
 // PROPIO (no reusa TamanoMenu) porque los botones de Portapapeles
 // son filas alargadas (ícono + nombre + acciones), no cuadrados como
 // los de MenuExpress — usan sus propios valores en px
-// (config.rs: portapapeles_boton_pequeno/mediano/grande, etapa C)
+// (config.rs: portapapeles_boton_pequeno/mediano/grande)
 // aunque comparten el mismo vocabulario Pequeño/Mediano/Grande.
 // tamano_texto de Portapapeles SÍ reusa TamanoMenu tal cual (ver
 // AccionCache::Portapapeles más arriba), sin tipo propio.
@@ -555,12 +553,12 @@ pub enum InstanciasAbrir {
 // ------------------------------------------------------
 // Espejo de MacroExtraJson.comportamiento (Rust) / macroExtra.
 // comportamiento (TS, core_macro.ts). UnaEjecucion y Toggle
-// comparten mecanismo en Runtime (Etapa 8B) — el enum los distingue
+// comparten mecanismo en Runtime — el enum los distingue
 // igual porque siguen siendo dos opciones separadas en la UI/perfil,
 // aunque el código de runt_macro.rs que decide arrancar/parar sea
 // el mismo para las dos. TeclaMantenida es la única mecánicamente
 // distinta (requiere Down/Up físico real, ver cache.rs::
-// resolver_match en la Etapa 8B).
+// resolver_match).
 // ======================================================
 
 #[derive(Clone, Debug, PartialEq, Eq)]

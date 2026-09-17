@@ -2,9 +2,9 @@
 // 📝 comp_Popup_Formulario_Nombre
 // ------------------------------------------------------
 // Popup genérico "escribir un nombre y Guardar/Cancelar",
-// extraído de abrirFormularioRenombrar (comp_panel_lateral.ts,
-// Etapa H1) para que otros consumidores (selector de temas,
-// Etapa H) lo reutilicen sin hardcodear el comando de perfil.
+// extraído de abrirFormularioRenombrar (comp_panel_lateral.ts)
+// para que otros consumidores (selector de temas, etc.)
+// lo reutilicen sin hardcodear el comando de perfil.
 // El llamador decide qué hacer con el nombre confirmado vía
 // onConfirmar; este popup solo se encarga del formulario y de
 // cerrarse a sí mismo.

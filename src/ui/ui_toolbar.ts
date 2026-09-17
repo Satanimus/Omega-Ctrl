@@ -422,9 +422,6 @@ export function crearToolbar(alGuardar: () => Promise<void>): HTMLElement {
 
   // ==================================================
   // ➕ AGREGAR FILA
-  // ------------------------------------------------------
-  // Antes vivía debajo de la última fila de la tabla (ver
-  // comp_opciones.ts) — se movió acá, a la barra superior.
   // ==================================================
 
   const botonAgregarFila = toolbar.querySelector(

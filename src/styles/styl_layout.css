@@ -584,8 +584,7 @@
    Coordenada/Extra). El indicador cyan (círculo a la
    izquierda del texto) es la identidad visual estándar
    para "esta opción está activa o es la default sin
-   tocar" en todo el programa — reemplaza el fondo azul
-   sólido que antes no se distinguía bien.
+   tocar" en todo el programa.
    ====================================================== */
 
 .popup-fila {
@@ -927,7 +926,7 @@
 }
 
 /* ======================================================
-   🧩📝 EDITOR DE MACRO (Etapa 5)
+   🧩📝 EDITOR DE MACRO
    ------------------------------------------------------
    Mismo espíritu visual que .popup-menu-editor (lista con
    scroll + ítems en fila), pero cada ítem es una fila-paso
@@ -973,10 +972,9 @@
 /* ======================================================
    ↕️ ASA DE REDIMENSIÓN — SOLO BORDE SUPERIOR
    ------------------------------------------------------
-   Única asa que queda (antes 8, ver activarRedimension()/
-   crearRedimensionadores() en comp_popup_macro_editor.ts): los
-   lados ya no se redimensionan solos, siguen el ancho de la
-   ventana principal.
+   Única asa (ver activarRedimension()/crearRedimensionadores()
+   en comp_popup_macro_editor.ts): los lados no se redimensionan
+   por su cuenta, siguen el ancho de la ventana principal.
    ====================================================== */
 
 .popup-macro-editor-resize {
@@ -993,7 +991,7 @@
 }
 
 /* ======================================================
-   🚫 BOTÓN "PELIGRO" (Eliminar — Etapa H1)
+   🚫 BOTÓN "PELIGRO" (Eliminar)
    ------------------------------------------------------
    Letra roja en reposo, borde rojo al pasar el mouse. Usado por
    Eliminar en el popup Acción de ventana principal y en el menú
@@ -1014,7 +1012,7 @@
 }
 
 /* ======================================================
-   🏷️ BARRA DE TÍTULO ARRASTRABLE (Etapa H2 / D3-D4)
+   🏷️ BARRA DE TÍTULO ARRASTRABLE
    ====================================================== */
 
 .popup-macro-barra {
@@ -1047,7 +1045,7 @@
   flex: 0 0 auto;
 }
 
-/* ✕ Cancelar cambios y cerrar (Etapa J, esquina de la barra):
+/* ✕ Cancelar cambios y cerrar (esquina de la barra):
    mismo criterio que el ✕ Eliminar de cada fila
    (.popup-macro-editor-eliminar) — en hover, sin el brillo cyan
    genérico de .ui-btn:hover, fondo transparente y borde/texto en
@@ -1070,7 +1068,7 @@
 }
 
 /* ======================================================
-   🔚 PIE DE BOTONES (Cancelar / Guardar como / Guardar — Etapa H2 / D5)
+   🔚 PIE DE BOTONES (Cancelar / Guardar como / Guardar)
    ====================================================== */
 
 .popup-macro-editor-pie {
@@ -1081,7 +1079,7 @@
 }
 
 /* ======================================================
-   ✏️ OVERLAY "GUARDAR COMO" (Etapa H2 / D5)
+   ✏️ OVERLAY "GUARDAR COMO"
    ------------------------------------------------------
    El popup fijo no puede abrir otro popup anidado (ver cabecera
    de comp_popup_macro_editor.ts), así que "Guardar como" se
@@ -1113,7 +1111,7 @@
 }
 
 /* ======================================================
-   🧱 CUERPO EN DOS COLUMNAS (Etapa H3 / E1)
+   🧱 CUERPO EN DOS COLUMNAS
    ====================================================== */
 
 .popup-macro-editor-cuerpo {
@@ -1135,11 +1133,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--gap4);
-  /* numero/asa/tipo eran "auto": el encabezado y cada fila son
-     grids SEPARADOS (uno por .popup-macro-editor-header, uno por
+  /* numero/asa/tipo NO pueden ser "auto": el encabezado y cada fila
+     son grids SEPARADOS (uno por .popup-macro-editor-header, uno por
      cada .popup-macro-editor-paso-fila) y Grid no sincroniza anchos
      auto entre instancias distintas — cada uno mide su propio
-     contenido, así que terminaban con anchos ligeramente distintos
+     contenido, así que terminan con anchos ligeramente distintos
      entre sí, desalineando todo lo que viene después en cada
      fila/el header. Ancho fijo vía variable (mismo patrón que
      --col-nota-width) para que todos usen el mismo número siempre.
@@ -1258,7 +1256,7 @@
 }
 
 /* ======================================================
-   📐 ENCABEZADO DE COLUMNAS (Etapa H4 / F1-F3)
+   📐 ENCABEZADO DE COLUMNAS
    ------------------------------------------------------
    Los anchos son variables CSS (--col-<nombre>-width) fijadas
    en .popup-macro-editor-columna-derecha al montar el editor y
@@ -1364,18 +1362,16 @@
   justify-content: center;
 }
 
-/* H12: hitbox invisible (8px, mismo footprint que antes: 4px +
-   2px de margen a cada lado) con una línea fina de 1px centrada
-   por ::before — mismo criterio que .divisor-columna en
-   styl_tabla.css. Antes el propio elemento de 4px de ancho +
-   border-radius se pintaba entero con --border-light, lo que se
-   veía como una barra gruesa (fácil de confundir con una barra de
-   scroll) en vez de una línea.
-   El resizer ya no es hijo del grid del encabezado (era un ítem más
-   del grid pese a position:absolute y desalineaba el auto-placement
-   de las celdas reales) — ahora es hermano de .popup-macro-editor-header
-   dentro de .popup-macro-editor-header-wrapper, y se posiciona sobre
-   ese wrapper, anclado al borde entre Extra y Nota. */
+/* Hitbox invisible (8px totales, incluyendo margen a cada lado)
+   con una línea fina de 1px centrada por ::before — mismo criterio
+   que .divisor-columna en styl_tabla.css. Pintar el propio elemento
+   entero con --border-light (en vez de la línea vía ::before) se ve
+   como una barra gruesa, fácil de confundir con una barra de scroll.
+   El resizer no es hijo del grid del encabezado — ser ítem del grid
+   pese a position:absolute desalinea el auto-placement de las
+   celdas reales — es hermano de .popup-macro-editor-header dentro
+   de .popup-macro-editor-header-wrapper, y se posiciona sobre ese
+   wrapper, anclado al borde entre Extra y Nota. */
 .popup-macro-editor-header-wrapper {
   flex: 0 0 auto;
   position: relative;
@@ -1386,11 +1382,11 @@
   top: 0;
   /* Posición real (`left`) medida y sincronizada por JS contra el
      borde Extra|Nota de una fila real — ver reposicionar() en
-     crearResizerColumna(). Un cálculo puramente en CSS (como el
-     `right: calc(...--col-nota-width...)` anterior) no tenía forma
-     de saber cuándo Extra ya había tocado su ancho mínimo al achicar
-     el POPUP entero: el separador seguía corriéndose sin tope y
-     terminaba invadiendo la columna Extra. El valor de acá abajo es
+     crearResizerColumna(). Un cálculo puramente en CSS (un
+     `right: calc(...--col-nota-width...)`) no tiene forma de saber
+     cuándo Extra ya tocó su ancho mínimo al achicar el POPUP
+     entero: el separador se sigue corriendo sin tope y termina
+     invadiendo la columna Extra. El valor de acá abajo es
      solo el arranque, antes del primer requestAnimationFrame. */
   right: calc(var(--gap4) * 2 + var(--col-nota-width) - 4px);
   width: 8px;
@@ -1415,7 +1411,7 @@
 }
 
 /* ======================================================
-   📋 LISTA Y FILAS DE PASOS (Etapa H4/H5 — anchos de columna)
+   📋 LISTA Y FILAS DE PASOS (anchos de columna)
    ====================================================== */
 
 .popup-macro-editor-lista {
@@ -1432,8 +1428,7 @@
 }
 
 /* Mismo fondo cebreado + hover que la tabla de la ventana principal
-   (Apariencia > Fondo de tabla) — antes fondo negro sólido heredado
-   de .popup-macro-editor-lista (var(--bg)). Cada .popup-macro-editor-paso
+   (Apariencia > Fondo de tabla). Cada .popup-macro-editor-paso
    es una "fila", en orden secuencial dentro de la lista. */
 .popup-macro-editor-paso {
   display: flex;
@@ -1489,10 +1484,10 @@
     ) 1fr var(--col-nota-width);
 }
 
-/* Bug 2/3: líneas divisorias entre columnas, mismo mecanismo que la
+/* Líneas divisorias entre columnas, mismo mecanismo que la
    tabla del gestor de coordenadas (border-right en cada celda, ver
-   .coordenadas-tabla tbody td en styl_coordenadas.css) — en vez del
-   fondo-de-gap anterior, que obligaba a cada celda a repintar su
+   .coordenadas-tabla tbody td en styl_coordenadas.css) — y no un
+   fondo-de-gap, que obligaría a cada celda a repintar su
    propio color de fila encima del cebreado ya puesto en
    .popup-macro-editor-paso (dos capas semitransparentes apiladas
    por celda, contraste exagerado). Acá el cebreado se pinta UNA sola
@@ -1516,12 +1511,12 @@
   cursor: grab;
 }
 
-/* Etapa B7: celda real de la columna Opciones — siempre contiene
+/* Celda real de la columna Opciones — siempre contiene
    ⁝ (asa) y, si opcionesExpandido, además X/⧉/⊙ en línea (ver
    crearFilaPaso). Los botones sin clase de color propia (⧉/⊙)
-   reusan .ui-btn con padding:0, mismo criterio compacto que ya
-   tenía .popup-macro-editor-asa — X ya trae su color propio de
-   .popup-macro-editor-eliminar, existente. */
+   reusan .ui-btn con padding:0, mismo criterio compacto que
+   .popup-macro-editor-asa — X trae su color propio de
+   .popup-macro-editor-eliminar. */
 .popup-macro-editor-opciones {
   display: flex;
   align-items: center;
@@ -1605,13 +1600,13 @@
   pointer-events: none;
 }
 
-/* Bug 2/3: a diferencia de numero/opciones/extra (celdas <div>
+/* A diferencia de numero/opciones/extra (celdas <div>
    normales, transparentes, que dejan ver el color de fila puesto una
    sola vez en .popup-macro-editor-paso), Tipo ES el propio botón
    (.ui-btn) — .ui-btn trae background:var(--bg) sólido y opaco
-   propio (más especificidad que la celda), que tapaba por completo
-   el cebreado y dejaba la columna con el mismo fondo en todas las
-   filas. Mismo criterio que .coordenadas-numero-toggle en
+   propio (más especificidad que la celda), que sin esto tapa por
+   completo el cebreado y deja la columna con el mismo fondo en todas
+   las filas. Mismo criterio que .coordenadas-numero-toggle en
    styl_coordenadas.css (botón dentro de una celda de tabla
    cebreada): en reposo queda transparente, así se ve el color de
    fila de .popup-macro-editor-paso por debajo sin repetirlo (evita
@@ -1634,7 +1629,7 @@
   font-size: var(--fs16);
 }
 
-/* Envoltorio de Tipo (Etapa I): igual que .popup-macro-editor-opciones
+/* Envoltorio de Tipo: igual que .popup-macro-editor-opciones
    con asa/X/⧉/⊙, este div SÍ se estira a toda la altura de la fila
    (a diferencia de botonTipo, que trae altura fija de .ui-btn), así
    que es él quien lleva el separador Tipo|Extra — un ::after de
@@ -1760,7 +1755,7 @@
 }
 
 /* ======================================================
-   📝 NOTA DE PASO (Etapa H5 / G4)
+   📝 NOTA DE PASO
    ------------------------------------------------------
    Texto plano, no se envía al ejecutar — letra gris para
    diferenciarla del resto de los campos.

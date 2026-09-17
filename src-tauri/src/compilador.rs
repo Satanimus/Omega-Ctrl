@@ -714,7 +714,7 @@ fn convertir_accion(
 
 fn convertir_menu_express(remapeo: &RemapeoJson, perfil: &PerfilJson) -> Option<AccionCache> {
     // Solo filas normales son referenciables por fila_id (mismo
-    // criterio de numero_fila en compilar_perfil, Regla 18: los
+    // criterio de numero_fila en compilar_perfil: los
     // separadores no cuentan ni participan de esta posición).
     let filas_referenciables: Vec<&RemapeoJson> = perfil
         .filas
@@ -1022,11 +1022,6 @@ fn referencia(remapeo: &RemapeoJson) -> Option<String> {
 // que ya usa Mantener/ClickSostenido para esperar el Up real.
 // Con cualquier otra condición (Simple/Doble/Triple), "Ninguno"
 // sigue siendo None (un solo toque, sin repetición).
-//
-// "mantener" se mantiene reconocido acá por compatibilidad con
-// perfiles guardados antes de este cambio — la UI ya no ofrece
-// esa opción (ver comp_popup_coordenada.ts), el nuevo camino
-// para llegar a ExtraCache::Mantener es "Ninguno"+Mantenido.
 // ======================================================
 
 fn convertir_extra(extra: &str, condicion: &CondicionTrigger) -> Option<ExtraCache> {
@@ -1040,8 +1035,6 @@ fn convertir_extra(extra: &str, condicion: &CondicionTrigger) -> Option<ExtraCac
         "normal" => Some(ExtraCache::Normal),
 
         "turbo" => Some(ExtraCache::Turbo),
-
-        "mantener" => Some(ExtraCache::Mantener),
 
         "toggle" => Some(ExtraCache::Toggle),
 

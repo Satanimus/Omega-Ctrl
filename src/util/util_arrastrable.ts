@@ -5,12 +5,10 @@
 // arrastre (ratón) o teclado (flechas), con selección
 // múltiple. No conoce el contenido de cada fila — solo
 // recibe una lista de ids + los elementos DOM ya creados
-// por el llamador (comp_popup_macro_editor.ts en la Etapa
-// 5, y más adelante la tabla principal en la Etapa 9).
+// por el llamador (comp_popup_macro_editor.ts y la tabla
+// principal).
 //
-// Especificación completa: "Plan Arrastre en tabla
-// principal" (documento del usuario). Resumen del
-// comportamiento implementado acá:
+// Comportamiento implementado acá:
 //
 // 1. Clic MANTENIDO sobre el botón ⟫ (asa) durante
 //    config::tiempo_mantenido() → activa el modo "Mover" y
@@ -127,7 +125,7 @@ function alturaMinimaPlaceholder(): number {
 
 // Duración de la animación de reordenamiento por teclado —
 // más rápida que la de soltar con ratón (var(--speed), ver
-// styl_variables.css), y sin placeholder (spec, sección 3).
+// styl_variables.css), y sin placeholder.
 const DURACION_ANIMACION_TECLADO_MS = 90;
 
 function duracionAnimacionArrastreMs(contenedor: HTMLElement): number {
@@ -154,13 +152,13 @@ export interface OpcionesArrastrable {
 
   onSalirModoMover?: () => void;
 
-  // Etapa D: notifica cualquier cambio de la selección que NO pasa
+  // Notifica cualquier cambio de la selección que NO pasa
   // por onReordenar (Shift/Ctrl+clic sin arrastre, y salirModoMover)
   // — el editor de Macros lo usa para redibujar el popup entero y
   // así reflejar de inmediato los botones de lote de la cabecera.
   onSeleccionCambio?: () => void;
 
-  // Etapa (fix): elementos que NO deben tratarse como "click afuera"
+  // Elementos que NO deben tratarse como "click afuera"
   // aunque no sean una fila registrada — ej. la cabecera de un editor
   // que agrega sus propios botones de acción sobre la selección
   // (Duplicar/Eliminar seleccionadas). Sin esto, cualquier pointerdown
@@ -171,7 +169,7 @@ export interface OpcionesArrastrable {
 
   obtenerIdsSeparadores?: () => string[];
 
-  // Regla 11: consulta si `id` es un separador contraído. El
+  // Consulta si `id` es un separador contraído. El
   // llamador (ver ui_tabla.ts) también aprovecha esta consulta
   // para expandirlo automáticamente (muta el modelo y reconstruye
   // la tabla) antes de que el controlador de arrastre calcule
@@ -222,11 +220,10 @@ export interface ControladorArrastre {
 
   establecerAncla(id: string | null): void;
 
-  // No pedido en la interfaz original — agregado porque este
-  // controlador engancha listeners en `document` (clic afuera,
-  // flechas) que viven mientras exista el controlador. Un
+  // Este controlador engancha listeners en `document` (clic
+  // afuera, flechas) que viven mientras exista el controlador. Un
   // popup que se abre/cierra muchas veces (ej. el editor de
-  // Macro, Etapa 5) debe llamar esto al cerrarse para no
+  // Macro) debe llamar esto al cerrarse para no
   // acumular listeners húerfanos de instancias anteriores.
   destruir(): void;
 }
@@ -475,12 +472,12 @@ export function crearControladorArrastre(
   function manejarTeclado(evento: KeyboardEvent): void {
     if (seleccionadas.size === 0) return;
 
-    // Esc sale del modo Mover (Regla 1/2 de reglas_esc.txt) — mismo
-    // camino que salir por click afuera o por Guardar: solo apaga
+    // Esc sale del modo Mover — mismo camino que salir por click
+    // afuera o por Guardar: solo apaga
     // selección/modo, no revierte ningún reordenamiento ya aplicado.
-    // stopPropagation: esta es la capa más externa (Regla 9) — un
+    // stopPropagation: esta es la capa más externa — un
     // solo Esc no debe seguir burbujeando hacia otros listeners
-    // (popups, etc.) que puedan sumarse en etapas siguientes.
+    // (popups, etc.).
     if (evento.key === "Escape") {
       evento.stopPropagation();
 
@@ -600,8 +597,8 @@ export function crearControladorArrastre(
   // Contador "+N" de filas extra en el grupo arrastrado — elemento
   // propio (no hijo de .arr-fantasma, que recorta con overflow:
   // hidden) para poder anclarlo directo a la posición del cursor,
-  // no a una esquina fija del fantasma (spec: "que se dibuje
-  // completo y siga al mouse").
+  // no a una esquina fija del fantasma, así se dibuja completo y
+  // sigue al mouse.
   function crearContador(cantidadFilas: number): HTMLElement {
     const contador = document.createElement("div");
 
@@ -679,7 +676,7 @@ export function crearControladorArrastre(
       }
     }
 
-    // D7 — separador colapsado: si el puntero cayó sobre un header de
+    // Separador colapsado: si el puntero cayó sobre un header de
     // separador (div.fila-separador) y ese separador está colapsado (el
     // elemento siguiente en el contenedor también es un header o no
     // existe), insertar el placeholder justo después del header — que
@@ -783,7 +780,7 @@ export function crearControladorArrastre(
     idsGrupoSinOrdenar: string[],
     eventoInicial: PointerEvent,
   ): void {
-    // Regla 11: expandir automáticamente cualquier separador
+    // Expandir automáticamente cualquier separador
     // contraído que vaya a arrastrarse, ANTES de leer el orden
     // vigente y de tomar el elemento del DOM — esSeparadorContraido
     // ya se encarga de mutar el modelo y reconstruir la tabla
@@ -798,7 +795,7 @@ export function crearControladorArrastre(
 
     limpiarFilasFantasma(ordenVigente);
 
-    // El grupo mantiene su orden relativo ORIGINAL (spec).
+    // El grupo mantiene su orden relativo ORIGINAL.
     const idsGrupo = ordenVigente.filter((id) =>
       idsGrupoSinOrdenar.includes(id),
     );
@@ -992,7 +989,7 @@ export function crearControladorArrastre(
   // Selecciona (si hace falta) y arranca el arrastre. Punto único
   // usado por las dos vías de entrada a modo Mover: mantenido
   // vencido, y arrastre detectado antes de que venza el mantenido
-  // (ver manejarAsaPointerMove). Ctrl/Shift+clic SIN arrastre ya no
+  // (ver manejarAsaPointerMove). Ctrl/Shift+clic SIN arrastre NO
   // entra acá — ver manejarAsaPointerUp: agrega/saca de la
   // selección y las filas quedan en su lugar, sin agruparse.
   function activarMoverDesdeAsa(evento: PointerEvent): void {
@@ -1140,9 +1137,9 @@ export function crearControladorArrastre(
   }
 
   // Asas cuyo próximo evento "click" hay que ahogar porque la
-  // presión en curso ya se convirtió en modo Mover (spec: clic
-  // corto = menú, clic mantenido = Mover, nunca ambos a la vez
-  // para la misma presión física del botón).
+  // presión en curso ya se convirtió en modo Mover: clic corto =
+  // menú, clic mantenido = Mover, nunca ambos a la vez para la
+  // misma presión física del botón.
   const asasASuprimirClick = new WeakSet<HTMLElement>();
 
   // ======================================================
@@ -1164,7 +1161,7 @@ export function crearControladorArrastre(
 
     if (!conCtrl && !conShift && !seleccionadas.has(id)) {
       // Fondo de fila sin Ctrl/Shift y sin selección previa: fuera
-      // del alcance de este componente (spec no lo define).
+      // del alcance de este componente.
       return;
     }
 
@@ -1199,7 +1196,7 @@ export function crearControladorArrastre(
     if (evento.shiftKey && !seleccionadas.has(id)) return;
 
     // Ctrl + fila sin seleccionar + arrastre → se agrega al
-    // grupo antes de largar el arrastre (spec, sección 4).
+    // grupo antes de largar el arrastre.
     if (!seleccionadas.has(id)) seleccionar(id);
 
     iniciarArrastre(grupoParaArrastrarDesde(id), evento);
@@ -1232,7 +1229,7 @@ export function crearControladorArrastre(
       return;
     }
 
-    if (!evento.ctrlKey) return; // clic simple sobre fila ya seleccionada: no hace nada (spec no lo define).
+    if (!evento.ctrlKey) return; // clic simple sobre fila ya seleccionada: no hace nada.
 
     // Ctrl+clic sin arrastre: alterna la selección según el
     // estado ANTES de este clic (evita seleccionar y

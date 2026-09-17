@@ -1,8 +1,8 @@
 // ======================================================
 // ❔📝 util_Texto_Ayuda
 // ------------------------------------------------------
-// Parser de las marcas de formato del contenido de ayuda.txt
-// (Regla 9): **negrita**, *cursiva*, `código`, [color:texto]
+// Parser de las marcas de formato del contenido de ayuda.txt:
+// **negrita**, *cursiva*, `código`, [color:texto]
 // (cyan, red, orange, yellow, green, blue, purple, pink, gray)
 // — sin HTML, todo armado vía DOM. Las marcas [color:...] son
 // recursivas: **negrita**/*cursiva*/`código` dentro de un color

@@ -1726,11 +1726,11 @@ fn input_teclado(vk: VIRTUAL_KEY, soltar: bool) -> INPUT {
 // adentro (click en un elemento pega contenido, no dispara un
 // remapeo) — por ahora no tiene efecto propio en esta ventana; se
 // conserva en el paquete solo porque así compila el AccionCache, no
-// se descarta por si acaso Etapa H/J le encuentra un uso (ej. cerrar
+// se descarta por si a futuro se le encuentra un uso (ej. cerrar
 // sola tras pegar, análogo a un menú Efímero).
 //
 // Deriva Clone: además de crear_ventana(), lo necesita
-// refrescar_datos() (Etapa H) para reconstruir PortapapelesDatosUI
+// refrescar_datos() para reconstruir PortapapelesDatosUI
 // cada vez que una operación (fijar/renombrar/editar/eliminar/
 // toggle Registro) cambia el pool — el paquete se guarda junto a los
 // datos en ABIERTOS_VENTANAS precisamente para eso, ver más abajo.
@@ -1751,7 +1751,7 @@ pub struct PortapapelesPaquete {
 // 🖥️ DATOS SERIALIZABLES PARA LA VENTANA (TS)
 // ------------------------------------------------------
 // Mismo vocabulario string que va a usar core_portapapeles.ts /
-// portapapeles_main.ts (Etapa J) — la ventana no conoce los enums de
+// portapapeles_main.ts — la ventana no conoce los enums de
 // Rust. camelCase vía rename_all, mismo criterio que
 // MenuExpressDatosUI.
 // ======================================================
@@ -1761,11 +1761,11 @@ pub struct PortapapelesPaquete {
 pub struct ElementoPortapapelesUI {
     // Ruta absoluta como String — identificador único y estable
     // frente a la ventana (fijar/renombrar/editar/eliminar la usan
-    // para saber sobre qué archivo operar, ver Etapa H). Cambia si
+    // para saber sobre qué archivo operar). Cambia si
     // el archivo se fija/desfija (rename físico) — ya no cambia al
     // renombrar (el nombre físico es opaco y no se toca, solo se
     // sobreescribe el ADS). obtener_datos() sirve la ruta al día de
-    // todos modos (Etapa H vuelve a pedir los datos tras cada
+    // todos modos (refrescar_datos vuelve a pedir los datos tras cada
     // operación).
     pub ruta: String,
 
@@ -1813,7 +1813,7 @@ pub struct PortapapelesDatosUI {
     pub tamano_texto: String,
 
     // Límite que ESTA fila pide — la ventana lo muestra en su popup
-    // Extra (Etapa J), no necesariamente el límite EFECTIVO del pool
+    // Extra, no necesariamente el límite EFECTIVO del pool
     // (ese es un detalle interno de back_portapapeles.rs, no de la
     // fila que el usuario está editando).
     pub limite: u32,
@@ -1857,8 +1857,8 @@ pub struct OtroPortapapelesUI {
 // 🌐 APPHANDLE GLOBAL
 // ------------------------------------------------------
 // Mismo criterio que back_menu_express.rs::APP — el trigger que abre
-// una ventana Portapapeles llega desde el hilo de entrada física
-// (Etapa I), no desde un comando Tauri, así que no hay forma de
+// una ventana Portapapeles llega desde el hilo de entrada física,
+// no desde un comando Tauri, así que no hay forma de
 // recibirlo como parámetro en ese momento. Se fija en el setup() de
 // tauri::Builder (ver lib.rs), una sola vez.
 // ======================================================
@@ -1885,7 +1885,7 @@ fn app_handle() -> Option<&'static AppHandle> {
 // funden — no hace falta acá, pero cuesta nada.
 //
 // Se guarda también el PAQUETE original (no solo los datos ya
-// convertidos) porque los comandos de mutación (Etapa H: fijar/
+// convertidos) porque los comandos de mutación (fijar/
 // renombrar/editar/eliminar/limpiar/toggle Registro) necesitan poder
 // reconstruir PortapapelesDatosUI después de cada operación —
 // construir_datos() pide un &PortapapelesPaquete, y esos comandos
@@ -2380,8 +2380,8 @@ fn construir_datos(id: &str, paquete: &PortapapelesPaquete) -> PortapapelesDatos
 // ======================================================
 // ⚡🪟 ABRIR O ALTERNAR
 // ------------------------------------------------------
-// Único punto de entrada que va a llamar runtime.rs (Etapa I) —
-// mismo criterio que back_menu_express.rs::abrir_o_alternar: alterna
+// Único punto de entrada que va a llamar runtime.rs — mismo
+// criterio que back_menu_express.rs::abrir_o_alternar: alterna
 // A NIVEL DE TRIGGER (volver a presionar el mismo trigger cierra SU
 // ventana), sin importar comportamiento/modo.
 // ======================================================
@@ -2410,7 +2410,7 @@ pub fn abrir_o_alternar(id: String, paquete: PortapapelesPaquete) {
         );
     });
 
-    // ETAPA J.1: esta ventana recién insertada ya hace que
+    // Esta ventana recién insertada ya hace que
     // debe_existir_listener() sea true — asegurar_listener() es
     // idempotente, así que no importa si ya estaba corriendo por
     // algún Registro activo en otra fila.
@@ -2428,7 +2428,7 @@ pub fn abrir_o_alternar(id: String, paquete: PortapapelesPaquete) {
 // el header y la barra de botones inferior "Modo Registro"/"Limpiar
 // todo" — ver spec, diagrama "VENTANA PORTAPAPELES"). Mismo criterio
 // que back_menu_express.rs::calcular_tamano_ventana: los px vienen
-// de config.rs (Etapa C), único lugar con el valor real — si cambia
+// de config.rs, único lugar con el valor real — si cambia
 // ahí, este cálculo ya lo respeta solo.
 // ======================================================
 
@@ -2482,7 +2482,7 @@ fn calcular_tamano_ventana(
 // ------------------------------------------------------
 // Corre en el hilo principal (run_on_main_thread) — mismo motivo que
 // back_menu_express.rs::crear_ventana: este disparo va a llegar
-// desde el hilo de entrada física (Etapa I), no desde un comando
+// desde el hilo de entrada física, no desde un comando
 // Tauri async, así que WebviewWindowBuilder::build() necesita
 // marshalling explícito al hilo principal (WebView2 lo exige).
 // ======================================================
@@ -2580,7 +2580,7 @@ fn crear_ventana(app: AppHandle, id: String, paquete: PortapapelesPaquete) {
                             mapa.remove(&id_cierre);
                         });
 
-                        // ETAPA J.1: cierre por [x]/Alt+F4 (no pasa
+                        // Cierre por [x]/Alt+F4 (no pasa
                         // por back_portapapeles::cerrar()) — mismo
                         // chequeo ahí, para no dejar el listener
                         // corriendo de más si esta era la última
@@ -2614,7 +2614,7 @@ fn crear_ventana(app: AppHandle, id: String, paquete: PortapapelesPaquete) {
 // ------------------------------------------------------
 // Mismo criterio que back_menu_express.rs, con un agregado propio de
 // Portapapeles: cerrar_todas() no solo cierra ventanas, también vacía
-// ACTIVOS por completo (ver más abajo) — compilador.rs (Etapa L) la
+// ACTIVOS por completo (ver más abajo) — compilador.rs la
 // llama en cada recompilación tratándola como un reinicio (spec: "Al
 // reiniciar el programa, vuelve a Simple").
 // ======================================================
@@ -2630,7 +2630,7 @@ pub fn cerrar(id: &str) {
         mapa.remove(id);
     });
 
-    // ETAPA J.1: el cierre real de la ventana (arriba, ventana.close())
+    // El cierre real de la ventana (arriba, ventana.close())
     // dispara CloseRequested/Destroyed de forma asíncrona — este
     // remove() y el chequeo de acá ya dejan el estado correcto de
     // inmediato, sin esperar a que ese evento llegue.
@@ -2644,7 +2644,7 @@ pub fn cerrar_todas() {
         cerrar(&id);
     }
 
-    // ETAPA L: recompilar/cambiar de perfil se trata como reinicio —
+    // Recompilar/cambiar de perfil se trata como reinicio —
     // ACTIVOS no persiste entre reinicios (spec: "Al reiniciar el
     // programa, vuelve a Simple"), así que una recompilación tiene
     // que vaciarlo igual, aunque no quede ninguna ventana abierta que
@@ -2663,10 +2663,10 @@ pub fn cerrar_todas() {
 // ======================================================
 // 📤 OBTENER DATOS
 // ------------------------------------------------------
-// Consulta de sólo lectura — la propia ventana la llama al cargar
-// (Etapa J), con el id que vino en la URL (?id=...), y de nuevo tras
+// Consulta de sólo lectura — la propia ventana la llama al cargar,
+// con el id que vino en la URL (?id=...), y de nuevo tras
 // cada operación que cambie el pool (fijar/renombrar/editar/
-// eliminar/limpiar/toggle Registro — Etapa H), para no tener que
+// eliminar/limpiar/toggle Registro), para no tener que
 // duplicar en TS la lógica de qué mostrar según el modo.
 // ======================================================
 
@@ -2675,7 +2675,7 @@ pub fn obtener_datos(id: &str) -> Option<PortapapelesDatosUI> {
 }
 
 // ======================================================
-// 🔄 REFRESCAR DATOS — ETAPA H
+// 🔄 REFRESCAR DATOS
 // ------------------------------------------------------
 // Reconstruye PortapapelesDatosUI desde cero (misma lógica que
 // abrir_o_alternar: construir_datos() según ACTIVOS) y actualiza la
@@ -2870,7 +2870,7 @@ mod tests {
     }
 
     // --------------------------------------------------
-    // ETAPA F — ACTIVOS / límite efectivo
+    // ACTIVOS / límite efectivo
     // --------------------------------------------------
     // No prueban el arranque/parada real del listener (eso exige un
     // entorno Windows con mensajes de verdad, ver back_portapapeles_
@@ -2968,7 +2968,7 @@ mod tests {
     }
 
     // --------------------------------------------------
-    // ETAPA G — mismo_contenido / resolver_elemento_simple /
+    // mismo_contenido / resolver_elemento_simple /
     // construir_datos / calcular_tamano_ventana
     // --------------------------------------------------
     // Ninguno de estos tests crea una ventana real (eso exige

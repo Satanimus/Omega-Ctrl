@@ -6,7 +6,7 @@
 // "Grabar Macro", ver crearPanelInicioGrabacion en
 // comp_popup_macro_editor.ts). No es un objeto que se guarde
 // en disco — vive solo durante la sesión de grabación (lo
-// consume el análisis de la Etapa E).
+// consume el análisis de la grabación).
 // ======================================================
 
 import type {
@@ -18,7 +18,7 @@ import type {
 // ======================================================
 // 📍 MODO DE COORDENADAS
 // ------------------------------------------------------
-// Regla 2 (revisada): mismo modelo jerárquico Tipo → Medido en
+// Mismo modelo jerárquico Tipo → Medido en
 // → Medido desde que ya usa el gestor de Coordenadas guardadas
 // (ver abrirPopupTipo en vent_coordenadas_main.ts) — reusa
 // directamente UbicacionCoordenada/ModoVentanaCoordenada/
@@ -107,7 +107,7 @@ export function configInicioGrabacionPorDefecto(): ConfigInicioGrabacion {
 // ------------------------------------------------------
 // "armada": panel de inicio abierto, ventana overlay visible
 //     (🟡 "Presione <tecla> para grabar"), esperando la tecla
-//     toggle configurable (Regla 4) para arrancar de verdad.
+//     toggle configurable para arrancar de verdad.
 // "activa": tecla toggle presionada estando armada — grabando
 //     de verdad (🔴 "Presione <tecla> para detener").
 // "inactiva": ni armada ni grabando.

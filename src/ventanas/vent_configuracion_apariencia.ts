@@ -8,10 +8,9 @@
 // Elemento con valores anidados (ver configuracion_listar_apariencia
 // en comandos.rs).
 //
-// Placeholder de esqueleto: monta el árbol en la tabla nueva,
-// pero hayEdicionesPendientes/validarYRecolectar/aplicarGuardado/
-// marcarErroresGuardado/restablecerPestana todavía no tienen
-// lógica real (llega en una etapa posterior de persistencia).
+// Monta el árbol en la tabla y maneja edición/guardado/reseteo de
+// valores personalizados (hayEdicionesPendientes/validarYRecolectar/
+// aplicarGuardado/marcarErroresGuardado/restablecerPestana).
 // ======================================================
 
 import { invoke } from "@tauri-apps/api/core";
@@ -52,7 +51,7 @@ interface FilaCssCruda {
   valor_personalizado: string | null;
 }
 
-// Modelo tal cual lo entrega configuracion_tema_listar (Etapa F).
+// Modelo tal cual lo entrega configuracion_tema_listar.
 interface TemaListadoUI {
   nombre: string;
   origen: string;
@@ -76,7 +75,7 @@ const SENTINEL_BORRAR = "__borrar__";
 
 // Un hijo solo cuenta como "con Valor Personalizado" si difiere del
 // Valor por Defecto — si coincide, es equivalente a no tener override
-// (Regla: Personalizado es un diff disperso, no una tabla completa a
+// (Personalizado es un diff disperso, no una tabla completa a
 // reemplazar) y debe mostrarse como vacío/lápiz en vez de repetir el
 // mismo valor que ya se ve en la columna de al lado.
 function esPersonalizadoReal(hijo: FilaCssCruda): boolean {
@@ -87,7 +86,7 @@ function esPersonalizadoReal(hijo: FilaCssCruda): boolean {
   );
 }
 
-// Fila ya montada en el DOM, guardada en orden (Etapa E8) para que el
+// Fila ya montada en el DOM, guardada en orden para que el
 // botón Expandir/Contraer de una fila de nivel 1 pueda ocultar/mostrar
 // el tramo de filas que le siguen hasta el próximo nivel 1 (o el final
 // de la tabla) sin recorrer el árbol de nuevo.
@@ -98,7 +97,7 @@ interface FilaMontada {
 }
 
 // ----------------------------------------------------
-// Columnas de la tabla en árbol (Etapa E3/E4)
+// Columnas de la tabla en árbol
 // ----------------------------------------------------
 
 const COLUMNAS_ARBOL: Columna[] = [
@@ -130,8 +129,7 @@ const ANCHOS_DEFAULT_ARBOL: Record<string, number> = {
   personalizado: 260,
 };
 
-// Sangría por nivel del árbol (Etapa E6): mayor jerarquía = menos
-// sangría (Regla 32).
+// Sangría por nivel del árbol: mayor jerarquía = menos sangría.
 const SANGRIA_POR_NIVEL: Record<number, string> = {
   1: "0",
   2: "20px",
@@ -139,7 +137,7 @@ const SANGRIA_POR_NIVEL: Record<number, string> = {
 };
 
 // ----------------------------------------------------
-// Mapa de colores del tema (Etapa F1)
+// Mapa de colores del tema
 // ----------------------------------------------------
 // Recorre el arreglo plano en busca de la sección "Color de tema"
 // (nivel 1) y junta, de cada nodo dentro de ese tramo, sus hijos de
@@ -270,7 +268,7 @@ const PRESETS_ESCALA: Record<ClaveEscala, Record<string, string>> = {
 };
 
 // ----------------------------------------------------
-// Expandir/Contraer (Etapa E8)
+// Expandir/Contraer
 // ----------------------------------------------------
 
 function alternarExpandir(
@@ -303,7 +301,7 @@ function alternarExpandir(
 }
 
 // ----------------------------------------------------
-// Render de Valor por Defecto (Etapa F3)
+// Render de Valor por Defecto
 // ----------------------------------------------------
 // Swatch + nombre de tema para colores; texto plano para el resto
 // de tipos (porcentaje/pixeles/texto/modo). Hijos separados por " ; ".
@@ -343,7 +341,7 @@ function renderizarValorDefecto(
 }
 
 // ----------------------------------------------------
-// Campo de edición según tipo (Etapa G2)
+// Campo de edición según tipo
 // ----------------------------------------------------
 
 function crearCampoValor(
@@ -398,7 +396,7 @@ function crearCampoValor(
 }
 
 // ----------------------------------------------------
-// Popup Editar (Etapa G3)
+// Popup Editar
 // ------------------------------------------------------
 // [FIX] Antes armaba el contenido una sola vez: al elegir una
 // opción de un grupo tipo-radio (ej. Plano/Degradado),
@@ -450,11 +448,11 @@ function crearPopupEditar(
 }
 
 // ----------------------------------------------------
-// Render de Valor Personalizado (Etapa G4)
+// Render de Valor Personalizado
 // ----------------------------------------------------
 // Misma lógica que renderizarValorDefecto (swatch+nombre de tema
 // para color, texto plano para el resto) pero a partir de
-// valor_personalizado y sin etiquetas (Regla 37).
+// valor_personalizado y sin etiquetas.
 
 function renderizarValorPersonalizado(
   hijos: FilaCssCruda[],
@@ -503,7 +501,7 @@ function crearFilaArbol(
 
   const nivel = nodo.entrada.nivel;
 
-  // A3/2-3: Título (nivel 1) no tiene valores propios (hijos siempre
+  // Título (nivel 1) no tiene valores propios (hijos siempre
   // vacíos, ver construirArbol) — se arma como una sola celda que
   // ocupa las 3 columnas (mismo patrón que montarFilaSubtitulo en
   // Teclas), sin división de columnas: así el nombre tiene todo el
@@ -545,13 +543,13 @@ function crearFilaArbol(
   tdNombre.style.paddingLeft = SANGRIA_POR_NIVEL[nivel] ?? "0";
   tdNombre.textContent = nodo.entrada.nombre_ui;
 
-  // F4: swatches+nombre de tema en vez del join de texto plano
+  // Swatches+nombre de tema en vez del join de texto plano
   // (poblado por actualizarColumnas() más abajo, junto con
   // Valor Personalizado).
   const tdDefecto = document.createElement("td");
   tdDefecto.className = "configuracion-celda configuracion-arbol-defecto";
 
-  // Columna Editar/Valor Personalizado fusionada (Etapa H11): el
+  // Columna Editar/Valor Personalizado fusionada: el
   // botón "✎"/valor ocupa el espacio disponible; el botón "X"
   // (Limpiar) se agrega al lado, ver más abajo.
   const tdPersonalizado = document.createElement("td");
@@ -571,9 +569,9 @@ function crearFilaArbol(
     botonPersonalizado.disabled = true;
   }
 
-  // Botón "X" (Limpiar): reemplaza el antiguo doble click sobre
-  // Valor por Defecto (Regla: ya no se borra a ciegas con un doble
-  // click, hace falta un botón visible). Vive siempre en el DOM,
+  // Botón "X" (Limpiar): un botón visible en vez de un doble click
+  // sobre Valor por Defecto para borrar a ciegas. Vive siempre en
+  // el DOM,
   // oculto por CSS salvo hover + fila con Valor Personalizado (ver
   // .configuracion-arbol-personalizado-celda--editado en
   // styl_configuracion.css) para que ocupe siempre la misma posición
@@ -587,7 +585,7 @@ function crearFilaArbol(
 
   tdPersonalizado.append(botonPersonalizado, botonLimpiar);
 
-  // G5/H11: refresca Valor por Defecto y el botón fusionado tras un
+  // Refresca Valor por Defecto y el botón fusionado tras un
   // cambio en el popup Editar o un borrado por "X" — el botón
   // muestra "✎" vacío cuando no hay Valor Personalizado, o el valor
   // ya guardado (swatch+nombre para color) en su lugar. También
@@ -611,8 +609,8 @@ function crearFilaArbol(
     }
   };
 
-  // F5/H1: click en "X" borra el Valor Personalizado de toda la fila
-  // (Regla 34). Si alguno de los hijos tenía un valor original (ya
+  // Click en "X" borra el Valor Personalizado de toda la fila.
+  // Si alguno de los hijos tenía un valor original (ya
   // guardado en el backend), la fila sigue marcada en filasConCambio
   // para que "Guardar cambios" mande el borrado — ver SENTINEL_BORRAR
   // en validarYRecolectar. Si ninguno tenía valor original (todo era
@@ -638,7 +636,7 @@ function crearFilaArbol(
     actualizarColumnas();
   });
 
-  // G6/H1/H11: botón fusionado (vacío=lápiz o con el Valor
+  // Botón fusionado (vacío=lápiz o con el Valor
   // Personalizado ya guardado) abre el mini popup sobre la fila;
   // cualquier cambio dentro del popup marca la fila como pendiente
   // de guardar. Se reabre igual estando vacío o con valor.
@@ -682,9 +680,9 @@ function crearTablaApariencia(panel: HTMLDivElement): HTMLTableSectionElement {
 
   thead.append(trEncabezado);
 
-  // E4: reusa el mecanismo de arrastre de la tabla principal — la
+  // Reusa el mecanismo de arrastre de la tabla principal — la
   // tabla en árbol usa ".configuracion-arbol-celda" (no
-  // ".cabecera-celda") como selector de celda, ver E1.
+  // ".cabecera-celda") como selector de celda.
   activarRedimensionColumnas(
     trEncabezado,
     COLUMNAS_ARBOL,
@@ -741,14 +739,14 @@ export function crearPestanaApariencia(
 
   const tbody = crearTablaApariencia(panel);
 
-  // E3: estado de sesión del selector de temas — nombre/origen del
+  // Estado de sesión del selector de temas — nombre/origen del
   // tema que da la base de "Valor por Defecto" (ver
   // configuracion_apariencia_iniciar_sesion / configuracion_tema_cargar
   // en comandos.rs). Se completan en cargar().
   let nombreTemaSesion = "";
   let origenTemaSesion = "";
 
-  // G1: si el tema de sesión tiene overrides css. vigentes — controla
+  // Si el tema de sesión tiene overrides css. vigentes — controla
   // la visibilidad de "Guardar valores editados" en el popup.
   let hayPersonalizadosSesion = false;
 
@@ -779,7 +777,7 @@ export function crearPestanaApariencia(
     abrirPopupOpcionesTema(evento);
   });
 
-  // E4: refleja en el botón el tema de sesión + si hay overrides
+  // Refleja en el botón el tema de sesión + si hay overrides
   // pendientes/aplicados (nivel 0 con valor_personalizado no nulo).
   function actualizarBotonSelectorTema(filas: FilaCssCruda[]): void {
     const hayPersonalizados = filas.some(
@@ -793,7 +791,7 @@ export function crearPestanaApariencia(
       : nombreTemaSesion;
   }
 
-  // F4: item de la lista de "Cargar" — carga el tema en la sesión
+  // Item de la lista de "Cargar" — carga el tema en la sesión
   // (preview) y refresca la tabla sin reiniciar la sesión.
   function crearItemTema(
     tema: TemaListadoUI,
@@ -822,10 +820,8 @@ export function crearPestanaApariencia(
     return boton;
   }
 
-  // F6 (dividido): popup del botón con el nombre del tema — lista
-  // de temas directa (predefinidos, separador, temas de usuario),
-  // sin el paso intermedio "Cargar ▾" que existía cuando compartía
-  // popup con Guardar/Renombrar/Eliminar.
+  // Popup del botón con el nombre del tema — lista de temas
+  // directa (predefinidos, separador, temas de usuario).
   async function abrirPopupCargarTema(evento: MouseEvent): Promise<void> {
     const lista = document.createElement("div");
     lista.className = "popup-lista";
@@ -850,7 +846,7 @@ export function crearPestanaApariencia(
     mostrarPopup(lista, evento.clientX, evento.clientY);
   }
 
-  // G2: popup del botón "…" — Guardar como / Guardar cambios /
+  // Popup del botón "…" — Guardar como / Guardar cambios /
   // Renombrar / Eliminar (todo lo que no es elegir tema).
   function abrirPopupOpcionesTema(evento: MouseEvent): void {
     let confirmandoEliminar = false;
@@ -860,7 +856,7 @@ export function crearPestanaApariencia(
       lista.className = "popup-lista";
 
       // ----------------------------------
-      // G3: Guardar cambios (directo al archivo del tema de usuario)
+      // Guardar cambios (directo al archivo del tema de usuario)
       // — va arriba de "Guardar como".
       // ----------------------------------
 
@@ -925,7 +921,7 @@ export function crearPestanaApariencia(
       lista.append(botonGuardarComo);
 
       // ----------------------------------
-      // G2: opciones extra solo para tema de usuario
+      // Opciones extra solo para tema de usuario
       // ----------------------------------
 
       if (origenTemaSesion === "usuario") {
@@ -933,7 +929,7 @@ export function crearPestanaApariencia(
         separadorUsuario.className = "app-popup-separador";
         lista.append(separadorUsuario);
 
-        // G4/H5: Renombrar — reutiliza abrirFormularioNombre
+        // Renombrar — reutiliza abrirFormularioNombre
         const botonRenombrar = document.createElement("button");
         botonRenombrar.className = "ui-btn";
         botonRenombrar.textContent = "Renombrar";
@@ -957,7 +953,7 @@ export function crearPestanaApariencia(
 
         lista.append(botonRenombrar);
 
-        // G5: Eliminar Tema (doble verificación, mismo comportamiento
+        // Eliminar Tema (doble verificación, mismo comportamiento
         // y color que "Eliminar perfil" de la barra lateral)
         const botonEliminarTema = document.createElement("button");
         botonEliminarTema.className = "ui-btn popup-perfil-eliminar";
@@ -1010,7 +1006,7 @@ export function crearPestanaApariencia(
     return fila;
   }
 
-  // H2/H8: estado de edición pendiente, vive fuera de cargar() para
+  // Estado de edición pendiente, vive fuera de cargar() para
   // sobrevivir entre renders del árbol dentro de la misma sesión de
   // la ventana (se limpia explícitamente al recargar, ver cargar()).
   const filasConCambio = new Set<NodoArbol>();
@@ -1112,8 +1108,8 @@ export function crearPestanaApariencia(
     return fila;
   }
 
-  // F1: separada de cargar() para poder refrescar la tabla tras
-  // "Cargar" tema (Etapa F) sin reiniciar la sesión de apariencia —
+  // Separada de cargar() para poder refrescar la tabla tras
+  // "Cargar" tema sin reiniciar la sesión de apariencia —
   // reiniciarla ahí perdería el preview recién cargado.
   async function recargarTablaApariencia(): Promise<void> {
     const filas = await invoke<FilaCssCruda[]>(
@@ -1160,7 +1156,7 @@ export function crearPestanaApariencia(
         valoresOriginales,
       );
 
-      // A4: separación extra para una fila de nivel 2 que tiene una
+      // Separación extra para una fila de nivel 2 que tiene una
       // fila hija de nivel 3 debajo (ej. "Separador" → "Fondo de sus
       // filas"), para reforzar la jerarquía de árbol.
       if (nodo.entrada.nivel === 2 && arbol[i + 1]?.entrada.nivel === 3) {
@@ -1184,7 +1180,7 @@ export function crearPestanaApariencia(
   }
 
   async function cargar(): Promise<void> {
-    // E5: reinicia la sesión de apariencia (descarta preview no
+    // Reinicia la sesión de apariencia (descarta preview no
     // aplicado de una apertura anterior) y toma nombre/origen del
     // tema realmente aplicado y persistido en disco.
     const sesion = await invoke<{ nombre: string; origen: string }>(
@@ -1202,7 +1198,7 @@ export function crearPestanaApariencia(
     return filasConCambio.size > 0 || huboCargaDeTema;
   }
 
-  // H5 (corregido): recolecta los hijos de las filas marcadas. Un
+  // Recolecta los hijos de las filas marcadas. Un
   // hijo con valor_personalizado no nulo se manda como cambio normal.
   // Un hijo que volvió a null pero SÍ tenía un valor original
   // guardado (ver valoresOriginales) se manda igual, con
@@ -1233,7 +1229,7 @@ export function crearPestanaApariencia(
     return { cambios, erroresLocales: [] };
   }
 
-  // H6 (corregido): separa el lote en "a guardar" (valor real) y "a
+  // Separa el lote en "a guardar" (valor real) y "a
   // borrar" (SENTINEL_BORRAR) — cada uno va a su comando Rust
   // correspondiente. Si ambos fallan/tienen error, se combinan los
   // resultados; configuracion_restablecer_claves_css no valida ni
@@ -1281,7 +1277,7 @@ export function crearPestanaApariencia(
     return { errores };
   }
 
-  // H7: ubica, para cada error, el nodo contenedor cuyo hijo tiene ese
+  // Ubica, para cada error, el nodo contenedor cuyo hijo tiene ese
   // id — se busca en filasConCambio porque es el único universo de
   // nodos que pudo haber generado un cambio enviado a guardar — y
   // marca su tr vía trPorNodo.
@@ -1300,7 +1296,6 @@ export function crearPestanaApariencia(
     }
   }
 
-  // H9
   async function limpiarEstadoTrasGuardado(): Promise<void> {
     // Fix bug doble click tras Aplicar cambios: valoresOriginales solo
     // se refrescaba en recargarTablaApariencia() (cargar/restablecer),

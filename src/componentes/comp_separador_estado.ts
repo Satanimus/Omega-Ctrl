@@ -3,7 +3,7 @@
 // ------------------------------------------------------
 // Botón Estado del header de un Separador.
 // Al hacer clic: fuerza ese estado en todas las filas del
-// tramo (cascada descendente, Regla 14). Muestra indicador
+// tramo (cascada descendente). Muestra indicador
 // gris cuando estadoVisual del separador es "mixto".
 // ======================================================
 

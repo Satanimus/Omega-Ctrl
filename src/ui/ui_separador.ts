@@ -73,7 +73,7 @@ export function crearSeparadorHeader(
 
   celdaOpciones.className = "celda separador-opciones";
 
-  // [FIX bug 3] Sin este atributo, la regla CSS que da min-width:150px
+  // [FIX] Sin este atributo, la regla CSS que da min-width:150px
   // cuando hay .opciones-extra (styl_tabla.css, selector
   // .celda[data-columna="opciones"]:has(.opciones-extra)) nunca
   // matcheaba acá — la celda quedaba fija en su ancho de columna y

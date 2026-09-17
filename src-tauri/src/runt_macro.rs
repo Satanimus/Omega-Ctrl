@@ -424,13 +424,13 @@ fn ejecutar_macro_completa(
     // Teclas retenidas por un paso "Solo Down" que todavía
     // no recibieron su "Solo Up" — se libera cualquier resto al
     // terminar la macro (red de seguridad si se detiene a mitad de
-    // un Down sin Up, ver Regla 16 para la validación que evita esto
-    // en el editor).
+    // un Down sin Up; el editor valida que esto no ocurra en uso
+    // normal).
     let mut retenidos: Vec<InputId> = Vec::new();
 
     // Overlay del indicador de ejecución (modo play): solo si
-    // indicadorEjecucion está activo (Regla 11); sin AppHandle
-    // disponible se omite igual y la macro corre normalmente (E5).
+    // indicadorEjecucion está activo; sin AppHandle
+    // disponible se omite igual y la macro corre normalmente.
     let overlay_abierto = indicador_ejecucion && abrir_overlay_indicador_play(&macro_archivo.pasos);
 
     ejecutar_pasos(

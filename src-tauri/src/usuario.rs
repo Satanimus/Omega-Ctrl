@@ -104,7 +104,7 @@ pub(crate) fn carpeta_default() -> Result<PathBuf, String> {
 }
 
 // Si ya existe una carpeta "Usuario" al lado del .exe actual, es
-// portable y manda por sobre cualquier otra fuente (Regla 1/2).
+// portable y manda por sobre cualquier otra fuente.
 fn carpeta_junto_a_exe() -> Option<PathBuf> {
     let exe = std::env::current_exe().ok()?;
     let carpeta = exe.parent()?.join("Usuario");
@@ -114,7 +114,7 @@ fn carpeta_junto_a_exe() -> Option<PathBuf> {
 
 // Marcador fijo en AppData (independiente de la carpeta Usuario que
 // resuelve), donde Configuración guarda la carpeta destino elegida
-// por el usuario (Regla 4) — el padre de "Usuario", no "Usuario"
+// por el usuario — el padre de "Usuario", no "Usuario"
 // mismo (mismo criterio que Default e Instalación). Contiene la
 // ruta absoluta en texto plano.
 fn ruta_override() -> Option<PathBuf> {
@@ -138,7 +138,7 @@ pub(crate) fn leer_override() -> Option<PathBuf> {
 // ⚙️ OVERRIDE DE CARPETA DE USUARIO (Configuración)
 // ------------------------------------------------------
 // guardar_override()/quitar_override() son los únicos
-// puntos de escritura de ubicacion.txt (Regla 3/4). No
+// puntos de escritura de ubicacion.txt. No
 // migran nada — eso lo hace antes el código que llama a
 // estas funciones, recién después de migrar.
 // ======================================================
@@ -167,7 +167,7 @@ pub(crate) fn quitar_override() -> Result<(), String> {
 
 // Carpeta del .exe, para la opción "Carpeta de instalación OmegaCtrl"
 // del selector — destino padre, igual que Default y un override
-// "Otra" (Regla 6): "Usuario" se crea/migra debajo de esta carpeta.
+// "Otra": "Usuario" se crea/migra debajo de esta carpeta.
 pub(crate) fn carpeta_instalacion() -> Result<PathBuf, String> {
     let exe = std::env::current_exe().map_err(|error| error.to_string())?;
 
@@ -176,7 +176,7 @@ pub(crate) fn carpeta_instalacion() -> Result<PathBuf, String> {
         .ok_or_else(|| "No se pudo resolver la carpeta del ejecutable".to_string())
 }
 
-// Confirma que se puede crear/escribir/borrar en la carpeta (Regla 9).
+// Confirma que se puede crear/escribir/borrar en la carpeta.
 pub(crate) fn validar_carpeta_escribible(carpeta: &Path) -> Result<(), String> {
     fs::create_dir_all(carpeta).map_err(|error| error.to_string())?;
 
@@ -189,7 +189,7 @@ pub(crate) fn validar_carpeta_escribible(carpeta: &Path) -> Result<(), String> {
 
 // Detecta si la carpeta cae dentro de una carpeta de sistema típica
 // (Program Files, Program Files (x86), Windows) para mostrar el
-// aviso de modo administrador (Regla 8).
+// aviso de modo administrador.
 pub(crate) fn es_carpeta_sistema(carpeta: &Path) -> bool {
     let claves = ["ProgramFiles", "ProgramFiles(x86)", "ProgramW6432", "windir"];
 
@@ -203,7 +203,7 @@ pub(crate) fn es_carpeta_sistema(carpeta: &Path) -> bool {
 }
 
 // ======================================================
-// 🚚 MIGRACIÓN DE CARPETA USUARIO (Regla 10/11)
+// 🚚 MIGRACIÓN DE CARPETA USUARIO
 // ------------------------------------------------------
 // Puro backend: no decide qué hacer ante un conflicto ni
 // ante la carpeta antigua, solo ejecuta lo que el comando le
@@ -211,7 +211,7 @@ pub(crate) fn es_carpeta_sistema(carpeta: &Path) -> bool {
 // correspondientes.
 // ======================================================
 
-// ¿El destino ya tiene una carpeta "Usuario" con contenido? (Regla 11)
+// ¿El destino ya tiene una carpeta "Usuario" con contenido?
 pub(crate) fn destino_usuario_no_vacio(destino: &Path) -> bool {
     let carpeta = destino.join("Usuario");
 
@@ -247,7 +247,7 @@ pub(crate) fn migrar_usuario(destino: &Path) -> Result<(), String> {
     copiar_directorio_recursivo(&origen, &destino_usuario)
 }
 
-// Borra una carpeta Usuario ya migrada (Regla 10, opción "Eliminar"
+// Borra una carpeta Usuario ya migrada (opción "Eliminar"
 // sobre la ruta antigua). Recibe la ruta ya resuelta de antemano
 // (capturada antes de guardar_override) — carpeta() a esta altura
 // ya apunta al destino nuevo.
@@ -256,9 +256,10 @@ pub(crate) fn eliminar_carpeta(carpeta: &Path) -> Result<(), String> {
 }
 
 // "Mantener" sobre la carpeta antigua cuando esta era la portable
-// junto al exe: no puede seguir llamándose "Usuario" o la Regla 1
-// la vuelve a tomar en el próximo arranque e ignora el override
-// recién guardado. Se renombra a "Usuario_old" junto al exe.
+// junto al exe: no puede seguir llamándose "Usuario" o la próxima
+// detección de carpeta portable la vuelve a tomar en el próximo
+// arranque e ignora el override recién guardado. Se renombra a
+// "Usuario_old" junto al exe.
 pub(crate) fn renombrar_a_usuario_old(carpeta: &Path) -> Result<(), String> {
     let destino = carpeta
         .parent()

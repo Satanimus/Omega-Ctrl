@@ -19,10 +19,9 @@
   height: 100%;
 
   /* Reserva justa para el scrollbar real (10px, ver
-       ::-webkit-scrollbar en styl_general.css) — antes eran 20px
-       fijos, el doble de lo necesario, que además quedaban sin
-       ningún fondo de fila pintado encima (se veían como un
-       hueco vacío al hacer scroll horizontal en ventanas
+       ::-webkit-scrollbar en styl_general.css); un valor mayor deja
+       espacio sin ningún fondo de fila pintado encima (se ve como
+       un hueco vacío al hacer scroll horizontal en ventanas
        angostas). */
   padding-right: 10px;
 
@@ -40,7 +39,7 @@
 }
 
 /* ======================================================
-   🔢 CARRIL DE NÚMEROS (Etapa 9B)
+   🔢 CARRIL DE NÚMEROS
    ------------------------------------------------------
    Fuera de .viewport: no es una columna de la fila, es un
    indicador de fondo que no se mueve con el arrastre. El
@@ -61,8 +60,7 @@
 
   background: transparent;
 
-  /* Separación del borde de la barra lateral — antes el carril
-       quedaba pegado directamente contra ella. */
+  /* Separación del borde de la barra lateral. */
   margin-left: var(--gap8);
 
   transition: width var(--speed);
@@ -105,7 +103,7 @@
   font-size: var(--fs13);
 }
 
-/* Etapa C: botón On/Off (.estado-toggle, ver styl_botones.css)
+/* Botón On/Off (.estado-toggle, ver styl_botones.css)
    superpuesto y centrado sobre el número — la fila-normal ya no
    tiene celda "estado" propia. */
 .carril-numero .estado-toggle {
@@ -135,7 +133,7 @@
 
   align-items: center;
 
-  /* [FIX] Etapa D: On/Off del separador debe caer en el mismo
+  /* [FIX] On/Off del separador debe caer en el mismo
        eje horizontal que el On/Off superpuesto de una fila normal
        (centrado en los --col-carril-numeros de siempre) — con
        justify-content: space-between el botón quedaba pegado al
@@ -324,7 +322,7 @@
   );
 }
 
-/* Etapa E: el tinte de separador se acota a las celdas
+/* El tinte de separador se acota a las celdas
    Opciones→Extra (ya no a la fila completa) — Nota queda sin
    color, ver .celda.nota-en-fila-separador más abajo.
    [FIX] se pinta con color-mix(...,transparent) en vez de mezclar
@@ -561,12 +559,11 @@
 
 /* Los botones dentro de la columna Opciones (toggle "⁝" + los 3
    extra) no deben estirarse con el ancho de la celda: el ancho lo
-   da el contenido, ancla por igual a fila normal y separador (ambos
+   da el contenido, aplica por igual a fila normal y separador (ambos
    envuelven su contenido en div.opciones-celda, ver comp_opciones.ts/
-   ui_separador.ts) — antes esta regla solo cubría el separador
-   (.celda.separador-opciones .ui-btn), así que en la fila normal
-   .celda .ui-btn (arriba, width:100%) ganaba: el toggle se ensanchaba
-   al expandirse la columna y los 3 extra competían por el ancho
+   ui_separador.ts). Sin este alcance, en la fila normal ganaría
+   .celda .ui-btn (arriba, width:100%): el toggle se ensancharía al
+   expandirse la columna y los 3 extra competirían por el ancho
    sobrante, dejando a Eliminar recortado por overflow:hidden. */
 .opciones-celda .ui-btn {
   width: fit-content;
@@ -587,10 +584,10 @@
 
 /* ======================================================
    ⋮ COLUMNA OPCIONES — botón toggle + extra inline
-   (fila, separador y cabecera — Etapa B/C/D, ver comp_*)
+   (fila, separador y cabecera, ver comp_*)
    ====================================================== */
 
-/* E.1 — contenedor del botón ⁝/Opciones + botones extra.
+/* Contenedor del botón ⁝/Opciones + botones extra.
    width: fit-content, igual criterio que .opciones-celda .ui-btn
    más arriba, para que no se estire con el ancho de la columna. */
 .opciones-celda {
@@ -604,8 +601,7 @@
 }
 
 /* Contenedor de los 3 botones (🎨 ⧉ X). La transición de
-   ancho/opacidad es la animación de expansión de la columna
-   (Regla 3 / Regla 9). */
+   ancho/opacidad es la animación de expansión de la columna. */
 .opciones-extra {
   display: flex;
 
@@ -627,7 +623,7 @@
     opacity var(--speed);
 }
 
-/* E.2 — botones ícono-solo, mismo tamaño que .ui-btn.icono. */
+/* Botones ícono-solo, mismo tamaño que .ui-btn.icono. */
 .opciones-boton-color,
 .opciones-boton-duplicar,
 .opciones-boton-eliminar {
@@ -638,7 +634,7 @@
   padding: 0;
 }
 
-/* E.3 — deshabilitado por defecto (Regla 13). */
+/* Deshabilitado por defecto. */
 .opciones-extra .ui-btn:disabled {
   opacity: 0.4;
 
@@ -651,17 +647,17 @@
   border-color: transparent;
 }
 
-/* E.4 — Regla 14: el title nativo ya se ve sobre botones
-   disabled sin CSS adicional; no usar pointer-events: none acá
-   porque taparía el tooltip nativo del navegador. */
+/* El title nativo ya se ve sobre botones disabled sin CSS
+   adicional; no usar pointer-events: none acá porque taparía el
+   tooltip nativo del navegador. */
 
-/* E.5 — color de reposo/hover: lo da la familia .boton-peligro
+/* Color de reposo/hover: lo da la familia .boton-peligro
    (styl_botones.css), aplicada a botonEliminar en comp_opciones.ts.
-   No redefinir acá border-color/color: esas reglas vivían acá antes
-   y siempre perdían contra el reset ghost de .fila .ui-btn (misma
-   especificidad, pero ese reset carga después en otro archivo) —
-   ese era el bug del borde que no se ponía rojo. */
-/* E.6 — Regla 9: confirmación expandida de Eliminar. */
+   No redefinir acá border-color/color: pierden contra el reset
+   ghost de .fila .ui-btn (misma especificidad, pero ese reset carga
+   después en otro archivo) — ese es el bug del borde que no se pone
+   rojo si se redefine acá. */
+/* Confirmación expandida de Eliminar. */
 .opciones-boton-eliminar--confirmando {
   width: auto;
 
@@ -679,9 +675,9 @@
     border-color var(--speed);
 }
 
-/* E.7 — la celda "opciones" (cabecera y fila) se ensancha cuando
-   la columna extra está expandida (Regla 3, Regla 9). min-width
-   en vez de width/flex-basis: el ancho base de la columna llega
+/* La celda "opciones" (cabecera y fila) se ensancha cuando la
+   columna extra está expandida. min-width en vez de width/flex-basis:
+   el ancho base de la columna llega
    por estilo inline (redimensionable via .divisor-columna), y
    min-width actúa como piso sin pisarlo. 150px ≈ botón toggle
    (28px) + gap4 + 3 botones extra (3×28px + 2×gap4) + padding
@@ -691,7 +687,7 @@
   min-width: 150px;
 }
 
-/* [bug 1, vuelta 2] Mientras Eliminar pide confirmación:
+/* [BUG] Mientras Eliminar pide confirmación:
    - se ocultan ⁝/Color/Duplicar de ESA celda (:has apuntando a
      .opciones-celda para las filas/separadores, y a
      .cabecera-celda[data-columna="opciones"] para el encabezado —

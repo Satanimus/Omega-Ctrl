@@ -120,10 +120,9 @@ export interface FilaPerfil {
 
   abrirExtra: AbrirExtraPerfil;
 
-  // Solo relevante cuando tipo === "macro" (columna Extra — desde
-  // la Etapa 8A guarda el Comportamiento de disparo, ya no la
-  // cantidad de pasos). El nombre de la macro asignada sigue
-  // viajando en accionReferencia (columna Acción, sin cambios acá).
+  // Solo relevante cuando tipo === "macro" (columna Extra —
+  // guarda el Comportamiento de disparo). El nombre de la macro
+  // asignada sigue viajando en accionReferencia (columna Acción).
   // Ver core_macro.ts.
   macroExtra: MacroExtraPerfil;
 

@@ -104,7 +104,7 @@ function activarArrastre(raiz: HTMLElement): void {
 
 // Persiste la posición actual (coordenadas lógicas, mismo criterio
 // que vent_indicador_macro_main.ts) en la clave propia de
-// Notificación (guardar_posicion_notificacion, Etapa D/B).
+// Notificación (guardar_posicion_notificacion).
 async function guardarPosicionTrasArrastre(
   ventana: ReturnType<typeof getCurrentWindow>,
 ): Promise<void> {

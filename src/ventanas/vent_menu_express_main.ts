@@ -14,42 +14,38 @@
 // (back_menu_express::abrir_o_alternar registra antes de
 // llamar a crear_ventana), sin carrera posible.
 //
-// ETAPA 6: layout real según datos.forma — Radial (anillo de
-// gajos, ver más abajo) y Cuadrícula (CSS Grid, columnas/filas
-// con la regla "0 = auto": se rellena primero la dimensión fija,
-// la otra crece).
+// Layout real según datos.forma: Radial (anillo continuo de gajos
+// — trapecio redondeado, como un gráfico de torta con hueco
+// central, sin barra superior; el hueco central muestra el nombre
+// del menú + el botón de cerrar, ver más abajo) y Cuadrícula (CSS
+// Grid, columnas/filas con la regla "0 = auto": se rellena primero
+// la dimensión fija, la otra crece; mantiene su barra superior de
+// siempre).
 //
-// ETAPA 7: ejecución real de los botones — mousedown manda el down
-// real (menu_express_boton_down), mouseup el up real
+// Ejecución real de los botones: mousedown manda el down real
+// (menu_express_boton_down), mouseup el up real
 // (menu_express_boton_up), y éste último resuelve Comportamiento
 // (Toggle/Efímero) del lado de Rust. Mantenido/Turbo se emulan solos:
 // el tiempo real entre down y up (mientras el botón del mouse siga
 // presionado) es exactamente lo que runtime.rs ya sabe interpretar
 // (mismo motor que un trigger físico sostenido, ver back_menu_express.rs).
 //
-// ETAPA 8: tamaños de botón/texto ya no están hardcodeados — se leen
-// de config.rs vía obtener_tamanos_menu_express (ver
-// leerTamanosMenuExpress más abajo), única fuente de verdad real.
-// ubicacion "Persistente" ahora recuerda la última posición real
-// (ver back_menu_express.rs) en vez de un punto fijo. Comportamiento
-// Efímero ahora cierra con fade-out (ver cerrarConFade más abajo) en
-// vez de destruirse en seco.
+// Tamaños de botón/texto se leen de config.rs vía
+// obtener_tamanos_menu_express (ver leerTamanosMenuExpress más
+// abajo), única fuente de verdad real. ubicacion "Persistente"
+// recuerda la última posición real (ver back_menu_express.rs).
+// Comportamiento Efímero cierra con fade-out (ver cerrarConFade
+// más abajo).
 //
-// ETAPA 9: Radial dejó de ser botones cuadrados repartidos en un
-// círculo — ahora es un ANILLO CONTINUO de gajos (trapecio
-// redondeado, como un gráfico de torta con hueco central), sin
-// barra superior. El hueco central muestra el nombre del menú + el
-// botón de cerrar (reemplaza al header, que en Radial ya no existe).
-// Como los gajos cubren el anillo completo (no dependen de no
-// solaparse entre sí), el radio YA NO crece con la cantidad de
-// botones (a diferencia del sistema viejo) — depende solo del
-// tamaño de botón elegido (menu_extra.tamanoBoton), igual criterio
-// espejado en back_menu_express.rs::calcular_tamano_ventana. Cada
-// gajo se recorta con clip-path:path(...) usando un arco SVG — el
-// hit-test del click respeta ese recorte (Chromium/WebView2), así
-// que gajos vecinos no se pisan el área de clic aunque cada
-// elemento ocupe, de fondo, todo el anillo.
-// Cuadrícula NO cambia — sigue con su barra superior de siempre.
+// En Radial, como los gajos cubren el anillo completo (no dependen
+// de no solaparse entre sí), el radio no crece con la cantidad de
+// botones — depende solo del tamaño de botón elegido
+// (menu_extra.tamanoBoton), igual criterio espejado en
+// back_menu_express.rs::calcular_tamano_ventana. Cada gajo se
+// recorta con clip-path:path(...) usando un arco SVG — el hit-test
+// del click respeta ese recorte (Chromium/WebView2), así que gajos
+// vecinos no se pisan el área de clic aunque cada elemento ocupe,
+// de fondo, todo el anillo.
 // ======================================================
 
 import { invoke } from "@tauri-apps/api/core";
@@ -142,7 +138,7 @@ function cerrar(): void {
 }
 
 // ======================================================
-// 🌫️ CIERRE SUAVE (Comportamiento Efímero) — ETAPA 8
+// 🌫️ CIERRE SUAVE (Comportamiento Efímero)
 // ------------------------------------------------------
 // back_menu_express.rs::boton_up ya NO cierra la ventana: solo
 // avisa (true) que este menú es Efímero y debe cerrarse tras el
@@ -168,7 +164,7 @@ function cerrarConFade(): void {
 // transparencia — el fallback sólido en menu_express.css cubre
 // navegadores sin soporte. En Radial esta variable la usan los
 // gajos (ver .menu-express-boton--gajo en menu_express.css); en
-// Cuadrícula la usa la tarjeta entera, igual que antes.
+// Cuadrícula la usa la tarjeta entera.
 // ======================================================
 
 function aplicarColorFondo(color: string): void {
@@ -195,7 +191,7 @@ function aplicarColorFondo(color: string): void {
 // referenciada (boton.color, ya resuelto por back_menu_express.rs).
 // Si esa fila no tiene color asignado (boton.color === ""), NO se
 // toca el borde — se mantiene heredado de la ventana (mismo
-// resultado visual que Monocromo para ese botón puntual, spec).
+// resultado visual que Monocromo para ese botón puntual).
 //
 // Se aplica sobre --boton-color-borde en vez de tocar `border`
 // directo, para que el mismo valor sirva tanto al borde real de
@@ -216,7 +212,7 @@ function aplicarColorBorde(
 }
 
 // ======================================================
-// 📐 TAMAÑOS EN PX (config.rs — etapa 8)
+// 📐 TAMAÑOS EN PX (config.rs)
 // ------------------------------------------------------
 // Se leen una sola vez al iniciar, vía obtener_tamanos_menu_express
 // (ver config.rs / comandos.rs) — config.rs es la única fuente de
@@ -297,8 +293,7 @@ async function leerTamanosMenuExpress(): Promise<void> {
 // ======================================================
 // 🏗️ ESTRUCTURA CON HEADER (Cuadrícula / estados de error)
 // ------------------------------------------------------
-// Igual que la única estructura que existía antes de la etapa 9.
-// Se sigue usando para Cuadrícula y para los estados en los que
+// Se usa para Cuadrícula y para los estados en los que
 // todavía no se sabe `datos.forma` (falta id / datos no
 // disponibles) — en esos casos no hay nada mejor que mostrar que
 // un cartel adentro de la tarjeta de siempre.
@@ -349,13 +344,13 @@ function construirEstructuraConHeader(): {
 }
 
 // ======================================================
-// 🏗️ ESTRUCTURA RADIAL (sin header) — ETAPA 9
+// 🏗️ ESTRUCTURA RADIAL (sin header)
 // ------------------------------------------------------
 // Sin barra superior: la tarjeta es transparente (solo se ven los
 // gajos + el círculo central), y el círculo central reemplaza al
 // header — muestra el nombre del menú y el botón de cerrar. El
-// arrastre de la ventana queda limitado al círculo central (spec:
-// "solo desde el centro"), nunca desde el anillo de gajos (esa zona
+// arrastre de la ventana queda limitado al círculo central, nunca
+// desde el anillo de gajos (esa zona
 // tiene que quedar libre para clickear los gajos sin arrastrar por
 // error).
 // ======================================================
@@ -398,8 +393,8 @@ function construirEstructuraRadial(): { centroTitulo: HTMLSpanElement } {
 // ------------------------------------------------------
 // Común a los tres layouts (lista, cuadrícula, gajo radial) —
 // separado de la creación del elemento en sí para poder reusarlo
-// tal cual con la forma de gajo (ETAPA 9), que ya no crea el botón
-// desde cero en el mismo lugar donde antes vivía este código.
+// tal cual con la forma de gajo, que no crea el botón desde cero en
+// el mismo lugar.
 //
 // mousedown/mouseup (NO click): un click dispara recién al
 // soltar, pero acá el down y el up son eventos DISTINTOS que
@@ -424,7 +419,7 @@ function adjuntarEventosBoton(
   elemento.addEventListener("mousedown", (evento) => {
     // Solo botón izquierdo — clic derecho/medio no ejecuta nada
     // (mismo criterio que "Click izquierdo solo" bloqueado como
-    // trigger de MenuExpress, ver spec etapa 8).
+    // trigger de MenuExpress).
     if (evento.button !== 0) return;
 
     evento.preventDefault();
@@ -492,20 +487,20 @@ function crearBoton(
 }
 
 // ======================================================
-// ⭕ LAYOUT RADIAL — ANILLO DE GAJOS (ETAPA 9)
+// ⭕ LAYOUT RADIAL — ANILLO DE GAJOS
 // ------------------------------------------------------
 // Cada botón es un gajo (trapecio redondeado) recortado con
 // clip-path:path(...) sobre un arco SVG — el elemento ocupa, de
 // fondo, todo el anillo (mismo tamaño que .menu-express-cuerpo),
 // pero solo se ve/clickea la porción dentro de su ángulo. El
-// primer gajo arranca arriba (-90°) y avanza en sentido horario,
-// mismo criterio que el sistema anterior. GAP_GRADOS separa cada
+// primer gajo arranca arriba (-90°) y avanza en sentido horario.
+// GAP_GRADOS separa cada
 // gajo de su vecino (recorte simétrico a cada lado del ángulo) para
 // que los colores de fila (a futuro, variable "Color botón") no se
 // toquen entre sí.
 //
-// El radio NO depende de la cantidad de botones (a diferencia del
-// sistema anterior): como los gajos cubren el anillo completo, más
+// El radio NO depende de la cantidad de botones: como los gajos
+// cubren el anillo completo, más
 // botones simplemente angostan cada gajo — nunca se solapan. El
 // tamaño del anillo depende solo de menu_extra.tamanoBoton, mismo
 // criterio espejado en back_menu_express.rs::calcular_tamano_ventana
@@ -707,12 +702,12 @@ function renderizarRadial(
 // ======================================================
 // ▦ LAYOUT CUADRÍCULA
 // ------------------------------------------------------
-// Regla (spec): solo una de columnas/filas puede limitar a la
-// vez — la que vale 0 es la flexible y se acomoda al número de
-// botones. Se rellena primero la dimensión fija (ej. 5 filas con
-// 10 botones → 2 columnas). Si ambas son 0 (no debería pasar,
-// crearMenuExtra() siempre deja una fija — pero por si acaso) o
-// algún valor no es válido, se toma como 1 (spec).
+// Solo una de columnas/filas puede limitar a la vez — la que
+// vale 0 es la flexible y se acomoda al número de botones. Se
+// rellena primero la dimensión fija (ej. 5 filas con 10 botones →
+// 2 columnas). Si ambas son 0 (no debería pasar, crearMenuExtra()
+// siempre deja una fija — pero por si acaso) o algún valor no es
+// válido, se toma como 1.
 // ======================================================
 
 function calcularGrid(
@@ -734,8 +729,8 @@ function calcularGrid(
     return { columnas: col, filas: Math.max(1, Math.ceil(n / col)) };
   }
 
-  // Ninguna de las dos es válida: ambas "1" (spec: valor no
-  // válido → 1), lo que en la práctica cae a una columna vertical.
+  // Ninguna de las dos es válida: ambas "1" (valor no válido → 1),
+  // lo que en la práctica cae a una columna vertical.
   return { columnas: 1, filas: Math.max(1, n) };
 }
 

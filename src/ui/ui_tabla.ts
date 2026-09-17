@@ -112,14 +112,13 @@ export function crearTabla(alModificar: () => void): HTMLElement {
 
   let celdaOpcionesCabecera: HTMLElement | null = null;
 
-  // [FIX bug 2/3] Antes esta celda se poblaba una sola vez, acá
-  // mismo, al crear la cabecera — como la cabecera nunca se vuelve
-  // a tocar en reconstruirTabla() (solo se reconstruyen filas/
-  // carrilLista), togglear "⁝" nunca hacía aparecer los 3 botones
-  // "...seleccionados" (bug 2), y por lo tanto tampoco se activaba
-  // el min-width:150px de la celda (bug 3, parte encabezado). Se
-  // extrae a función reusable, llamada acá y de nuevo dentro de
-  // reconstruirTabla().
+  // [FIX] Poblar esta celda una sola vez acá mismo, al crear la
+  // cabecera, no alcanza: la cabecera nunca se vuelve a tocar en
+  // reconstruirTabla() (solo se reconstruyen filas/carrilLista), así
+  // que togglear "⁝" no hacía aparecer los 3 botones
+  // "...seleccionados" ni activaba el min-width:150px de la celda.
+  // Por eso se extrae a función reusable, llamada acá y de nuevo
+  // dentro de reconstruirTabla().
   function actualizarCeldaOpcionesCabecera(): void {
     if (!celdaOpcionesCabecera) {
       return;
@@ -258,7 +257,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
   filas.className = "filas";
 
   // ==================================================
-  // 🔢 CARRIL DE NÚMEROS (Etapa 9B)
+  // 🔢 CARRIL DE NÚMEROS
   // ------------------------------------------------------
   // Fuera de .viewport a propósito: la numeración no es una
   // columna más de la fila, es un indicador de fondo fuera
@@ -292,7 +291,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
   });
 
   // ==================================================
-  // ⁝⁝ ARRASTRAR Y SOLTAR (util_arrastrable.ts, Etapa 9)
+  // ⁝⁝ ARRASTRAR Y SOLTAR (util_arrastrable.ts)
   // ------------------------------------------------------
   // El controlador vive una sola vez para toda la vida de
   // la tabla (a diferencia del editor de Macro, que la crea
@@ -304,7 +303,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
   // calcular pertenencia a separador — sin este reconstruirTabla()
   // el carril de números/expandir y los colores/bordes de
   // separador de cada fila quedan con los valores de ANTES del
-  // movimiento (ver bugs de sincronía y de color de fondo).
+  // movimiento.
   // ==================================================
 
   const controladorArrastre = crearControladorArrastre({
@@ -321,7 +320,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
     onReordenar: (nuevoOrden) => {
       const perfil = obtenerPerfilUi();
 
-      // Regla 9/10/12: el nuevo orden mezcla ids de fila y de
+      // El nuevo orden mezcla ids de fila y de
       // separador tal cual el usuario los arrastró — es
       // directamente el nuevo array de filas del perfil, sin
       // rangos ni recálculo de pertenencia (eso lo deriva
@@ -329,7 +328,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
       //
       // [FIX] `nuevoOrden` solo trae los ids VISIBLES (obtenerOrdenIds
       // se arma con construirPlanVisual, que omite las filas de
-      // cualquier separador contraído — ver Regla 7). Si se
+      // cualquier separador contraído). Si se
       // reconstruía `perfil.filas` filtrando solo esos ids, las
       // filas ocultas de un separador contraído que no participó
       // del arrastre quedaban afuera para siempre (se "eliminaban").
@@ -379,7 +378,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
         .filas.filter(esSeparador)
         .map((separador) => separador.id),
 
-    // Regla 11: si se arrastra un separador contraído, se expande
+    // Si se arrastra un separador contraído, se expande
     // automáticamente al iniciar el gesto de arrastre — mutamos el
     // modelo y reconstruimos la tabla acá mismo (mismo criterio que
     // el botón ↴/≫ de crearExpandirSeparador) para que las filas que
@@ -451,14 +450,14 @@ export function crearTabla(alModificar: () => void): HTMLElement {
 
     const numerosAbsolutos = construirNumerosAbsolutos(perfil);
 
-    // Etapa B: el carril solo se ensancha (espacio para el botón
+    // El carril solo se ensancha (espacio para el botón
     // Expandir/Contraer) cuando hay al menos un separador visible.
     carrilNumeros.classList.toggle(
       "tiene-separadores",
       plan.some((item) => item.tipo === "separador"),
     );
 
-    // Regla 18 (revisada): el número de fila es su posición
+    // El número de fila es su posición
     // absoluta entre TODAS las filas del perfil (contando también
     // las ocultas dentro de separadores contraídos), no la posición
     // entre las filas visibles — así el número que aparece en un
@@ -494,7 +493,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
         numero.className = "carril-numero";
         numero.textContent = String(numerosAbsolutos.get(item.fila.id));
 
-        // Etapa C: On/Off superpuesto al número (absolute, ver
+        // On/Off superpuesto al número (absolute, ver
         // .carril-numero .estado-toggle en styl_tabla.css).
         numero.append(crearEstado(item.fila, alModificar));
 
@@ -603,7 +602,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
 
     registrarFilaArrastrable(filaNueva);
 
-    // [FIX bug 2] El botón On/Off con estado de alerta vive
+    // [FIX] El botón On/Off con estado de alerta vive
     // superpuesto al número, en el carril (carrilLista), no dentro
     // de la fila reconstruida arriba — sin este paso, una fila que
     // entra/sale de conflicto o advertencia no actualizaba su
@@ -635,7 +634,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
   // ------------------------------------------------------
   // Un clic sobre un control de cualquier columna que NO
   // sea el asa (Opciones) tiene prioridad y saca del modo
-  // Mover (spec Etapa 9, punto 3) — el propio asa maneja
+  // Mover (spec punto 3) — el propio asa maneja
   // su clic corto/mantenido por separado (ver
   // comp_opciones.ts + util_arrastrable.ts).
   // ==================================================
@@ -661,7 +660,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
   tabla.append(carrilNumeros, viewport);
 
   // Actualiza el botón estado de los separadores que contienen alguna
-  // de las filas afectadas, sin reconstruir la tabla entera (bug 2).
+  // de las filas afectadas, sin reconstruir la tabla entera.
   const actualizarSeparadoresDeFilas = (idsFilas: string[]): void => {
     const perfil = obtenerPerfilUi();
 
@@ -692,8 +691,7 @@ export function crearTabla(alModificar: () => void): HTMLElement {
       separadoresActualizados.add(separadorPadre.id);
 
       // Buscar el slot Expandir/On-Off del separador en el carril
-      // (ya no vive en el header, ver Etapa D) y reemplazar solo el
-      // botón estado (primer hijo del slot).
+      // y reemplazar solo el botón estado (primer hijo del slot).
       const slotEl = carrilLista.querySelector<HTMLElement>(
         `.carril-expandir-slot[data-id="${separadorPadre.id}"]`,
       );

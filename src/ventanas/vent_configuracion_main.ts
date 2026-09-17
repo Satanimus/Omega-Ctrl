@@ -507,9 +507,10 @@ function actualizarBotonPersonalizado(
   }
 }
 
-// Reemplaza el antiguo doble click en "Valor por defecto" (borraba
-// directo, sin poder verse antes de soltar el botón): solo agrega/
-// saca la clase que habilita mostrar el botón "X" (Limpiar) en hover
+// Un botón visible en vez de borrar directo con doble click en
+// "Valor por defecto" (sin poder verse antes de soltar el botón):
+// solo agrega/saca la clase que habilita mostrar el botón "X"
+// (Limpiar) en hover
 // de la columna Editar/Valor Personalizado — el botón mismo vive
 // siempre en el DOM (ver montarFila) para que su posición no salte
 // al aparecer.
@@ -879,10 +880,9 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
     botonPersonalizado.type = "button";
     botonPersonalizado.className = "configuracion-arbol-personalizado";
 
-    // Botón "X" (Limpiar): reemplaza el antiguo doble click sobre
-    // "Valor por defecto" (Regla: ya no se elimina el Valor
-    // Personalizado a ciegas con un doble click, hace falta un botón
-    // visible). Vive siempre en el DOM, oculto por CSS salvo hover +
+    // Botón "X" (Limpiar): un botón visible en vez de eliminar el
+    // Valor Personalizado a ciegas con un doble click sobre "Valor
+    // por defecto". Vive siempre en el DOM, oculto por CSS salvo hover +
     // fila editada (ver .configuracion-arbol-personalizado-celda--editado
     // en styl_configuracion.css) para que ocupe siempre la misma
     // posición a la derecha de la columna.
@@ -935,8 +935,7 @@ function crearPestanaEditable(opciones: OpcionesPestana): Pestana {
       mostrarPopup(popup, evento.clientX, evento.clientY);
     });
 
-    // Botón "X" (reemplaza el antiguo doble click sobre "Valor por
-    // defecto"): borra el Valor Personalizado de la fila,
+    // Botón "X": borra el Valor Personalizado de la fila,
     // restableciendo valorActual al valor por defecto.
     botonLimpiar.addEventListener("click", () => {
       montada.valorActual = fila.valorDefecto;
@@ -1234,12 +1233,11 @@ interface EstadoInicioUI {
 // 🪟 INICIAR CON WINDOWS / INICIAR MINIMIZADO (fila fija,
 // pestaña General)
 // ------------------------------------------------------
-// Participa del flujo de cambios pendientes/Aplicar (Regla 13): el
+// Participa del flujo de cambios pendientes/Aplicar: el
 // switch solo edita el estado en memoria (Editado); la persistencia
 // real (incl. tauri-plugin-autostart) ocurre en guardarInicio(),
 // llamado por pestanaGeneral.aplicarGuardado al pulsar "Aplicar
-// cambios". "Iniciar minimizado" depende de "Iniciar con Windows"
-// (Reglas 6/7/8).
+// cambios". "Iniciar minimizado" depende de "Iniciar con Windows".
 // ======================================================
 
 let iniciarConWindowsActual = false;
@@ -1263,12 +1261,12 @@ const interruptorIniciarConWindows = crearInterruptor(
       : "false";
 
     if (!iniciarConWindowsEditado) {
-      // Regla 8: si se apaga mientras estaba en On, no se conserva.
+      // Si se apaga mientras estaba en On, no se conserva.
       iniciarMinimizadoEditado = false;
       interruptorIniciarMinimizado.dataset.activo = "false";
     }
 
-    // Regla 7: solo interactuable si "Iniciar con Windows" está On.
+    // Solo interactuable si "Iniciar con Windows" está On.
     interruptorIniciarMinimizado.disabled = !iniciarConWindowsEditado;
     interruptorIniciarMinimizado.dataset.deshabilitado = iniciarConWindowsEditado
       ? "false"
@@ -1341,7 +1339,7 @@ async function guardarInicio(): Promise<void> {
 // Mismo criterio que Iniciar con Windows: el popup solo edita el
 // estado en memoria (Editado); guardarIniciarConPerfil() persiste al
 // Aplicar cambios. "ultimo" es el valor especial para "El último
-// usado" (Regla 15).
+// usado".
 // ======================================================
 
 let perfilInicioActual = "ultimo";
@@ -1587,11 +1585,11 @@ async function cargarEstadoInicio(): Promise<void> {
 // ------------------------------------------------------
 // Va después de Mostrar/Minimizar a bandeja, antes de Iniciar con
 // perfil. El toggle y la Duración SÍ participan del flujo de
-// cambios pendientes/Aplicar (Regla 13) — se combinan con
-// pestanaGeneralTabla más abajo para formar la pestanaGeneral
-// final. Solo el botón Mostrar/Guardar se aplica al instante
-// (Regla 14, mismo criterio que el botón Ubicación del popup Extra
-// de Macro, ver comp_popup_macro_extra.ts).
+// cambios pendientes/Aplicar — se combinan con pestanaGeneralTabla
+// más abajo para formar la pestanaGeneral final. Solo el botón
+// Mostrar/Guardar se aplica al instante (mismo criterio que el
+// botón Ubicación del popup Extra de Macro, ver
+// comp_popup_macro_extra.ts).
 // ======================================================
 
 let mostrarNotificacionesActual = false;
@@ -1879,7 +1877,7 @@ const pestanaGeneral: Pestana = {
 };
 
 // ======================================================
-// ⌨️ PESTAÑA TECLAS (Etapa 5)
+// ⌨️ PESTAÑA TECLAS
 // ------------------------------------------------------
 // El backend (configuracion_listar_teclas) no agrupa por
 // subtítulo, solo manda "fuente" (keyboard/mouse) como
@@ -2045,10 +2043,6 @@ async function refrescarTrasCambioApariencia(): Promise<void> {
   await invoke("configuracion_refrescar_ventanas_apariencia");
 }
 
-// (nota etapa H pendiente: la fusión de CLAVES_TAMANOS_EN_APARIENCIA
-// al guardar/restablecer, que vivía acá, se reintroduce cuando
-// crearPestanaApariencia tenga persistencia real.)
-//
 // Apariencia (pestaña única, ex Apariencia+Tema fusionadas) = Color
 // de tema + Color de Texto + Color y opacidad de elementos + Opacidad
 // (indicadores Macro/Coordenada) + Texto + Dimensiones, con el
@@ -2203,8 +2197,8 @@ function restablecerCarpetaUsuario(): void {
 }
 
 // Ejecuta el cambio real (llamado solo desde "Aplicar cambios").
-// Orden clave (Regla del usuario): confirmar_cambio_carpeta_usuario
-// migra los datos ANTES de guardar el override, y solo si migró sin
+// Orden clave: confirmar_cambio_carpeta_usuario migra los datos
+// ANTES de guardar el override, y solo si migró sin
 // error se limpia la ruta antigua (eliminar/renombrar) — si algo
 // falla acá, el error sube tal cual al catch de "Aplicar cambios".
 async function guardarCarpetaUsuario(): Promise<void> {
@@ -2881,8 +2875,8 @@ botonGuardarGlobal.addEventListener("click", async () => {
 
     // Carpeta de Usuario y el cambio de motor se guardan al final: si
     // algún cambio de las otras pestañas falló, ninguno de los dos
-    // llega a tocarse (Regla 12 solo debe dispararse cuando el
-    // guardado completo es exitoso).
+    // llega a tocarse (deben dispararse solo cuando el guardado
+    // completo es exitoso).
     if (huboCambioCarpetaUsuario) {
       await guardarCarpetaUsuario();
     }

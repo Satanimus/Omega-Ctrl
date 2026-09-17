@@ -56,8 +56,8 @@ import { recomputarCascadaAscendente } from "./core_separadores";
 // ======================================================
 // 📦 MODELO JSON
 // ------------------------------------------------------
-// Refleja exactamente lo que serializa perfil_json.rs desde la
-// Etapa H: un único array `filas` con separadores insertados
+// Refleja exactamente lo que serializa perfil_json.rs: un
+// único array `filas` con separadores insertados
 // como ítems más, discriminados por el tag "tipoItem" a nivel
 // del mismo objeto (#[serde(tag = "tipoItem", rename_all =
 // "lowercase")] sobre un enum de variantes-newtype — serde
@@ -152,8 +152,7 @@ interface RemapeoJson {
 // ------------------------------------------------------
 // Nombres de campo tal cual los serializa Rust (snake_case,
 // sin #[serde(rename)]) — mismo criterio que RemapeoJson. Sin
-// num_filas (Etapa H: eliminado también del lado Rust, Regla
-// 2 — la pertenencia se deriva por posición, no se guarda).
+// num_filas: la pertenencia se deriva por posición, no se guarda.
 // ======================================================
 
 interface SeparadorJson {
@@ -193,7 +192,7 @@ interface InputJson {
 // el nombre visible. Traducir ese nombre a UI es
 // responsabilidad de la UI (acá), no de Rust. Se traduce a
 // "usuario" (no a "ui") para que, si la tecla tiene un
-// nombre personalizado (Etapa 5 de la Ventana de
+// nombre personalizado (Ventana de
 // Configuración, pestaña Teclas), la tabla principal lo
 // muestre en vez del nombre de fábrica — ver
 // core_traductor.ts.
@@ -235,7 +234,7 @@ export async function convertirperfil_json(
       : convertirSeparador(item),
   );
 
-  // estadoVisual es derivado (Regla 15/16) — no viaja en el JSON,
+  // estadoVisual es derivado — no viaja en el JSON,
   // se recalcula una vez acá contra las filas ya convertidas para
   // que cada separador nazca con el agregado correcto (on/off/mixto)
   // de su tramo en vez de un valor placeholder.

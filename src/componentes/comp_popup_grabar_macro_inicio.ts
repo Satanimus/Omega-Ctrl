@@ -2,10 +2,10 @@
 // 🔴 comp_Popup_Grabar_Macro_Inicio
 // ------------------------------------------------------
 // Popup de inicio de una Grabación de Macro: se abre al
-// presionar el botón "Grabar Macro" del editor (cableado en
-// la Etapa G, no acá) y pregunta Modo de Coordenadas y
+// presionar el botón "Grabar Macro" del editor (cableado
+// aparte) y pregunta Modo de Coordenadas y
 // tratamiento de Tiempos de espera para toda la sesión de
-// grabación (Reglas 2/3/5). Popup no-persistente: una sola
+// grabación. Popup no-persistente: una sola
 // resolución (Promise), como confirmarPopup — no se redibuja
 // a sí mismo en cada cambio, solo actualiza estado local en
 // memoria hasta que se confirma o se cancela.

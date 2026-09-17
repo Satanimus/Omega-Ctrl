@@ -147,7 +147,7 @@ botonCancelar.addEventListener("click", () => {
   cerrar();
 });
 
-// Regla 7: Esc cancela esta ventana (equivalente a Cancelar).
+// Esc cancela esta ventana (equivalente a Cancelar).
 document.addEventListener("keydown", (evento) => {
   if (evento.key === "Escape") cerrar();
 });
@@ -330,7 +330,7 @@ async function mostrarFlashConfirmacion(
 }
 
 // ======================================================
-// 👁️ MODO PREVISUALIZACIÓN (Etapa F)
+// 👁️ MODO PREVISUALIZACIÓN
 // ------------------------------------------------------
 // Marcador "⊙" en vivo, sin header/Cancelar/texto de
 // diagnóstico. El destino ya viene calculado desde Rust
@@ -348,8 +348,8 @@ async function mostrarFlashConfirmacion(
 // eso acá se posiciona con PhysicalPosition, convirtiendo la
 // mitad de ventana (lógica, 28x28) a físico vía scaleFactor().
 //
-// El marcador es arrastrable (Regla 17/Bug 5) — ver
-// seguirArrastreMarcador() más abajo.
+// El marcador es arrastrable — ver activarArrastreMarcador()
+// más abajo.
 // ======================================================
 
 const MITAD_LADO_PREVIEW_LOGICO = 28;
@@ -359,14 +359,14 @@ async function iniciarPreview(id: string, numero: number): Promise<void> {
 
   const marcador = document.createElement("div");
   marcador.className = "captura-marcador-preview";
-  // Círculo con punto central (Regla 5) en vez de la cruz "X": un
-  // SVG simétrico centrado en (12,12) cae exacto en el centro de la
+  // Círculo con punto central en vez de la cruz "X": un SVG
+  // simétrico centrado en (12,12) cae exacto en el centro de la
   // ventana, que es donde se posiciona el destino calculado.
   marcador.innerHTML =
     '<svg viewBox="0 0 24 24" width="48" height="48"><circle cx="12" cy="12" r="9" /><circle class="captura-marcador-punto" cx="12" cy="12" r="1.6" /></svg>';
   raiz.append(marcador);
 
-  // Bug 2: el número de la fila que creó el marcador se muestra
+  // El número de la fila que creó el marcador se muestra
   // siempre, apegado abajo dentro del círculo. Se crea ACÁ, antes de
   // cualquier "await" — si alguno de los invoke() de abajo (config
   // de intervalo, scaleFactor) tarda o falla, no debe arrastrar
@@ -395,14 +395,14 @@ async function iniciarPreview(id: string, numero: number): Promise<void> {
     // Sin diagnóstico visible en este modo — se sigue con 100ms.
   }
 
-  // Bug 5: config (ubicación/modo/punto de referencia) de ESTA fila
-  // — necesaria acá en el frontend para poder calcular el x/y crudo
+  // Config (ubicación/modo/punto de referencia) de ESTA fila —
+  // necesaria acá en el frontend para poder calcular el x/y crudo
   // en vivo durante el arrastre (mismas fórmulas que el modo
   // captura normal, ver actualizar()), en vez de depender de
   // startDragging() + outerPosition() al soltar (ver comentario
-  // largo en seguirArrastreMarcador: startDragging() nunca deja
-  // llegar el mouseup al webview en Windows — Tauri #10767 — por
-  // eso antes esto no persistía nunca).
+  // largo en activarArrastreMarcador: startDragging() nunca deja
+  // llegar el mouseup al webview en Windows — Tauri #10767, así que
+  // eso no persistiría nunca).
   let config: ConfigCaptura | null = null;
 
   try {
@@ -435,10 +435,10 @@ async function iniciarPreview(id: string, numero: number): Promise<void> {
   const ventana = getCurrentWindow();
   const escala = await ventana.scaleFactor();
 
-  // Bug 3: zona de arrastre chica (20px de diámetro, ~10px de radio
-  // desde el centro) en vez de todo el marcador (que ocupa la ventana
-  // entera) — antes la mano "grab" aparecía en cualquier punto de la
-  // ventana, muy lejos del círculo dibujado.
+  // Zona de arrastre chica (20px de diámetro, ~10px de radio desde
+  // el centro) en vez de todo el marcador (que ocupa la ventana
+  // entera) — si fuera la ventana entera, la mano "grab" aparecería
+  // en cualquier punto de la ventana, muy lejos del círculo dibujado.
   const zonaArrastre = document.createElement("div");
   zonaArrastre.className = "captura-marcador-zona-arrastre";
   marcador.append(zonaArrastre);
@@ -479,12 +479,12 @@ async function actualizarPreview(
       "obtener_destino_preview_coordenada",
     );
   } catch {
-    // Bug 4: antes cualquier error transitorio de IPC (un timeout
-    // puntual, etc.) cortaba el polling para siempre con
-    // detenerPolling() — el marcador quedaba "congelado" en su
-    // última posición en vez de seguir a la ventana/cursor. Ahora se
-    // salta este tick nada más; el intervalo sigue vivo y lo
-    // reintenta en el próximo (100ms después por defecto).
+    // Un error transitorio de IPC (un timeout puntual, etc.) no debe
+    // cortar el polling para siempre con detenerPolling() — el
+    // marcador quedaría "congelado" en su última posición en vez de
+    // seguir a la ventana/cursor. Se salta este tick nada más; el
+    // intervalo sigue vivo y lo reintenta en el próximo (100ms
+    // después por defecto).
     return;
   }
 
@@ -503,7 +503,7 @@ async function actualizarPreview(
 }
 
 // ======================================================
-// 🖱️ ARRASTRAR EL MARCADOR (Regla 17 / Bug 5)
+// 🖱️ ARRASTRAR EL MARCADOR
 // ------------------------------------------------------
 // Antes esto usaba ventana.startDragging() (arrastre nativo del
 // SO) + esperar mouseup en document para recién ahí leer
@@ -550,7 +550,7 @@ function activarArrastreMarcador(
         return { x: cursorX, y: cursorY };
 
       case "relativa_cursor":
-        // Pendiente (Bug 5, a definir): no hay un "origen" fijo
+        // No hay un "origen" fijo
         // durante el arrastre de un marcador ya existente (a
         // diferencia del modo captura de 2 pasos, que sí tiene un
         // punto de origen marcado explícitamente por el usuario).

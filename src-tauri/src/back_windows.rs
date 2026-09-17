@@ -13,8 +13,7 @@
 //
 // SALIDA: recibe un InputEvent y lo emite físicamente
 // vía SendInput/WinAPI. Sin concepto de "dispositivo
-// destino" — SendInput inyecta a nivel de sistema (ver
-// Regla 6 del plan de Modo Portable).
+// destino" — SendInput inyecta a nivel de sistema.
 //
 // No decide qué hacer con un evento. No conoce Runtime,
 // Cache ni AnalizadorTrigger.
@@ -357,11 +356,11 @@ unsafe extern "system" fn hook_teclado(codigo: i32, wparam: WPARAM, lparam: LPAR
     }
 
     // [FIX] Ya NO hay shortcut por cache::esta_vacia() acá: con perfil
-    // desactivado, el atajo global Activar/Desactivar (Regla 2 del
-    // plan) tiene que seguir viendo cada evento físico para poder
+    // desactivado, el atajo global Activar/Desactivar tiene que
+    // seguir viendo cada evento físico para poder
     // reactivar el perfil — y esa detección vive únicamente en
-    // entrada::procesar_evento (entrada.rs es el único funnel, Regla
-    // 3), no acá, para no duplicarla en cada backend. El shortcut
+    // entrada::procesar_evento (entrada.rs es el único funnel),
+    // no acá, para no duplicarla en cada backend. El shortcut
     // viejo cortaba ANTES de llegar a ese funnel, dejando el atajo
     // muerto apenas se desactivaba el perfil (y, con él, cualquier
     // forma de reactivarlo sin reiniciar). back_interception.rs nunca
@@ -585,8 +584,7 @@ fn traducir_mouse(mensaje: WPARAM, datos: &MSLLHOOKSTRUCT) -> Option<InputEvent>
 //
 // InputEvent → INPUT(s) físicos vía SendInput. Sin
 // concepto de "dispositivo destino" — SendInput inyecta a
-// nivel de sistema (ver Regla 6 del plan de Modo Portable),
-// a diferencia de back_interception::emitir_evento() que
+// nivel de sistema, a diferencia de back_interception::emitir_evento() que
 // manda a un Device puntual (teclado_primario()/mouse_
 // primario()).
 // ======================================================

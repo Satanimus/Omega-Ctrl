@@ -4,7 +4,7 @@
 // Panel lateral derecho, persistente (toggle ❔), mismo
 // patrón de referencias a nivel de módulo que
 // comp_panel_lateral.ts. Muestra el contenido de ayuda.txt
-// (backend) para el objeto bajo el mouse (ver Etapa F).
+// (backend) para el objeto bajo el mouse.
 // ======================================================
 
 import { invoke } from "@tauri-apps/api/core";

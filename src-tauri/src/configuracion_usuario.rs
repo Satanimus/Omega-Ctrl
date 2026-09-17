@@ -618,8 +618,8 @@ pub fn leer_iniciar_con_perfil() -> Result<Option<String>, String> {
 // ✅ VALIDAR "INICIAR CON PERFIL"
 // ------------------------------------------------------
 // Si el valor guardado es un perfil específico que ya no existe
-// o falla al cargar, resetea a "ultimo" sin avisar al usuario
-// (Regla 19). Se llama al arrancar y al abrir Configuración.
+// o falla al cargar, resetea a "ultimo" sin avisar al usuario.
+// Se llama al arrancar y al abrir Configuración.
 // ======================================================
 pub fn validar_iniciar_con_perfil() -> Result<(), String> {
     let valor = leer_iniciar_con_perfil()?;
@@ -1015,7 +1015,7 @@ fn validar_segun_tipo(tipo: &TipoValor, valor: &str) -> Result<(), String> {
 // ======================================================
 // 📦 CLAVES FUERA DEL CATÁLOGO VISUAL (General)
 // ------------------------------------------------------
-// mostrar_notificaciones/duracion_notificacion_ms (Regla 13) no son
+// mostrar_notificaciones/duracion_notificacion_ms no son
 // una fila más de configuracion.tsv — si lo fueran, aparecerían
 // también como fila genérica en la tabla de Configuración → General,
 // duplicando la fila combinada propia. Pero SÍ deben pasar

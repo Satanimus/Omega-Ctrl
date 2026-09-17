@@ -1,10 +1,10 @@
 // ======================================================
 // 🧮 core_Analisis_Grabacion
 // ------------------------------------------------------
-// Etapa E del Grabador de Macro: traduce los eventos crudos
-// devueltos por tomar_eventos_grabacion_macro() (Etapa D, vía
+// Traduce los eventos crudos
+// devueltos por tomar_eventos_grabacion_macro() (vía
 // EventoGrabadoCapturaUI en comandos.rs) a PasoMacro[] listos
-// para insertarse en la tabla del editor (Etapa G).
+// para insertarse en la tabla del editor.
 //
 // No conoce Tauri ni invoke() — recibe el arreglo de eventos
 // ya traído por el llamador (mismo criterio de separación que
@@ -96,10 +96,10 @@ function puntoReferenciaAbsoluto(
 // Traduce una posición absoluta de pantalla a los campos
 // coordUbicacion/coordModoVentana/coordX/coordY de un
 // PasoMacro tipo "coordenada", según el Modo de Coordenadas
-// elegido en el popup de inicio (Regla 2). Punto de referencia
+// elegido en el popup de inicio. Punto de referencia
 // fijo "sup_izq" en modo ventana_pixeles (mismo default que
 // crearPasoMacro() — el popup de inicio no pide punto de
-// referencia, ver Etapa C).
+// referencia).
 // ======================================================
 
 interface CoordenadaCalculada {
@@ -157,8 +157,7 @@ function posicionACoordenada(
 // ======================================================
 // ⏱️ TRATAMIENTO DE ESPERAS
 // ------------------------------------------------------
-// Espejo de ModoEsperaGrabacion (core_grabacion_macro.ts,
-// Regla 3).
+// Espejo de ModoEsperaGrabacion (core_grabacion_macro.ts).
 // ======================================================
 
 function calcularEsperaMs(
@@ -180,7 +179,7 @@ function calcularEsperaMs(
 // ======================================================
 // 🧩 GRUPO ABIERTO (combo en construcción)
 // ------------------------------------------------------
-// Regla 1: el grupo sigue abierto mientras algo siga físicamente
+// El grupo sigue abierto mientras algo siga físicamente
 // presionado (teclasVivas no vacío), sin límite de tiempo — ya no
 // se compara contra una ventana fija entre eventos.
 // ======================================================
@@ -189,11 +188,11 @@ interface GrupoAbierto {
   // Orden de aparición de las entradas de este grupo. La última es
   // el "gatillo actual" (gatilloActual()); todas las anteriores son
   // los modificadores. Puede contener códigos repetidos cuando un
-  // multi-tap se aplanó (Regla 3: "1+2+2+2").
+  // multi-tap se aplanó ("1+2+2+2").
   secuencia: Entrada[];
 
-  // Condición resultante del multi-tap del gatillo actual (Regla
-  // 3): "doble"/"triple" mientras los toques quedan colapsados sin
+  // Condición resultante del multi-tap del gatillo actual:
+  // "doble"/"triple" mientras los toques quedan colapsados sin
   // agregarse a secuencia; vuelve a "simple" en cuanto se aplana o
   // se pasa a una tecla nueva.
   condicion: "simple" | "doble" | "triple";
@@ -214,7 +213,7 @@ interface GrupoAbierto {
   ultimoUpDe: Map<string, number>;
 
   // Entradas Down que todavía no recibieron su Up — mientras no
-  // esté vacío, el grupo sigue abierto (Regla 1).
+  // esté vacío, el grupo sigue abierto.
   teclasVivas: string[];
 
   posicion: [number, number] | null;
@@ -223,7 +222,7 @@ interface GrupoAbierto {
 
   // Posición/ventana en el momento del Up del gatillo (botón de
   // mouse), si trajo una — null hasta que ese Up llega. Solo se
-  // usa para detectar arrastre (Regla nueva: Down en un punto, Up
+  // usa para detectar arrastre (Down en un punto, Up
   // en otro distinto ⇒ el grupo emite Down/Up diferido en vez de
   // colapsar en un único paso Tecla/Mouse).
   posicionAlSoltar: [number, number] | null;
@@ -234,7 +233,7 @@ interface GrupoAbierto {
 
   momentoUltimo: number;
 
-  // Etapa C — Patrón Diferido (Reglas 4-6). true en cuanto el grupo
+  // Patrón Diferido: true en cuanto el grupo
   // deja de poder representarse como una sola fila (Down de tecla
   // nueva tras un ciclo ya completo, o Up en orden no anidado).
   diferido: boolean;
@@ -248,10 +247,11 @@ interface GrupoAbierto {
   }[];
 
   // Snapshot de grupo.secuencia.slice(0, -1) tomado en el instante
-  // en que Regla 4 dispara diferido=true (modificador(es) sostenidos
+  // en que se dispara diferido=true (modificador(es) sostenidos
   // que enmarcan el grupo — uno solo, o varios si venían pegados al
-  // principio sin tecla intermedia, Regla 5). null mientras no se
-  // haya tomado el snapshot, o si Regla 6 (orden no anidado) invalida
+  // principio sin tecla intermedia). null mientras no se
+  // haya tomado el snapshot, o si un orden de liberación no anidado
+  // invalida
   // cualquier agrupación: en ese caso el grupo entero se reconstruye
   // línea por línea desde eventosCrudos, sin envoltorio.
   wrapperDiferido: Entrada[] | null;
@@ -265,7 +265,7 @@ function gatilloActual(grupo: GrupoAbierto): Entrada {
 }
 
 // ======================================================
-// 🔁 CONDICIÓN DE MULTI-TAP (Regla 3)
+// 🔁 CONDICIÓN DE MULTI-TAP
 // ------------------------------------------------------
 // Decide si un nuevo toque del MISMO código que el gatillo actual
 // colapsa como doble/triple (misma ventana que cache.rs:
@@ -301,15 +301,15 @@ function condicionMultiTap(
 // Reconstruye los pasos de un grupo diferido a partir de
 // eventosCrudos (registro cronológico de cada Down/Up).
 //
-// Modo con envoltorio (grupo.wrapperDiferido no nulo — Reglas
-// 4-5): el/los modificador(es) sostenidos que enmarcan el grupo
+// Modo con envoltorio (grupo.wrapperDiferido no nulo): el/los
+// modificador(es) sostenidos que enmarcan el grupo
 // salen como una línea "(down)" al principio y una línea "(up)"
 // al final; cada tecla intermedia que completa su propio ciclo
 // down/up mientras el envoltorio sigue sostenido sale como una
-// única fila simple (Regla 4), en el orden real en que ocurrieron.
+// única fila simple, en el orden real en que ocurrieron.
 //
-// Modo sin envoltorio (grupo.wrapperDiferido null — Regla 6,
-// orden de liberación no anidado): no hay envoltorio confiable
+// Modo sin envoltorio (grupo.wrapperDiferido null, orden de
+// liberación no anidado): no hay envoltorio confiable
 // que fijar — cada evento crudo del grupo entero sale como su
 // propia línea Down o Up independiente, en el orden real en que
 // ocurrió.
@@ -332,7 +332,7 @@ function emitirDiferido(
 ): PasoMacro[] {
   const pasos: PasoMacro[] = [];
 
-  // Regla 6: sin envoltorio confiable — línea por línea, literal.
+  // Sin envoltorio confiable — línea por línea, literal.
   if (!grupo.wrapperDiferido) {
     for (const evento of grupo.eventosCrudos) {
       const paso = crearPasoMacro("tecla_mouse");
@@ -343,7 +343,7 @@ function emitirDiferido(
     return pasos;
   }
 
-  // Reglas 4-5: envoltorio sostenido al principio y al final.
+  // Envoltorio sostenido al principio y al final.
   const wrapper = grupo.wrapperDiferido;
   const codigosWrapper = new Set(wrapper.map((entrada) => entrada.codigo));
 
@@ -355,7 +355,7 @@ function emitirDiferido(
   pasoDown.teclaRetencion = "down";
   pasos.push(pasoDown);
 
-  // Teclas intermedias (Regla 4): cada una completa su propio ciclo
+  // Teclas intermedias: cada una completa su propio ciclo
   // down/up mientras el envoltorio sigue sostenido — una sola fila
   // simple por ciclo completo, en el orden real en que ocurrieron.
   const abiertas = new Map<string, Entrada>();
@@ -397,7 +397,7 @@ function emitirDiferido(
 // ------------------------------------------------------
 // Devuelve, en orden: Espera (si > 0 y no es el primer grupo de
 // la sesión) + Coordenada (si hubo posición capturada Y difiere
-// de la última posición ya emitida) + Tecla/Mouse (Regla 7).
+// de la última posición ya emitida) + Tecla/Mouse.
 //
 // Arrastre (Down en un punto, Up en otro): si el gatillo es de
 // tipo Mouse y posicionAlSoltar difiere de la posición de
@@ -457,7 +457,7 @@ function cerrarGrupo(
     pasos.push(pasoCoordenada);
   }
 
-  // Regla 4-6 (Etapa C): grupo diferido — ya no cabe en una sola fila
+  // Grupo diferido: ya no cabe en una sola fila
   // Tecla/Mouse ni en el par down/up de arrastre de abajo (que asume
   // un único gatillo). Se delega la construcción de los pasos de
   // Tecla/Mouse completa a emitirDiferido().
@@ -630,8 +630,8 @@ export function analizarGrabacion(
 
       const actual = gatilloActual(grupo);
 
-      // Repique del MISMO gatillo ya aplanado (cola de la Regla 3):
-      // se agrega directo a secuencia, literal, sin reintentar
+      // Repique del MISMO gatillo ya aplanado: se agrega directo a
+      // secuencia, literal, sin reintentar
       // doble/triple y SIN pasar por la comprobación de Patrón
       // Diferido de abajo — un repique del propio gatillo nunca la
       // dispara, sin importar cuántas veces se repita ("1+2+2+2+2",
@@ -648,7 +648,7 @@ export function analizarGrabacion(
         continue;
       }
 
-      // Regla 3: repique del MISMO gatillo — intenta colapsar en
+      // Repique del MISMO gatillo — intenta colapsar en
       // doble/triple; si la ventana se superó o ya se llegó a
       // triple, aplana (agrega literal a secuencia).
       if (evento.entrada.codigo === actual.codigo) {
@@ -682,14 +682,14 @@ export function analizarGrabacion(
         continue;
       }
 
-      // Regla 1 / Regla 4: tecla nueva. Si el grupo ya es diferido,
+      // Tecla nueva. Si el grupo ya es diferido,
       // o si alguna tecla anterior de la secuencia ya completó su
       // ciclo down/up mientras el grupo seguía abierto (secuencia
       // más larga que teclasVivas), esta tecla ya no se suma a
-      // secuencia — el grupo pasa a Patrón Diferido (Regla 4) y el
+      // secuencia — el grupo pasa a Patrón Diferido y el
       // envoltorio sostenido queda fijado en grupo.secuencia.slice(0,
-      // -1) tal como estaba justo antes de este evento (Regla 5 si
-      // ese envoltorio tiene 2+ teclas pegadas al principio).
+      // -1) tal como estaba justo antes de este evento (ese
+      // envoltorio puede tener 2+ teclas pegadas al principio).
       if (grupo.diferido || grupo.secuencia.length > grupo.teclasVivas.length) {
         if (!grupo.diferido) {
           grupo.wrapperDiferido = grupo.secuencia.slice(0, -1);
@@ -729,10 +729,10 @@ export function analizarGrabacion(
         grupo.ventanaAlSoltar = evento.ventana;
       }
 
-      // Regla 6: orden de liberación no anidado — se suelta una
+      // Orden de liberación no anidado: se suelta una
       // tecla que no es el gatillo actual MIENTRAS el gatillo actual
       // sigue vivo (si el gatillo ya se hubiese soltado antes, esto
-      // sería un cierre normal en orden anidado, Regla 2). Invalida
+      // sería un cierre normal en orden anidado). Invalida
       // cualquier envoltorio ya fijado: el grupo entero se reconstruye
       // línea por línea desde eventosCrudos (emitirDiferido, modo sin
       // envoltorio).
@@ -760,7 +760,7 @@ export function analizarGrabacion(
       continue;
     }
 
-    // Pulse (Regla 12: incluye Rueda) — Regla 1: se une al grupo
+    // Pulse (incluye Rueda) — se une al grupo
     // abierto si algo sigue sostenido, sin comparar tiempo.
     if (grupo && grupo.teclasVivas.length > 0) {
       emitirCierre(

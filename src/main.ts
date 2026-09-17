@@ -43,12 +43,11 @@ void aplicarOverridesApariencia();
 // ======================================================
 // 💾 GUARDAR Y ACTIVAR PERFIL
 // ------------------------------------------------------
-// compilar_perfil() ahora devuelve ResultadoCompilacion en vez de
-// solo activar/no la cache (ver Etapa 5/12) — las advertencias que
-// trae se guardan acá para que el statusbar y el "OFF ⚠️" de cada
-// fila (ver comp_controles.ts::crearEstado()) las reflejen apenas
-// se reconstruya la tabla, que ya ocurre justo después de este
-// llamado (ver ui_toolbar.ts).
+// compilar_perfil() devuelve ResultadoCompilacion — las
+// advertencias que trae se guardan acá para que el statusbar y el
+// "OFF ⚠️" de cada fila (ver comp_controles.ts::crearEstado()) las
+// reflejen apenas se reconstruya la tabla, que ya ocurre justo
+// después de este llamado (ver ui_toolbar.ts).
 // ======================================================
 
 async function guardarPerfil(): Promise<void> {
@@ -129,7 +128,7 @@ window.addEventListener(
 // Click en un perfil de la lista del menú de bandeja: mismo camino
 // que el click en la lista del panel lateral (mismo chequeo de
 // ediciones sin guardar, mismo popup de confirmación si corresponde,
-// mismo refresco de tabla/estado/nombre). [Etapa C] El backend NO
+// mismo refresco de tabla/estado/nombre). El backend NO
 // muestra la ventana en este click (ver
 // back_tray::pedir_cambio_perfil_al_frontend); solo se mostrará si
 // cambiarPerfilDesde encuentra ediciones sin guardar y va a abrir el
@@ -142,12 +141,14 @@ listen<string>("bandeja-seleccionar-perfil", (evento) => {
     clientY: window.innerHeight / 2,
   });
 
-  cambiarPerfilDesde(evento.payload, eventoSintetico, "bandeja").catch((error) => {
-    console.error(
-      "❌ No se pudo cambiar de perfil desde la bandeja de sistema:",
-      error,
-    );
-  });
+  cambiarPerfilDesde(evento.payload, eventoSintetico, "bandeja").catch(
+    (error) => {
+      console.error(
+        "❌ No se pudo cambiar de perfil desde la bandeja de sistema:",
+        error,
+      );
+    },
+  );
 });
 
 // Ventana restaurada desde la bandeja (abrir sin cambiar de perfil):

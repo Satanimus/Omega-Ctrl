@@ -52,8 +52,7 @@
 //     Imprime warning por stderr si falla el guardado.
 // solicitar_cambio_modo(nuevo_modo)
 //     Persiste el nuevo modo y señala al backend anterior
-//     que debe detenerse (ver Regla 10 del plan de Modo
-//     Portable). El loop de iniciar() detecta que el
+//     que debe detenerse. El loop de iniciar() detecta que el
 //     backend retornó y arranca el nuevo.
 // cargar_modo_desde_config()
 //     Lee configuracion_usuario::leer_modo_motor() y llama
@@ -146,15 +145,14 @@ pub fn guardar_modo(modo: Modo) {
 // 🔄 SOLICITAR CAMBIO DE MODO (cambio en caliente)
 // ------------------------------------------------------
 // Persiste y actualiza el modo en memoria, luego le señala
-// al backend anterior que debe detenerse — con la asimetría
-// de Regla 10:
+// al backend anterior que debe detenerse — con esta asimetría:
 // • Interception → Portable: solicitar_detener() pone una
 //   bandera; el loop de back_interception::iniciar() la
 //   revisa en el próximo evento físico real y sale limpio.
 // • Portable → Interception: back_windows::detener() envía
 //   WM_QUIT al hilo de hooks — instantáneo, sin esperar
 //   ningún evento.
-// El loop de motor::iniciar() (D3) detecta que el backend
+// El loop de motor::iniciar() detecta que el backend
 // retornó y arranca el nuevo.
 // ======================================================
 

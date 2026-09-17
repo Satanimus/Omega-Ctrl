@@ -453,8 +453,7 @@ fn traducir(stroke: &Stroke) -> Option<InputEvent> {
 // sale limpiamente sin matar el hilo a la fuerza.
 // La dirección Interception→Portable necesita este
 // mecanismo reactivo (el loop solo despierta ante un
-// evento físico real — ver Regla 10 del plan de Modo
-// Portable). La dirección opuesta (Portable→Interception)
+// evento físico real). La dirección opuesta (Portable→Interception)
 // es instantánea desde afuera vía back_windows::detener().
 // ======================================================
 

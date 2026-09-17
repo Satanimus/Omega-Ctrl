@@ -2,10 +2,9 @@
 // ↴ comp_Separador_Expandir
 // ------------------------------------------------------
 // Botón Expandir/Contraer de un header de Separadores, más
-// el botón On/Off del separador (Etapa D) a su izquierda,
+// el botón On/Off del separador a su izquierda,
 // lado a lado dentro del mismo slot. Vive en el carril de
-// números (no dentro de .fila-separador) — ver nota de
-// arquitectura de la Etapa B.
+// números (no dentro de .fila-separador).
 //
 // El slot (.carril-expandir-slot) reserva SIEMPRE el mismo
 // alto que una fila (var(--row-height)) y centra los botones

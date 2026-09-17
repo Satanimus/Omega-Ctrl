@@ -214,7 +214,7 @@
   flex-shrink: 0;
 }
 
-/* Título "EDITAR TEMA" (antes "Personalizar estilo:"), pestaña
+/* Título "EDITAR TEMA", pestaña
    Apariencia: mismo estilo que los demás títulos
    (.configuracion-subtitulo-fija) + separación extra arriba (una
    línea en blanco) para no quedar pegado a los botones de tema. */
@@ -330,8 +330,8 @@
 }
 
 /* 40px del indicador/pista + 8px de gap + 180px de la etiqueta —
-   mismo ancho de etiqueta que se usaba antes, para no cambiar cómo
-   entra el texto más largo ("Ruta para carpeta de usuario:"). El
+   los 180px están calculados para que entre el texto más largo
+   ("Ruta para carpeta de usuario:"). El
    switch (.popup-switch, width:100%) se estira a ocupar todo este
    ancho cuando es lo único que hay adentro. */
 .configuracion-opciones-col1 {
@@ -404,8 +404,7 @@
 /* Botones "Seleccionar Carpeta" (Carpeta de Usuario), "Iniciar con
    perfil" y "Mostrar"/"Guardar" (Notificaciones): texto alineado a
    la izquierda dentro del botón, con el mismo borde y fondo sólido
-   que el botón de Duración (sin la variante fantasma que tenían
-   antes). */
+   que el botón de Duración. */
 .configuracion-boton-alineado-izquierda {
   justify-content: flex-start;
   text-align: left;
@@ -473,10 +472,10 @@
 /* ======================================================
    FAMILIA DE CELDA (grupo de estilo único)
    ------------------------------------------------------
-   Reemplaza el padding fijado antes vía ".configuracion-tabla
-   tbody td" / ".configuracion-tabla-arbol tbody td" (selector con
-   tbody, de mayor especificidad que cualquier clase de modificador
-   — por eso un padding-left en la celda no le ganaba). Toda celda
+   El padding va acá y no en ".configuracion-tabla tbody td" /
+   ".configuracion-tabla-arbol tbody td" (selector con tbody, de
+   mayor especificidad que cualquier clase de modificador — con
+   ese selector un padding-left de modificador no le gana). Toda celda
    de dato de las 4 pestañas debe llevar esta clase base; el
    modificador -primera es lo único que cambia entre "primera
    columna visible de la fila" (Nombre en General/Apariencia,
@@ -503,8 +502,7 @@
   color: var(--text-disabled);
 }
 
-/* Ya no funciona como botón (era el doble click); solo muestra el
-   valor por defecto. */
+/* No es un botón: solo muestra el valor por defecto. */
 .configuracion-valor-defecto {
   color: var(--text);
 }
@@ -586,10 +584,10 @@
    TABLA EN ÁRBOL (Apariencia)
    ------------------------------------------------------
    Mismo alto de fila que .configuracion-tabla. Ancho de
-   columna arrastrable (Etapa E, reusa .divisor-columna) y
+   columna arrastrable (reusa .divisor-columna) y
    sangría/color por nivel ya implementados; falta el resto
    del estilo definitivo (swatches de color, popup de
-   edición) — llega en etapas F/G.
+   edición).
    ====================================================== */
 
 .configuracion-tabla-arbol {
@@ -598,9 +596,9 @@
   font-size: var(--fs13);
 }
 
-/* E5: el ancho de cada columna lo da el width inline seteado en
-   vent_configuracion_apariencia.ts (E4) contra las variables de
-   E3; position: relative es requisito de .divisor-columna, que se
+/* El ancho de cada columna lo da el width inline seteado en
+   vent_configuracion_apariencia.ts contra las variables de ancho;
+   position: relative es requisito de .divisor-columna, que se
    posiciona absolute respecto a su celda (mismo mecanismo que la
    tabla principal, ver ui_redimension_columnas.ts). */
 .configuracion-arbol-celda {
@@ -608,7 +606,7 @@
   white-space: nowrap;
 }
 
-/* Mismo estilo de cabecera que el resto de las tablas (--cabecera-tabla-color/opacidad) — unificado, ya no usa fondo claro/letra oscura. */
+/* Mismo estilo de cabecera que el resto de las tablas (--cabecera-tabla-color/opacidad). */
 .configuracion-tabla-arbol thead th {
   background: color-mix(
     in srgb,
@@ -649,7 +647,7 @@
   );
 }
 
-/* A4: separación extra antes de una fila hija (nivel 3) — refuerza
+/* Separación extra antes de una fila hija (nivel 3) — refuerza
    la jerarquía de árbol en filas de nivel 2 que agrupan un nivel 3
    debajo (ej. "Separador" → "Fondo de sus filas"). */
 .configuracion-tabla-arbol tbody tr.configuracion-arbol-con-hijo td {
@@ -657,7 +655,7 @@
   padding-bottom: var(--gap8);
 }
 
-/* F6: cuadradito de color en la columna Valor por Defecto. */
+/* Cuadradito de color en la columna Valor por Defecto. */
 .configuracion-arbol-swatch {
   display: inline-block;
   width: 12px;
@@ -668,11 +666,11 @@
   margin-right: 4px;
 }
 
-/* Ya no funciona como botón (era el doble click); solo muestra el
-   valor por defecto — el resto del estilo de celda ya lo da
-   .configuracion-celda, no hace falta nada propio acá. */
+/* No es un botón: solo muestra el valor por defecto — el resto del
+   estilo de celda lo da .configuracion-celda, no hace falta nada
+   propio acá. */
 
-/* E7: sangría/color por nivel (Regla 28: única diferencia visual
+/* Sangría/color por nivel (única diferencia visual
    entre nivel 2 y 3 es la sangría, que ya pone padding-left inline
    en vent_configuracion_apariencia.ts — acá solo el color). Nivel 1
    (fila de Título) usa el grupo de estilo único
@@ -682,13 +680,13 @@
   color: var(--text-disabled);
 }
 
-/* E8/E9: fila ocultada por el botón Expandir/Contraer de su
+/* Fila ocultada por el botón Expandir/Contraer de su
    Título (nivel 1). */
 .configuracion-tabla-arbol tr.oculta {
   display: none;
 }
 
-/* E9: botón ghost puro, mismo criterio que el resto de botones
+/* Botón ghost puro, mismo criterio que el resto de botones
    ghost del proyecto (sin fondo ni borde en reposo). */
 .configuracion-arbol-expandir {
   display: inline-flex;
@@ -715,7 +713,7 @@
   color: var(--highlight);
 }
 
-/* H11: columna Editar/Valor Personalizado fusionada — la celda
+/* Columna Editar/Valor Personalizado fusionada — la celda
    pierde el padding genérico de .configuracion-celda (el botón de
    adentro pone el suyo), pero conserva el alto de fila estándar.
    Pasa a flex para poder sumar el botón "X" (Limpiar) al lado del
@@ -733,8 +731,8 @@
 /* Botón único: "✎" cuando no hay Valor Personalizado, o el valor ya
    guardado (swatch+nombre para color, texto para el resto) en su
    lugar — mismo criterio ghost que .configuracion-arbol-expandir,
-   ocupando el ancho disponible (ya no el 100% de la celda: ahora
-   comparte espacio con el botón "X") y alineado a la izquierda. */
+   ocupando el ancho disponible (comparte espacio con el botón
+   "X") y alineado a la izquierda. */
 .configuracion-arbol-personalizado {
   display: flex;
   align-items: center;
@@ -791,7 +789,7 @@
   visibility: visible;
 }
 
-/* G7: mini popup de edición (una fila por valor, ver
+/* Mini popup de edición (una fila por valor, ver
    crearFilaPopup en comp_popup_grupo.ts). */
 .popup-editar-apariencia {
   display: flex;
@@ -813,7 +811,7 @@
 
 /* Fila con un campo editado, todavía sin guardar (mismo criterio que
    .configuracion-arbol-editando/-error de Apariencia: la columna
-   Valor Personalizado ya no tiene un input propio siempre visible
+   Valor Personalizado no tiene un input propio siempre visible
    al que colgarle el borde — ver botón fusionado en montarFila). */
 .configuracion-fila-editando {
   box-shadow: inset 3px 0 0 var(--green);
@@ -824,7 +822,7 @@
   box-shadow: inset 3px 0 0 var(--text-red);
 }
 
-/* H10: mismo criterio que .configuracion-fila-editando/-error de
+/* Mismo criterio que .configuracion-fila-editando/-error de
    arriba, pero aplicado al <tr> completo — la tabla en árbol de
    Apariencia no tiene un input uniforme por fila al que colgarle el
    borde (cada fila puede agrupar color/opacidad/etc.). */

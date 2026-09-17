@@ -100,8 +100,8 @@ export function eliminarFilaPorId(id: string): void {
 // ======================================================
 // 🗂️ AGREGAR   SEPARADORES
 // ------------------------------------------------------
-// Nace como fila-separador al final de perfil.filas (Regla
-// 1/2). Como la pertenencia es puramente posicional (Regla 3)
+// Nace como fila-separador al final de perfil.filas. Como
+// la pertenencia es puramente posicional
 // y los separadores existentes ya agotan sus filas antes que
 // cualquier fila suelta, agregarla al final ya es "después
 // del último separador existente" — no hace falta calcular
@@ -119,7 +119,7 @@ export function agregarSeparadores(): void {
 // ------------------------------------------------------
 // A diferencia de clonarFilaPorId, acá no alcanza con empujar
 // al final: el clon (separador + sus filas) se inserta justo
-// después del tramo original (Regla 6: filas entre este
+// después del tramo original (filas entre este
 // separador y el siguiente), para no terminar apuntando a
 // filas ajenas.
 // ======================================================

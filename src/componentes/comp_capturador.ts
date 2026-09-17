@@ -32,7 +32,7 @@ type DestinoCaptura = "Trigger" | "Accion";
 // ======================================================
 // 🎚️ ATAJO SIMPLE (config.rs: tecla_toggle_perfil /
 // tecla_guardar_coordenada) — mismos modificadores+gatillo que
-// Trigger, sin condicion (Regla 5: ambos limitados a Simple).
+// Trigger, sin condicion (ambos limitados a Simple).
 // ======================================================
 
 export interface AtajoCaptura {
@@ -188,7 +188,7 @@ export function crearCapturador(
 // 🎚️ CREAR CAPTURADOR DE ATAJO (config.rs)
 // ------------------------------------------------------
 // Variante reducida de crearCapturador: sin ContextoFila/
-// FilaPerfil, sin botón "+" de condición (Regla 5: estos atajos
+// FilaPerfil, sin botón "+" de condición (estos atajos
 // no admiten Doble/Triple/Mantenido) y sin conocer las claves de
 // configuracion_guardar_lote — arma el texto y avisa vía
 // alGuardar, quien llama decide qué hacer con él.

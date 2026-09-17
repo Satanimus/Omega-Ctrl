@@ -136,7 +136,7 @@ export function filaTieneConflicto(
 // ver comandos.rs) — es quien conoce el valor vigente de
 // tecla_toggle_perfil/tecla_guardar_coordenada (config.rs). Por eso
 // esta función es async, a diferencia de obtenerConflictos(). Cubre
-// Trigger y Accion de cada fila (Regla 11) — una fila puede generar
+// Trigger y Accion de cada fila — una fila puede generar
 // hasta dos conflictos "003", uno por columna.
 // ======================================================
 

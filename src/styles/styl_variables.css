@@ -34,9 +34,8 @@
       ========================== */
 
      --highlight: #00aeff;
-     /* Antes color propio (#C62828) editable en el catálogo de
-      Apariencia; ahora derivado de --red-light + un aumento de brillo
-      (mezcla con blanco), así queda un solo rojo configurable. */
+     /* Derivado de --red-light + un aumento de brillo (mezcla con
+      blanco), así queda un solo rojo configurable. */
      --highlight-red: color-mix(in srgb, var(--red-light) 80%, white 20%);
      --highlight-dark: #007db8;
      --black-dark: #000000;
@@ -106,7 +105,7 @@
 
      /* ==========================
        Color y opacidad de elementos
-       (catálogo apariencia.tsv, Etapa I)
+       (catálogo apariencia.tsv)
        ========================== */
 
      --barra-superior-color: var(--panel);
@@ -158,9 +157,8 @@
        Colores principales
        ========================== */
 
-     /* Antes color propio (#388E3C) editable en el catálogo de
-      Apariencia; ahora derivado de --green-dark + un aumento de
-      brillo (mezcla con blanco), así queda un solo verde configurable. */
+     /* Derivado de --green-dark + un aumento de brillo (mezcla con
+      blanco), así queda un solo verde configurable. */
      --green: color-mix(in srgb, var(--green-dark) 80%, white 20%);
 
      /* ==========================
@@ -237,11 +235,9 @@
 
      --col-num: 42px;
 
-     /* Ancho fijo del carril de números (fuera de la tabla,
-       ver .carril-numeros en styl_tabla.css). Antes compartía
-       --col-num con la columna "#" de la tabla y cambiaba de
-       tamaño junto a ella; ahora es independiente. Se elimina
-       cuando la columna "#" desaparezca (Etapa B). */
+     /* Ancho fijo del carril de números (fuera de la tabla, ver
+       .carril-numeros en styl_tabla.css), independiente de
+       --col-num. Se elimina cuando la columna "#" desaparezca. */
      --col-carril-numeros: 28px;
 
      /* Espacio extra que suma el carril de números cuando el
@@ -259,22 +255,19 @@
 
      --col-action: 150px;
 
-     /* Antes 150px: la columna Extra mostraba el texto de la
-       opción elegida. Ahora es un botón solo-ícono (∴, ver
-       .extra-control en styl_botones.css) — mismo ancho que
-       --col-type. */
+     /* Botón solo-ícono (∴, ver .extra-control en styl_botones.css)
+       — mismo ancho que --col-type. */
      --col-behavior: 52px;
 
      --col-options: 42px;
 
      /* Tabla en árbol de Apariencia (ventana Configuración,
-       ver vent_configuracion_apariencia.ts, Etapa E). */
+       ver vent_configuracion_apariencia.ts). */
      --col-config-nombre: 220px;
 
      --col-config-defecto: 260px;
 
-     /* H11: columna Editar/Valor Personalizado fusionada en una sola
-      (antes 40px + 220px separadas). */
+     /* Columna Editar/Valor Personalizado, fusionada en una sola. */
      --col-config-personalizado: 260px;
 
      /* ==========================
@@ -305,11 +298,10 @@
        ========================== */
 
      /* Contraste (bordes/hover) para las ventanas overlay/flotantes
-      (Captura, Portapapeles, Menú Express) — su fondo ahora reusa
-      --panel/--panel2 directo (ver reemplazo de --overlay-superficie/
-      --overlay-popup/--overlay-tooltip), pero el contraste blanco
-      sigue siendo propio de estas ventanas sin fondo sólido detrás
-      (transparent:true en Tauri, ver comandos.rs). */
+      (Captura, Portapapeles, Menú Express); su fondo reusa
+      --panel/--panel2 directo. El contraste blanco es propio de
+      estas ventanas sin fondo sólido detrás (transparent:true en
+      Tauri, ver comandos.rs). */
      --overlay-contraste: #ffffff;
 
      /* ==========================
@@ -324,9 +316,9 @@
 
      /* Ventana overlay Indicador_Macro (styl_indicador_macro.css) —
       Color/Opacidad de Encabezado y Fondo, compartidas entre sus
-      3 modos (Grabación/Play/Ubicar, misma ventana). El texto ya
-      no es configurable — queda fijo al 100% (ver
-      .indicador-macro-texto en styl_indicador_macro.css). */
+      3 modos (Grabación/Play/Ubicar, misma ventana). El texto no es
+      configurable — queda fijo al 100% (ver .indicador-macro-texto
+      en styl_indicador_macro.css). */
      --indicador-macro-encabezado-color: #404040;
 
      --indicador-macro-encabezado-opacidad: 80%;
@@ -338,9 +330,8 @@
      /* Marcador de preview de la ventana de captura de coordenada
       (.captura-marcador-preview/.captura-marcador-confirmacion en
       styl_captura.css) — "Texto" es la opacidad del propio ícono SVG
-      (este marcador no tiene texto). Ya no tiene "Fondo": el
-      marcador quedó sin relleno de fondo. "Color" es el color del
-      marcador ⊙ mismo (antes fijo en var(--highlight)). */
+      (este marcador no tiene texto ni fondo). "Color" es el color
+      del marcador ⊙ mismo. */
      --indicador-coordenada-texto-opacidad: 40%;
 
      --indicador-coordenada-color: #00aeff;

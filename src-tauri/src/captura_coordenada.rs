@@ -91,7 +91,7 @@
 //     el valor (a diferencia de obtener_resultado()).
 //     actualizar_xy_preview(id, x, y) la llama comandos.rs::
 //     guardar_posicion_preview_coordenada tras persistir el arrastre
-//     del marcador (Regla 17) en Coordenadas.tsv, para que el x/y en
+//     del marcador en Coordenadas.tsv, para que el x/y en
 //     memoria no quede desincronizado del disco mientras la
 //     previsualización sigue abierta.
 // ======================================================
@@ -225,7 +225,7 @@ pub fn desactivar_preview(id: &str) {
 }
 
 /// Llamada desde comandos.rs::guardar_posicion_preview_coordenada
-/// (Regla 17, arrastre del marcador) justo después de persistir en
+/// (arrastre del marcador) justo después de persistir en
 /// Coordenadas.tsv — sin esto, obtener_config_preview(id) seguiría
 /// devolviendo el x/y ANTERIOR al arrastre (CONFIG_PREVIEWS es
 /// memoria, independiente del archivo en disco) y el siguiente tick

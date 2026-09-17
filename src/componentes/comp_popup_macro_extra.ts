@@ -10,8 +10,8 @@
 //
 // A diferencia de esos popups, acá hay una sola sección: el
 // Comportamiento (Una ejecución / Toggle / Tecla mantenida) — ver
-// core_macro.ts para el detalle de qué significa cada uno. Desde
-// la Etapa 8A, Extra dejó de ser la puerta de entrada al editor
+// core_macro.ts para el detalle de qué significa cada uno. Extra
+// dejó de ser la puerta de entrada al editor
 // (eso vive ahora en Acción, ver comp_popup_macro_accion.ts).
 // ======================================================
 

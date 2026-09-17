@@ -83,7 +83,7 @@ body {
 }
 
 /* ==========================
-   Tarjeta Radial (etapa 9) — sin header, sin fondo rectangular:
+   Tarjeta Radial — sin header, sin fondo rectangular:
    solo se ve el anillo de gajos + el círculo central, dibujados
    por .menu-express-cuerpo/.menu-express-radial-centro. overflow
    visible porque el anillo (con su margen de 16px, ver
@@ -196,11 +196,11 @@ body {
 }
 
 /* ==========================
-   Forma: Radial (etapa 9) — anillo continuo de gajos. El
+   Forma: Radial — anillo continuo de gajos. El
    contenedor mide diametro x diametro (fijado por JS,
    calcularRadiosRadial), centrado dentro de la tarjeta por el
    flex del padre (.menu-express-card--radial). No arrastra la
-   ventana (a diferencia de antes) — el arrastre en Radial vive
+   ventana — el arrastre en Radial vive
    solo en .menu-express-radial-centro (spec: "solo desde el
    centro").
    ========================== */
@@ -328,7 +328,7 @@ body {
 
 /* ==========================
    Tamaños de botón (menu_extra.tamanoBoton) — valores base;
-   config.rs (etapa 8) los hará configurables de verdad. Por
+   pendiente que config.rs los haga configurables de verdad. Por
    ahora fijos acá, mismo criterio que captura.css con sus
    propias medidas. Solo aplica a lista/Cuadrícula — Radial
    calcula su propio tamaño de anillo en TS (calcularRadiosRadial).

@@ -196,7 +196,7 @@ fn formatear_atajo(atajo: &config::AtajoSimple) -> String {
 // Misma lógica que entrada::ejecutar_toggle_perfil() (activar si la
 // cache está vacía, si no desactivar), sin disparar la notificación
 // de ventana — el clic en este ítem ya es, en sí mismo, la
-// confirmación visual (Regla 6: mismo comportamiento que el botón
+// confirmación visual (mismo comportamiento que el botón
 // verde de la ventana principal).
 // ======================================================
 
@@ -345,7 +345,7 @@ pub(crate) fn solo_mostrar_ventana(app: &AppHandle) {
 
 /// Muestra/restaura la ventana principal y avisa al frontend para
 /// que resincronice perfil actual, tabla y estado activo/inactivo
-/// por si cambiaron mientras estaba minimizada (Regla 6) — sin
+/// por si cambiaron mientras estaba minimizada — sin
 /// agregar ningún polling nuevo. Usar solo cuando NO hay, además, un
 /// cambio de perfil de por medio (ver pedir_cambio_perfil_al_frontend).
 fn mostrar_ventana_y_resincronizar(app: &AppHandle) {

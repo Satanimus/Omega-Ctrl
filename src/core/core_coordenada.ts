@@ -35,7 +35,7 @@ export interface CoordenadaPerfil {
   activa: boolean;
 
   // Nota/App copiadas de la CoordenadaBanco al momento de
-  // seleccionar (Etapa D) — solo para mostrar en el box
+  // seleccionar — solo para mostrar en el box
   // informativo del popup (Opción 1: copia congelada, no vive
   // en vivo contra el gestor). Si luego se edita la Nota/App de
   // esa coordenada desde el gestor, esta fila NO se entera sola

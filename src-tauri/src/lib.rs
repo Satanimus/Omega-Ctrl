@@ -73,7 +73,7 @@ pub fn run() {
     back_app::iniciar_monitor();
     tauri::Builder::default()
         .device_event_filter(tauri::DeviceEventFilter::Always)
-        // Iniciar con Windows (Configuración → General) — Regla 5.
+        // Iniciar con Windows (Configuración → General).
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
@@ -142,17 +142,15 @@ pub fn run() {
 
             // Si "Iniciar con perfil" apunta a un perfil
             // específico que ya no existe o falla al cargar, resetea
-            // a "El último usado" sin avisar (Regla 19). No bloquea
+            // a "El último usado" sin avisar. No bloquea
             // el arranque si falla.
             let _ = configuracion_usuario::validar_iniciar_con_perfil();
 
-            // Corrección (Regla 9): el botón cerrar (X) de la ventana
+            // El botón cerrar (X) de la ventana
             // principal SIEMPRE cierra el programa por completo, sin
             // importar "Mostrar en bandeja de sistema" ni "Minimizar
-            // a bandeja de sistema". Se elimina el bloque anterior que
-            // interceptaba CloseRequested para ocultar a bandeja — la
-            // manera de enviar el programa a la bandeja pasa a ser
-            // minimizar la ventana, no cerrarla.
+            // a bandeja de sistema". La manera de enviar el programa
+            // a la bandeja es minimizar la ventana, no cerrarla.
 
             // Minimizar a bandeja de sistema (Reglas 10-13): al
             // minimizar la ventana principal, si "Mostrar en bandeja

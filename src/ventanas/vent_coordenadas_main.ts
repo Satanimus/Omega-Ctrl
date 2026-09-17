@@ -7,8 +7,8 @@
 //
 // Lista + filtra el catálogo (banco_coordenadas.rs vía
 // core_banco_coordenadas.ts) y permite editar/eliminar cada
-// fila. La tabla de filas (columnas #/⁝/⊙️/▶/X/Grupo/Nombre/
-// Tipo/X,Y) se termina de portar en las etapas siguientes.
+// fila. La tabla de filas tiene columnas #/⁝/⊙️/▶/X/Grupo/Nombre/
+// Tipo/X,Y.
 // ======================================================
 
 import { invoke } from "@tauri-apps/api/core";
@@ -137,7 +137,7 @@ function actualizarTextoFiltros(): void {
   botonFiltroGrupo.textContent = `Grupo: ${filtroGrupo || "Todos"}`;
   botonFiltroTipo.textContent = `Tipo: ${filtroTipo ? textoTipoCoordenada(Number(filtroTipo)) : "Todos"}`;
 
-  // Regla 5: borde cyan mientras el filtro esté activo.
+  // Borde cyan mientras el filtro esté activo.
   botonFiltroGrupo.classList.toggle(
     "coordenadas-boton-filtro-activo",
     filtroGrupo !== "",
@@ -243,7 +243,7 @@ const tbody = document.createElement("tbody");
 
 tabla.append(thead, tbody);
 
-// Bug 1: la tabla en sí no scrollea — este contenedor es el que
+// La tabla en sí no scrollea — este contenedor es el que
 // tiene overflow-y y ocupa el espacio disponible de la card, dejando
 // que la tabla crezca a su altura natural adentro (mismo patrón que
 // vent_configuracion_main.ts::scrollTabla).
@@ -318,13 +318,13 @@ async function cargarGruposFiltro(): Promise<void> {
 // Última lista filtrada renderizada.
 let listaFiltradaActual: CoordenadaBanco[] = [];
 
-// Ids de coordenadas cuyo marcador aún no fue generado (Etapa E) —
-// muestran "Generar marcador ⊙" en la columna X,Y en vez de los dos
+// Ids de coordenadas cuyo marcador aún no fue generado — muestran
+// "Generar marcador ⊙" en la columna X,Y en vez de los dos
 // botones de coordenada.
 const idsSinMarcador = new Set<string>();
 
 // ======================================================
-// ➕ AGREGAR FILA — Regla 7
+// ➕ AGREGAR FILA
 // ======================================================
 
 async function agregarFila(): Promise<void> {
@@ -353,16 +353,15 @@ async function agregarFila(): Promise<void> {
 }
 
 // Ids de coordenadas con previsualización (marcador "⊙") activa —
-// cada una en su propia ventana overlay. Etapa F: reemplaza el
-// idPrevisualizado único (Etapa E) porque ahora puede haber
-// cualquier cantidad activas a la vez.
+// cada una en su propia ventana overlay: puede haber cualquier
+// cantidad activas a la vez.
 const idsPrevisualizados = new Set<string>();
 
-// Id de la coordenada con el círculo verde de selección activo — Etapa H.
+// Id de la coordenada con el círculo verde de selección activo.
 let idSeleccionado: string | null = null;
 
 // ======================================================
-// 👁️ PREVISUALIZACIÓN — Etapa F
+// 👁️ PREVISUALIZACIÓN
 // ======================================================
 
 async function cerrarPrevisualizacion(): Promise<void> {
@@ -405,11 +404,11 @@ async function abrirPrevisualizacion(
 // ======================================================
 // 🔄 ACTUALIZAR X,Y EN VIVO MIENTRAS SE ARRASTRA EL MARCADOR
 // ------------------------------------------------------
-// Bug 5: antes la columna X,Y solo se refrescaba al CERRAR la
+// La columna X,Y no puede esperar a que se cierre la
 // previsualización (cargarLista() en cerrarPrevisualizacionDe/
-// alternarPrevisualizacion) — mientras el marcador seguía abierto,
-// arrastrarlo no se reflejaba en la tabla hasta cerrarlo. Mismo
-// patrón de polling que ya usa vent_captura_main.ts (Regla 17):
+// alternarPrevisualizacion) para refrescarse — mientras el marcador
+// sigue abierto, arrastrarlo tiene que reflejarse en la tabla. Mismo
+// patrón de polling que ya usa vent_captura_main.ts:
 // mientras haya al menos una previsualización activa, cada tick
 // consulta el x/y CRUDO en memoria (obtener_xy_preview_coordenada
 // — ya actualizado por guardar_posicion_preview_coordenada tras
@@ -500,7 +499,7 @@ async function alternarPrevisualizacion(
 ): Promise<void> {
   if (idsPrevisualizados.has(coordenada.id)) {
     await cerrarPrevisualizacionDe(coordenada.id);
-    // Regla 17: si el usuario arrastró el marcador antes de cerrar la
+    // Si el usuario arrastró el marcador antes de cerrar la
     // previsualización, x/y ya quedaron guardados en disco (Rust) —
     // se recarga la lista para reflejarlo en la columna X,Y.
     await cargarLista();
@@ -509,13 +508,13 @@ async function alternarPrevisualizacion(
 
   await abrirPrevisualizacion(coordenada, numero);
 
-  // Regla 15: sin esto, el botón ⊙ de ESTA fila no queda marcado como
+  // Sin esto, el botón ⊙ de ESTA fila no queda marcado como
   // activo hasta que algún otro evento (cerrar una, o el botón global)
   // vuelva a renderizar la tabla completa.
   renderizarTabla(listaFiltradaActual);
 }
 
-// Regla 10: botón del encabezado ⊙️ — si hay alguna previsualización
+// Botón del encabezado ⊙️ — si hay alguna previsualización
 // oculta (ninguna fila activa), muestra el marcador de todas las
 // filas de la tabla filtrada actual; si ya están todas visibles, las
 // oculta todas.
@@ -537,7 +536,7 @@ async function alternarPrevisualizacionGlobal(): Promise<void> {
 
 
 // ======================================================
-// 📌 GENERAR MARCADOR — Etapa E
+// 📌 GENERAR MARCADOR
 // ------------------------------------------------------
 // Mismo mecanismo de captura ya usado en crearDetalleCoordenada
 // (comp_popup_macro_editor.ts): abre la ventana overlay de
@@ -578,7 +577,7 @@ function iniciarCapturaMarcador(coordenada: CoordenadaBanco): void {
   }, 200);
 }
 
-// Regla 14 (y Bug 5): en modo Porcentaje, máximo 2 decimales — usada
+// En modo Porcentaje, máximo 2 decimales — usada
 // tanto al renderizar la celda como al refrescarla en vivo durante
 // el arrastre del marcador (ver actualizarXYEnVivo()).
 function formatearEjeCoordenada(coordenada: CoordenadaBanco, valor: number): string {
@@ -652,7 +651,7 @@ function abrirPopupTipo(
   coordenada: CoordenadaBanco,
   alCerrar: () => void,
 ): void {
-  // Bug 4: solo el primer dibujado posiciona el popup (mostrarPopup,
+  // Solo el primer dibujado posiciona el popup (mostrarPopup,
   // que calcula el anclaje contra el punto de click). Los redibujados
   // siguientes (al elegir una opción) solo reemplazan el contenido en
   // el mismo lugar (actualizarContenidoPopup) — si se recalculara la
@@ -754,10 +753,10 @@ function abrirPopupTipo(
 }
 
 // ======================================================
-// ✅ SELECCIÓN HACIA EL LLAMADOR — Etapa H
+// ✅ SELECCIÓN HACIA EL LLAMADOR
 // ======================================================
 
-// Regla 9: mensaje flotante junto al mouse al enviar la selección con
+// Mensaje flotante junto al mouse al enviar la selección con
 // la ventana fijada (si no está fijada, la ventana se cierra sola —
 // no hace falta confirmación visual).
 function mostrarToastEnviado(clientX: number, clientY: number): void {
@@ -826,7 +825,7 @@ function crearCeldaEditable(
   const entrarEnEdicion = (): void => {
     const input = document.createElement("input");
     input.type = "text";
-    // Bug 3: sin esto, el ancho mínimo por defecto del <input> (basado
+    // Sin esto, el ancho mínimo por defecto del <input> (basado
     // en el atributo "size", 20 por defecto) fuerza a la tabla a
     // ensanchar la columna al entrar en edición. Con size=1, el ancho
     // real lo sigue dando el CSS (width:100% de .coordenadas-celda-input).
@@ -859,7 +858,7 @@ function crearCeldaEditable(
   return td;
 }
 
-// Regla 11: celda de la columna Grupo — mismo comportamiento de
+// Celda de la columna Grupo — mismo comportamiento de
 // crearCeldaEditable (click → input, escribe nombre nuevo), más un
 // popup compacto con los grupos ya existentes para elegir con un
 // click sin tener que escribirlo.
@@ -884,14 +883,14 @@ function crearCeldaGrupo(
   const entrarEnEdicion = (evento: MouseEvent): void => {
     const input = document.createElement("input");
     input.type = "text";
-    // Bug 3: ver comentario equivalente en crearCeldaEditable.
+    // Ver comentario equivalente en crearCeldaEditable.
     input.size = 1;
     input.value = texto.textContent ?? "";
     input.className = "coordenadas-celda-input";
 
     input.addEventListener("blur", () => confirmarValor(input.value));
     input.addEventListener("keydown", (eventoTecla) => {
-      // Bug 2: al empezar a escribir, el popup de grupos ya creados
+      // Al empezar a escribir, el popup de grupos ya creados
       // (mostrado más abajo) debe desaparecer con el down de cualquier
       // tecla, no solo al confirmar con Enter.
       ocultarPopup();
@@ -960,7 +959,7 @@ function crearFila(
   tdNumero.append(botonNumero);
   tr.append(tdNumero);
 
-  // Bug 5: el flex va en un div INTERNO, no en el <td> mismo — igual
+  // El flex va en un div INTERNO, no en el <td> mismo — igual
   // que el encabezado (celdaOpcionesEncabezado). Poner display:flex
   // directo sobre el <td> le hace perder su layout de celda de tabla,
   // y la columna termina calculando un ancho distinto al del

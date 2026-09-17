@@ -467,7 +467,7 @@ function textoAccionPaso(paso: PasoMacro): string {
 }
 
 // ======================================================
-// 🔒 VALIDACIÓN DE CIERRE DOWN/UP (Regla 16)
+// 🔒 VALIDACIÓN DE CIERRE DOWN/UP
 // ------------------------------------------------------
 // Cada paso "Solo Down" debe cerrar con exactamente un paso "Solo
 // Up" posterior con la misma secuencia completa (modificadores +
@@ -534,7 +534,7 @@ function validarRetencionMacro(pasos: PasoMacro[]): string | null {
 }
 
 // ======================================================
-// 🔴 GRABACIÓN DE MACRO (Etapa G)
+// 🔴 GRABACIÓN DE MACRO
 // ------------------------------------------------------
 // Botón "Grabar Macro" del panel Funciones — su panel de inicio
 // (Tipo/Medido en/Medido desde + Tiempos de espera) se arma
@@ -565,7 +565,7 @@ function atajoCapturaATexto(atajo: AtajoCapturaUI): string {
 // tecla toggle), armada (panel de inicio abierto, dataset.activo
 // — un segundo click cancela: desarma y cierra todo), grabando
 // de verdad (texto distinto + disabled — desde acá solo la tecla
-// física, Regla 4, puede detenerla).
+// física puede detenerla).
 // ======================================================
 
 function crearBotonGrabarMacro(
@@ -611,13 +611,13 @@ function crearBotonGrabarMacro(
 // ======================================================
 // 🔴 PANEL DE INICIO DE GRABACIÓN
 // ------------------------------------------------------
-// Anidado bajo el botón "Grabar Macro" (Nota2 del plan). Mismo
+// Anidado bajo el botón "Grabar Macro". Mismo
 // orden/piezas que abrirPopupTipo (vent_coordenadas_main.ts,
 // tomado de referencia): Tipo → Medido en (solo si Tipo=Ventana)
 // → Medido desde (solo si Medido en=Pixeles, 3 arriba + 2 abajo)
 // → separador → Tiempos de espera → Milisegundos (solo si
 // Tiempos ≠ Real). Sin botón "Iniciar grabación": arrancar de
-// verdad es cosa de la tecla toggle física (Regla 4) — este
+// verdad es cosa de la tecla toggle física — este
 // panel solo junta la config antes de que se presione.
 // ======================================================
 
@@ -752,8 +752,8 @@ function textoTipoReducidoPaso(paso: PasoMacro): string {
   return `Ventana: ${ICONO_PUNTO_REFERENCIA_PASO[paso.coordPuntoReferencia]}`;
 }
 
-// Regla 14 (mismo criterio que formatearEjeCoordenada en
-// vent_coordenadas_main.ts): máximo 2 decimales en modo
+// Mismo criterio que formatearEjeCoordenada en
+// vent_coordenadas_main.ts: máximo 2 decimales en modo
 // Porcentaje.
 function textoEjeReducidoPaso(paso: PasoMacro, valor: number): string {
   const esPorcentaje =
@@ -835,7 +835,7 @@ function montarEditor(
   // a la vez.
   let idMenuAbierto: string | null = null;
 
-  // Etapa B: toggle de la columna Opciones — expande/contrae el
+  // Toggle de la columna Opciones — expande/contrae el
   // ancho de esa columna en header + todas las filas a la vez. El
   // ancho de columna se recalcula solo (Grid `auto`, ver
   // .popup-macro-editor-columna-derecha) al cambiar el contenido de
@@ -848,8 +848,8 @@ function montarEditor(
   // idsPrevisualizados en vent_coordenadas_main.ts.
   const idsPreviosMacro = new Set<string>();
 
-  // Etapa G: popup de inicio de Grabación (Modo de Coordenadas /
-  // Tiempos de espera, Reglas 2/3) anidado bajo el botón "Grabar
+  // Popup de inicio de Grabación (Modo de Coordenadas /
+  // Tiempos de espera) anidado bajo el botón "Grabar
   // Macro" del panel Funciones — mismo criterio de "solo un
   // desplegable a la vez" que idPasoExpandido/idMenuAbierto, así que
   // abrir este cierra esos dos y viceversa (ver alternarGrabacionInicio
@@ -868,8 +868,8 @@ function montarEditor(
   // Config elegida en el panel de inicio — vive desde que se abre
   // el panel (arma la grabación) hasta que termina la sesión
   // (cancelada estando armada, o finalizada tras Activa→Inactiva).
-  // Sigue viva aunque el panel se oculte al pasar a Activa (Regla
-  // 8) porque finalizarGrabacion la necesita para analizar los
+  // Sigue viva aunque el panel se oculte al pasar a Activa
+  // porque finalizarGrabacion la necesita para analizar los
   // eventos — null solo cuando no hay ninguna sesión en curso.
   let estadoInicioGrabacion: ConfigInicioGrabacion | null = null;
 
@@ -926,7 +926,7 @@ function montarEditor(
   };
 
   // ----------------------------------
-  // 🔴 GRABACIÓN DE MACRO — CONTROL (Etapa G, revisado)
+  // 🔴 GRABACIÓN DE MACRO — CONTROL
   // ------------------------------------------------------
   // alAlternarGrabacionInicio: click en el botón "Grabar Macro".
   // Según estadoGrabacion:
@@ -937,24 +937,24 @@ function montarEditor(
   //    tecla) → cancela: desarma, cierra la ventana overlay y el
   //    panel.
   //  • activa → no hace nada (disabled — solo la tecla física
-  //    detiene, Regla 4).
+  //    detiene).
   //
-  // armarGrabacion: abre la ventana overlay del indicador (Etapa
-  // B, arranca en 🟡 armada) + arma el hook en Rust (Etapa D) para
+  // armarGrabacion: abre la ventana overlay del indicador
+  // (arranca en 🟡 armada) + arma el hook en Rust para
   // que empiece a escuchar la tecla toggle. Deja un polling (mismo
   // patrón que capturarTeclaPaso/vent_captura_main.ts) sobre
   // obtener_estado_grabacion_macro para reaccionar a las dos
   // transiciones que dispara la tecla física: Armada→Activa (oculta
-  // el panel, Regla 8) y Activa→Inactiva (analiza y cierra).
+  // el panel) y Activa→Inactiva (analiza y cierra).
   //
-  // finalizarGrabacion: trae los eventos crudos (Etapa D), los
-  // traduce a Pasos con analizarGrabacion (Etapa E) usando la
+  // finalizarGrabacion: trae los eventos crudos, los
+  // traduce a Pasos con analizarGrabacion usando la
   // config elegida en el panel de inicio y la ventana de combo del
-  // capturador normal (Regla 9 — mismo valor que usa
+  // capturador normal (mismo valor que usa
   // AnalizadorTrigger para decidir que una secuencia terminó, ver
   // tiempo_doble() en config.rs), los valida con
-  // validarRetencionMacro (Patrón Diferido, Reglas 4-6) y, si
-  // pasan, los inserta al final de macroArchivo.pasos (Regla 8: el
+  // validarRetencionMacro (Patrón Diferido) y, si
+  // pasan, los inserta al final de macroArchivo.pasos (el
   // usuario solo ve el resultado ya agregado a la tabla) y cierra
   // la ventana overlay.
   // ----------------------------------
@@ -1028,7 +1028,7 @@ function montarEditor(
 
           if (nuevoEstado === "activa") {
             // Armada → Activa: la tecla toggle arrancó la captura
-            // de verdad — se oculta el panel de config (Regla 8).
+            // de verdad — se oculta el panel de config.
             grabacionInicioAbierto = false;
 
             redibujar();
@@ -1330,7 +1330,7 @@ function montarEditor(
       redibujar();
     });
 
-    // Renombrar (Etapa E5, spec punto 5): pegado a la derecha del
+    // Renombrar (spec punto 5): pegado a la derecha del
     // nombre en esta misma barra, para que se lea como "esto
     // renombra al nombre de al lado" — ya no flota suelto en el
     // extremo derecho junto a Cancelar. El spacer de abajo empuja
@@ -1340,7 +1340,7 @@ function montarEditor(
 
     spacer.className = "popup-macro-barra-spacer";
 
-    // Cancelar (Etapa J): esquina superior derecha de la barra,
+    // Cancelar: esquina superior derecha de la barra,
     // separado de nombre/Renombrar por el spacer de arriba para que
     // no se confunda con ellos ni se toque sin querer. Ícono ✕ solo
     // (mismo criterio que el ✕ Eliminar de cada fila): rojo en
@@ -1524,7 +1524,7 @@ function montarEditor(
   }
 
   // ----------------------------------
-  // ⁝ TOGGLE DE LA COLUMNA OPCIONES (Etapa B)
+  // ⁝ TOGGLE DE LA COLUMNA OPCIONES
   // ----------------------------------
 
   function alternarOpciones(): void {
@@ -1748,7 +1748,7 @@ function montarEditor(
 
     // Anchos iniciales de columna como variables CSS en el contenedor
     // del editor (spec F3) — los resizers del encabezado (F2) y las
-    // celdas de cada fila de paso (Etapa 7) leen las mismas variables,
+    // celdas de cada fila de paso leen las mismas variables,
     // así quedan sincronizados sin duplicar el ancho en dos lugares.
     columnaDerecha.style.setProperty(
       "--col-nota-width",
@@ -1807,8 +1807,7 @@ function montarEditor(
           idsPreviosMacro,
           (nuevoId) => {
             // Solo un popup anidado (Opción/Tipo/Extra/Grabación) puede
-            // estar abierto a la vez en todo el editor (spec punto 3 +
-            // Etapa G).
+            // estar abierto a la vez en todo el editor (spec punto 3).
             idPasoExpandido = idPasoExpandido === nuevoId ? null : nuevoId;
             idMenuAbierto = null;
             grabacionInicioAbierto = false;
@@ -2067,7 +2066,7 @@ function montarEditor(
     controladorArrastre!.establecerAncla(anclaSeleccionRestaurable);
 
     // Cerrar el popup anidado abierto (Opción/Tipo/Extra/Grabación —
-    // spec punto 3 + Etapa G, solo una instancia a la vez) al hacer
+    // spec punto 3, solo una instancia a la vez) al hacer
     // click fuera de él. Se registra con setTimeout para no
     // dispararse en el mismo click que lo abrió. Se usa capture para
     // interceptar antes que los botones internos (que tienen
@@ -2129,10 +2128,10 @@ function montarEditor(
         }
       };
 
-      // Regla 5: Esc cierra cajas anidadas (Opción/Tipo/Extra) dentro
+      // Esc cierra cajas anidadas (Opción/Tipo/Extra) dentro
       // del editor. stopPropagation: es la capa más interna — no debe
       // seguir burbujeando hacia el listener de popups globales ni al
-      // modo Mover (Regla 9).
+      // modo Mover.
       const cerrarAlEsc = (evento: KeyboardEvent): void => {
         if (evento.key !== "Escape") return;
 
@@ -2224,7 +2223,7 @@ function crearEncabezadoColumnas(
   // cada fila (crearFilaPaso) — asa, X (Eliminar), ⧉ (Duplicar).
   // Visibles siempre que la columna Opciones esté expandida (para dar
   // a conocer que la función existe, aun sin selección activa);
-  // habilitados solo con al menos 1 fila seleccionada (Regla 2).
+  // habilitados solo con al menos 1 fila seleccionada.
   if (opcionesExpandido) {
     const botonEliminarSeleccionadas = document.createElement("button");
 
@@ -2295,11 +2294,11 @@ function crearResizerColumna(
 
   resizer.className = "popup-macro-col-resizer";
 
-  // Etapa D: el resizer ahora escribe --col-nota-width en vez de
+  // El resizer escribe --col-nota-width en vez de
   // --col-extra-width — Extra (1fr) se ajusta solo con lo que sobre.
   const variable = "--col-nota-width";
 
-  // Etapa K: el resizer ya NO se posiciona con un `right` fijo en CSS
+  // El resizer NO se posiciona con un `right` fijo en CSS
   // (calc(...--col-nota-width...) asumía que la fila siempre tenía
   // ancho de sobra). Al achicar el POPUP desde el borde, Extra puede
   // llegar a su --macro-funciones-min-width y comprimirse por debajo
@@ -2496,7 +2495,7 @@ function crearFilaPaso(
 
   filaPrincipal.append(numero);
 
-  // ⁝ Opciones — celda real de esa columna del grid (Etapa B):
+  // ⁝ Opciones — celda real de esa columna del grid:
   // siempre contiene el botón ⁝ (toggle de columna completa, clic
   // mantenido lo sigue manejando util_arrastrable.ts directamente
   // sobre este mismo botón vía su clase) y, si opcionesExpandido,
@@ -2543,7 +2542,7 @@ function crearFilaPaso(
 
     celdaOpciones.append(botonDuplicarRapido);
 
-    // ⊙ Previsualizar — Etapa C: solo en filas Tipo === "coordenada".
+    // ⊙ Previsualizar — solo en filas Tipo === "coordenada".
     // hayVistaPrevia reserva el mismo espacio (vacío) en las demás
     // filas cuando exista al menos una Coordenada en la macro, mismo
     // criterio que la columna Marcador con hayBucle, para que la
@@ -2601,7 +2600,7 @@ function crearFilaPaso(
     alternarMenu(`tipo:${idPaso}`);
   });
 
-  // Envoltorio de Tipo (Etapa I): el separador Tipo|Extra necesita un
+  // Envoltorio de Tipo: el separador Tipo|Extra necesita un
   // borde a TODA la altura de la fila, pero botonTipo (.ui-btn) trae
   // su propia altura fija (28px) — igual que celdaOpciones envuelve
   // a asa/X/⧉/⊙ para poder darle border-right de fila completa (ver
@@ -2902,7 +2901,7 @@ function crearControlMarcador(
   return boton;
 }
 
-// Etapa B: cuerpo real de Duplicar/Eliminar, reusado por los
+// Cuerpo real de Duplicar/Eliminar, reusado por los
 // botones ⧉/X de la columna Opciones (crearFilaPaso).
 function duplicarPasoMacro(
   paso: PasoMacro,
@@ -3025,7 +3024,7 @@ function eliminarPasosSeleccionados(
   guardarYRedibujar();
 }
 
-// Etapa B: ⊙ Previsualizar — mismo mecanismo que alternarPrevisualizacion
+// ⊙ Previsualizar — mismo mecanismo que alternarPrevisualizacion
 // en vent_coordenadas_main.ts (abrir_ventana_preview_coordenada /
 // cerrar_ventana_preview_coordenada), usando idPaso como id en vez del
 // id de un CoordenadaBanco (el paso de Macro guarda sus campos de
@@ -3236,10 +3235,8 @@ function crearListaImportarMacro(
 // ======================================================
 // 📌 PANEL "FUNCIONES" (columna izquierda fija, 7 tipos)
 // ------------------------------------------------------
-// Antes vivía al pie del popup (crearMenuAgregarPaso); desde la
-// Etapa 5 pasa a ser la columna izquierda fija del editor, con
-// subtítulo "Funciones" (spec punto 8). Sin el prefijo "+ " que
-// tenía cada botón.
+// Columna izquierda fija del editor, con subtítulo "Funciones"
+// (spec punto 8). Sin el prefijo "+ " en cada botón.
 // ======================================================
 
 function crearPanelFunciones(
@@ -3513,7 +3510,7 @@ function crearDetalleTeclaMouse(
 
   contenedor.append(crearFilaPopup("Combo", botonCapturar));
 
-  // Limitar (Regla 14): retención Down/Up diferido — arrastre entre
+  // Limitar: retención Down/Up diferido — arrastre entre
   // pasos. Dos interruptores independientes (no crearGrupoOpciones:
   // deben poder quedar ambos apagados). Activar uno apaga el otro;
   // click sobre el ya activo lo apaga (vuelve a "").
@@ -3550,7 +3547,7 @@ function crearDetalleTeclaMouse(
   // opciones acá, se leen de paso.teclaAccion.condicion (el
   // gatillo capturado arriba). Sin "repeticion_rueda" (no hay
   // gatillo Rueda dentro de una Macro, ver core_macro.ts).
-  // Regla 15: con "Solo Up" no se muestra — el Up solo libera lo
+  // Con "Solo Up" no se muestra — el Up solo libera lo
   // retenido por el Down correspondiente, no admite Extra propio.
   const extraOpciones: { texto: string; valor: ExtraTeclaMouseMacro }[] = [
     { texto: "Ninguno", valor: "" },
@@ -3580,7 +3577,7 @@ function crearDetalleTeclaMouse(
   // cualquier condición con Extra Normal/Turbo (dura el bucle de
   // repetición). Con Extra Ninguno + Simple/Doble/Triple no hace
   // falta — el combo se envía una sola vez, sin tiempo que
-  // configurar. Regla 15: con "Solo Down" tampoco — la duración la
+  // configurar. Con "Solo Down" tampoco — la duración la
   // da el paso "Solo Up" correspondiente más adelante en la macro.
   const necesitaDuracion =
     paso.teclaRetencion !== "down" &&
@@ -3685,10 +3682,10 @@ function crearDetalleBucle(
     ),
   );
 
-  // "Modo" (Con fin/Sin fin) se sacó en la Etapa 8A: el Bucle pasa a
+  // No hay opción "Modo" (Con fin/Sin fin): el Bucle usa
   // un solo algoritmo (resta 1 en cada visita, resetea al llegar a
   // 0 y sigue de largo — listo para una próxima visita si está
-  // anidado dentro de otro bucle, ver core_macro.ts / Etapa 8B).
+  // anidado dentro de otro bucle, ver core_macro.ts).
 
   return contenedor;
 }

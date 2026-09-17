@@ -87,12 +87,12 @@ function textoProgresoPlay(progreso: ProgresoIndicadorMacro): string {
 // #10767) — en Windows el arrastre nativo no es confiable para
 // estas ventanas overlay.
 //
-// El intento anterior calculaba el delta con evento.screenX/screenY
-// (coordenadas del evento del mouse dentro del webview) multiplicado
-// por scaleFactor() — en Webview2/Windows esas coordenadas no
-// siempre están en la misma base física que outerPosition(), lo que
-// hacía que el arrastre no funcionara. Se cambia al mismo patrón que
-// SÍ funciona en el marcador arrastrable de vent_captura_main.ts
+// Calcular el delta con evento.screenX/screenY (coordenadas del
+// evento del mouse dentro del webview) multiplicado por
+// scaleFactor() no funciona: en Webview2/Windows esas coordenadas
+// no siempre están en la misma base física que outerPosition(). Se
+// usa el mismo patrón que funciona en el marcador arrastrable de
+// vent_captura_main.ts
 // (activarArrastreMarcador): en cada mousemove se pide el cursor
 // físico real vía el comando obtener_cursor_captura (mismo backend,
 // GetCursorPos) y la ventana se reposiciona directo a esa coordenada
@@ -156,8 +156,8 @@ function activarArrastre(raiz: HTMLElement): void {
   });
 }
 
-// Persiste la posición actual de la ventana (Etapa C:
-// guardar_posicion_indicador_macro) en coordenadas LÓGICAS — mismo
+// Persiste la posición actual de la ventana
+// (guardar_posicion_indicador_macro) en coordenadas LÓGICAS — mismo
 // sistema que usa comandos.rs al crear/posicionar la ventana
 // (posicion_x/posicion_y ahí están divididas por scale_factor()).
 // outerPosition() devuelve físicas, así que hay que escalar antes
@@ -247,9 +247,8 @@ function ajustarTamañoAlContenido(card: HTMLElement): void {
 // Mismo estilo que la ventana "Modo Captura" (vent_captura_main.ts):
 // header con ícono de arrastre (⠿), título y botón Cancelar; debajo,
 // el cuerpo con el punto de estado y el texto — ya existentes en
-// los 3 modos. El header es la única zona de arrastre (antes lo era
-// la ventana entera) para no competir con el click del botón
-// Cancelar.
+// los 3 modos. El header es la única zona de arrastre, para no
+// competir con el click del botón Cancelar.
 // ======================================================
 
 interface CardIndicadorMacro {
@@ -297,8 +296,8 @@ function crearCard(raiz: HTMLElement, titulo: string): CardIndicadorMacro {
   return { card, punto, texto };
 }
 
-// Regla 7 (mismo criterio que vent_captura_main.ts): Esc cancela
-// esta ventana, igual que el botón Cancelar del header.
+// Mismo criterio que vent_captura_main.ts: Esc cancela esta
+// ventana, igual que el botón Cancelar del header.
 document.addEventListener("keydown", (evento) => {
   if (evento.key === "Escape") void cancelar();
 });

@@ -10,7 +10,7 @@
 // - Analiza triggers.
 // - Ejecuta acciones.
 //
-// Excepción puntual (Etapa 8C): SÍ llama a runtime::detener_todo()
+// Excepción puntual: SÍ llama a runtime::detener_todo()
 // junto a cada punto donde ya vacía la cache (activar/desactivar/
 // guardar/clonar/renombrar/eliminar/crear/seleccionar perfil) — red
 // de seguridad para que cambiar de perfil corte cualquier ejecución
@@ -107,7 +107,7 @@
 //
 // buscar_nombres_portapapeles()
 //     Busca en todos los perfiles guardados el nombre de fila
-//     portapapeles_accion.nombre para cada id pedida (Cambio 2).
+//     portapapeles_accion.nombre para cada id pedida.
 // ======================================================
 
 use crate::cache;
@@ -125,10 +125,9 @@ use crate::perfil_ui::{ResultadoPerfil, ResultadoPerfilInicial};
 // ======================================================
 // 🟢 ACTIVAR PERFIL
 // ------------------------------------------------------
-// Devuelve ResultadoCompilacion completo (no solo el bool de antes)
-// para que el botón "Activar perfil" de la UI pueda refrescar el
-// "OFF ⚠️" de cada fila y el statusbar con las advertencias de ESTA
-// compilación — antes se perdían en silencio (ver
+// Devuelve ResultadoCompilacion completo para que el botón "Activar
+// perfil" de la UI pueda refrescar el "OFF ⚠️" de cada fila y el
+// statusbar con las advertencias de ESTA compilación (ver
 // ui_toolbar.ts::botonEstado).
 // ======================================================
 
@@ -137,7 +136,7 @@ pub fn activar_perfil() -> Result<ResultadoCompilacion, String> {
 
     let perfil = cargar_desde_disco(&ruta)?;
 
-    // Etapa 8C: ver excepción documentada en el header del archivo.
+    // Ver excepción documentada en el header del archivo.
     runtime::detener_todo();
 
     Ok(compilador::compilar(&perfil))
@@ -148,7 +147,7 @@ pub fn activar_perfil() -> Result<ResultadoCompilacion, String> {
 // ======================================================
 
 pub fn desactivar_perfil() {
-    // Etapa 8C: ver excepción documentada en el header del archivo.
+    // Ver excepción documentada en el header del archivo.
     runtime::detener_todo();
 
     cache::borrar_cache();
@@ -157,8 +156,8 @@ pub fn desactivar_perfil() {
 // ======================================================
 // 🚚 DETENER SI ESTABA ACTIVO (post-migración carpeta Usuario)
 // ------------------------------------------------------
-// Usado antes de migrar la carpeta de Usuario a otra ruta
-// (Regla 12): si el perfil estaba activo, se detiene; si
+// Usado antes de migrar la carpeta de Usuario a otra ruta: si el
+// perfil estaba activo, se detiene; si
 // no lo estaba, no hace nada.
 // ======================================================
 
@@ -233,7 +232,7 @@ pub fn guardar_perfil(perfil: PerfilJson) -> Result<ResultadoCompilacion, String
 
     guardar_en_disco(&perfil, &ruta)?;
 
-    // Etapa 8C: ver excepción documentada en el header del archivo.
+    // Ver excepción documentada en el header del archivo.
     runtime::detener_todo();
 
     Ok(compilador::compilar(&perfil))
@@ -322,7 +321,7 @@ pub fn guardar_perfil_como(nombre: String, perfil: PerfilJson) -> Result<Resulta
 
     let nombre = siguiente_nombre(nombre)?;
 
-    // Etapa 8C: ver excepción documentada en el header del archivo.
+    // Ver excepción documentada en el header del archivo.
     runtime::detener_todo();
 
     cache::borrar_cache();
@@ -359,7 +358,7 @@ pub fn renombrar_perfil(nuevo_nombre: String) -> Result<ResultadoPerfil, String>
 
     let nueva_ruta = usuario::ruta_perfil(&nuevo_nombre)?;
 
-    // Etapa 8C: ver excepción documentada en el header del archivo.
+    // Ver excepción documentada en el header del archivo.
     runtime::detener_todo();
 
     cache::borrar_cache();
@@ -380,7 +379,7 @@ pub fn renombrar_perfil(nuevo_nombre: String) -> Result<ResultadoPerfil, String>
 pub fn eliminar_perfil_actual() -> Result<ResultadoPerfil, String> {
     let ruta_actual = usuario::perfil_actual()?;
 
-    // Etapa 8C: ver excepción documentada en el header del archivo.
+    // Ver excepción documentada en el header del archivo.
     runtime::detener_todo();
 
     cache::borrar_cache();
@@ -419,7 +418,7 @@ pub fn eliminar_perfil_actual() -> Result<ResultadoPerfil, String> {
 // ======================================================
 
 pub fn crear_perfil_nuevo() -> Result<ResultadoPerfil, String> {
-    // Etapa 8C: ver excepción documentada en el header del archivo.
+    // Ver excepción documentada en el header del archivo.
     runtime::detener_todo();
 
     cache::borrar_cache();
@@ -446,7 +445,7 @@ pub fn seleccionar_perfil(nombre: String) -> Result<ResultadoPerfil, String> {
         return Err("El perfil seleccionado no existe".into());
     }
 
-    // Etapa 8C: ver excepción documentada en el header del archivo.
+    // Ver excepción documentada en el header del archivo.
     runtime::detener_todo();
 
     cache::borrar_cache();
@@ -540,7 +539,7 @@ fn cargar_desde_disco(ruta: &Path) -> Result<PerfilJson, String> {
 }
 
 // ======================================================
-// 🆔📋 BUSCAR NOMBRES DE PORTAPAPELES — Cambio 2 (Etapa 2B)
+// 🆔📋 BUSCAR NOMBRES DE PORTAPAPELES
 // ------------------------------------------------------
 // Recorre TODOS los perfiles guardados en la carpeta Usuario (no
 // solo el perfil actual — una ID de Portapapeles puede venir de
@@ -551,7 +550,7 @@ fn cargar_desde_disco(ruta: &Path) -> Result<PerfilJson, String> {
 // Las IDs que no aparecen en ningún perfil simplemente no están en
 // el mapa devuelto — el llamador (back_portapapeles::
 // listar_otras_ids_con_fijados + comandos::portapapeles_listar_otros)
-// decide qué mostrar en ese caso (spec Cambio 2: la ID cruda).
+// decide qué mostrar en ese caso (la ID cruda).
 //
 // Un solo recorrido de todos los .json de Usuario (no uno por id) —
 // barato aun con varios perfiles guardados. Si una misma id
@@ -596,7 +595,7 @@ pub fn buscar_nombres_portapapeles(ids: &[String]) -> HashMap<String, String> {
 }
 
 // ======================================================
-// ✅ EXISTE Y CARGA (Etapa G)
+// ✅ EXISTE Y CARGA
 // ------------------------------------------------------
 // Usado por configuracion_usuario::validar_iniciar_con_perfil()
 // para comprobar que el perfil guardado en "Iniciar con perfil"

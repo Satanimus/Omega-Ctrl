@@ -2,9 +2,9 @@
 // ⏱️❔ ui_Ayuda_Hover
 // ------------------------------------------------------
 // Detección global (delegada en document) del id_objeto bajo
-// el mouse, con debounce de 2s (Regla 7) y persistencia visual
-// al salir a espacio vacío (Regla 8). Los controles instrumentados
-// (Etapa H) marcan su id_objeto con el atributo ATRIBUTO_AYUDA_ID.
+// el mouse, con debounce (DEBOUNCE_AYUDA_MS) y persistencia
+// visual al salir a espacio vacío. Los controles instrumentados
+// marcan su id_objeto con el atributo ATRIBUTO_AYUDA_ID.
 // ======================================================
 
 import { invoke } from "@tauri-apps/api/core";

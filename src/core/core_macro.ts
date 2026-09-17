@@ -73,17 +73,15 @@ export function textoMacroAccion(accionReferencia: string | null): string {
 }
 
 // ======================================================
-// 🎚️ COMPORTAMIENTO (columna Extra de la tabla) — Etapa 8A
+// 🎚️ COMPORTAMIENTO (columna Extra de la tabla)
 // ------------------------------------------------------
-// Reemplaza el viejo textoMacroExtra (mostraba "cantidad de
-// pasos" — ya no aplica: Extra deja de ser la puerta al
-// editor, ver comp_popup_macro_accion.ts). Ahora Extra es
-// simplemente el selector de Comportamiento, mismo espíritu
+// Extra es el selector de Comportamiento, mismo espíritu
 // que abrirExtra/portapapelesExtra: una opción persistente a
-// elegir, no una acción a ejecutar.
+// elegir, no una acción a ejecutar (la puerta al editor vive
+// en Acción, ver comp_popup_macro_accion.ts).
 //
-// "unaEjecucion" y "toggle" comparten mecanismo en Runtime
-// (Etapa 8B) — la diferencia es solo de etiqueta acá. Solo
+// "unaEjecucion" y "toggle" comparten mecanismo en Runtime —
+// la diferencia es solo de etiqueta acá. Solo
 // "teclaMantenida" es mecánicamente distinta (depende de
 // Down/Up físico real).
 // ======================================================
@@ -145,10 +143,9 @@ export type TipoPasoMacro =
 // no hay Rueda dentro de una Macro.
 export type ExtraTeclaMouseMacro = "" | "normal" | "turbo";
 
-// Etapa F: arrastre diferido. "down" retiene mods+gatillo abajo
+// Arrastre diferido. "down" retiene mods+gatillo abajo
 // hasta que un paso "up" posterior con la misma secuencia los
-// libere. "" (Ninguno) es el comportamiento normal de siempre —
-// ver Reglas 14-16.
+// libere. "" (Ninguno) es el comportamiento normal de siempre.
 export type RetencionTeclaMacro = "" | "down" | "up";
 
 // Mismo vocabulario que CoordenadaPerfil.ubicacion
@@ -208,8 +205,8 @@ export interface PasoMacro {
 
   teclaExtra: ExtraTeclaMouseMacro;
 
-  // Etapa F: marca "Solo Down"/"Solo Up" del subtítulo "Limitar"
-  // (Regla 14). "" cuando no está limitado.
+  // Marca "Solo Down"/"Solo Up" del subtítulo "Limitar".
+  // "" cuando no está limitado.
   teclaRetencion: RetencionTeclaMacro;
 
   // Un solo campo de Duración (ms), con dos usos según
@@ -232,7 +229,7 @@ export interface PasoMacro {
   // Solo relevantes cuando tipo === "bucle". marcadorDestino
   // es la letra de Marcador a la que vuelve (null hasta
   // elegir un paso anterior). Un solo algoritmo (sin distinción
-  // con_fin/sin_fin, ver Etapa 8B): resta 1 en cada visita: al
+  // con_fin/sin_fin): resta 1 en cada visita: al
   // llegar a 0, resetea al valor programado y sigue de largo
   // — listo para una próxima visita si está anidado dentro de
   // otro bucle (permite bucles anidados, ver spec).
@@ -536,7 +533,7 @@ export function textoTipoPasoMacro(tipo: TipoPasoMacro): string {
 // 🔣 ÍCONO DE TIPO (columna Tipo del editor — solo ícono)
 // ------------------------------------------------------
 // Mismo emoji que textoTipoPasoMacro, sin el texto — la celda
-// Tipo de cada fila de paso (Etapa 7) muestra solo esto.
+// Tipo de cada fila de paso muestra solo esto.
 // ======================================================
 
 export function iconoTipoPasoMacro(tipo: TipoPasoMacro): string {

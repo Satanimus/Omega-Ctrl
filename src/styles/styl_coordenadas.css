@@ -12,9 +12,9 @@
    🧱 CUERPO DE VENTANA
    ------------------------------------------------------
    Fila horizontal: card principal + panel de ayuda lateral
-   derecho (comp_panel_ayuda_coordenadas.ts). Antes .coordenadas-card
-   ocupaba 100vh directo desde <main> — ahora ese alto lo da
-   este contenedor, y la card pasa a flex:1 (ver abajo).
+   derecho (comp_panel_ayuda_coordenadas.ts). El alto de 100vh
+   lo fija este contenedor, y .coordenadas-card lo toma con
+   flex:1 (ver abajo).
    ====================================================== */
 
 .coordenadas-cuerpo {
@@ -85,7 +85,7 @@
   color: var(--highlight);
 }
 
-/* Regla 5: borde cyan permanente mientras el filtro esté activo
+/* Borde cyan permanente mientras el filtro esté activo
    (Grupo o Tipo distinto de "Todos"), para recordar que la lista
    está filtrada aunque el mouse no esté encima. */
 .coordenadas-boton-filtro-activo {
@@ -208,7 +208,7 @@
 }
 
 /* ======================================================
-   📏 ANCHO DE COLUMNAS — Reglas 2, 3, 4
+   📏 ANCHO DE COLUMNAS
    ------------------------------------------------------
    #/Opciones/Tipo/X,Y (1º, 2º, 5º, 6º): se ajustan a su
    contenido (nowrap + width:1%, truco estándar para que la
@@ -307,7 +307,7 @@
 }
 
 /* Celda editable: span de solo lectura + input que lo reemplaza.
-   Regla 13: el borde gris solo se muestra si el campo está vacío
+   El borde gris solo se muestra si el campo está vacío
    (ver .coordenadas-celda-texto--vacia) — una vez escrito algún
    valor, queda sin borde en reposo. */
 .coordenadas-celda-texto {
@@ -335,7 +335,7 @@
 }
 
 /* ======================================================
-   ✅ NÚMERO / SELECCIÓN — Etapa H
+   ✅ NÚMERO / SELECCIÓN
    ------------------------------------------------------
    Mismo patrón que .estado-toggle[data-estado="off"] de
    styl_botones.css (círculo superpuesto y centrado sobre
@@ -385,7 +385,7 @@
 }
 
 /* ======================================================
-   ✅ TOAST "Enviado" — Regla 9
+   ✅ TOAST "Enviado"
    ====================================================== */
 
 .coordenadas-toast-enviado {

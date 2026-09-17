@@ -338,7 +338,7 @@ export function abrirPopupColor(
 }
 
 // ======================================================
-// 🎨 POPUP COLOR — SELECCIONADAS (Regla 12)
+// 🎨 POPUP COLOR — SELECCIONADAS
 // ------------------------------------------------------
 // Misma paleta (COLOR_OPCIONES) que abrirPopupColor, pero
 // aplica el color elegido a todas las filas de `ids` en vez

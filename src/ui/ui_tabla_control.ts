@@ -11,7 +11,7 @@ let actualizarConflictosCallback: (() => void) | null = null;
 // Actualiza el botón estado de los separadores que contienen las filas
 // afectadas, sin reconstruir la tabla entera. Se llama desde
 // reconstruirFila() para que el separador refleje inmediatamente el
-// estado de alerta de sus filas (bug 2).
+// estado de alerta de sus filas.
 let actualizarSeparadoresDeFilasCallback:
   | ((idsFilas: string[]) => void)
   | null = null;

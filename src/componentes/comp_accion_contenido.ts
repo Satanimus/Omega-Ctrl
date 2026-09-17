@@ -34,8 +34,8 @@ export function crearAccionMultimedia(
   return boton;
 }
 
-// El editor propio (seleccionados/disponibles) se conecta recién en
-// la Etapa 3 — por ahora el botón solo muestra el nombre del menú
+// El editor propio (seleccionados/disponibles) todavía no está
+// conectado — por ahora el botón solo muestra el nombre del menú
 // (o el default), sin abrir nada al hacer clic (ver comp_accion.ts).
 export function crearAccionMenuExpress(
   filaPerfil: FilaPerfil,

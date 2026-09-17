@@ -181,7 +181,7 @@ async function recargarContenidoPanel(): Promise<void> {
 // mismo refresco de UI. `evento` solo se usa para posicionar el
 // popup de confirmación (si hace falta mostrarlo).
 //
-// [Etapa B/C] `origen` distingue panel lateral (siempre visible, sin
+// `origen` distingue panel lateral (siempre visible, sin
 // notificación) de bandeja de sistema (notifica el cambio, y solo
 // ahí se fuerza mostrar la ventana — y únicamente si hay ediciones
 // sin guardar y va a aparecer el popup de confirmación; si no hay

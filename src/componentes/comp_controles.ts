@@ -76,7 +76,7 @@ import { esSeparador } from "../core/core_separadores";
 // ======================================================
 // 🟢🔴 ESTADO (interruptor ON/OFF)
 // ------------------------------------------------------
-// Etapa C: ya no vive en una celda de la fila — se dibuja
+// Ya no vive en una celda de la fila — se dibuja
 // superpuesto al número en el carril (ver ui_tabla.ts).
 // ======================================================
 
@@ -99,7 +99,7 @@ export function crearEstado(
   // ver core_advertencias_compilacion.ts) — al usuario le alcanza con
   // saber que la fila no está funcionando; el motivo puntual se lee
   // en el statusbar (ver ui_statusbar.ts). Ambos chequeos son solo
-  // entre filas normales (Regla 19: los separadores no participan
+  // entre filas normales (los separadores no participan
   // de conflictos ni advertencias de compilación).
   const filasNormales = obtenerPerfilUi().filas.filter(
     (item): item is FilaPerfil => !esSeparador(item),
@@ -279,7 +279,7 @@ export function crearExtra(
   // abrir tiene su propio popup Extra (Iniciar/Instancias/Abrir con
   // o Argumento) — igual de persistente que los anteriores. El
   // botón "Abrir con" que muestra hoy ese popup es el selector
-  // manual; la Etapa 11 le antepone el listado de recientes/
+  // manual; está pendiente anteponerle el listado de recientes/
   // instalados del registro, sin tocar este enganche.
   if (filaPerfil.tipo === "abrir") {
     return crearPopup({
@@ -293,7 +293,7 @@ export function crearExtra(
     });
   }
 
-  // macro tiene su propio popup Extra (Etapa 8A): ya no es la
+  // macro tiene su propio popup Extra: ya no es la
   // puerta de entrada al editor (eso se mudó a Acción, ver
   // comp_accion.ts / comp_popup_macro_accion.ts) sino el selector
   // de Comportamiento (Una ejecución/Toggle/Tecla mantenida) —

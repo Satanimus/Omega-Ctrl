@@ -4,7 +4,7 @@
 // Guarda en memoria el Vec<AdvertenciaCompilacion> de la ÚLTIMA
 // compilación conocida — lo genera convertir_abrir() en
 // compilador.rs cuando la ruta de una fila "abrir" ya no existe en
-// disco, y (desde la Etapa 7) convertir_macro() cuando la macro
+// disco, y convertir_macro() cuando la macro
 // referenciada por una fila "macro" ya no existe en /Macros. Se
 // actualiza en cada punto donde el backend compila y
 // devuelve ResultadoCompilacion/advertencias: guardar cambios
