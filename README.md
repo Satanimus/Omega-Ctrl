@@ -27,17 +27,23 @@ Omega Ctrl es una eficiente y completa aplicación de escritorio para Windows (T
 
 ## Capturas de pantalla
 
-![Editor de fila / Barra lateral de ayuda](docs/screenshots/selector_ayuda.png)
+- **Selecciona opciones en popups y obtén ayuda en la barra lateral**:
+  ![Editor de fila / Barra lateral de ayuda](docs/screenshots/selector_ayuda.png)
 
-![Portapapeles con visor imagenes / Menú Express](docs/screenshots/portapapeles_menu.png)
+- **Portapapeles con previsualizador de imágenes y crea Menú Express con atajos a cualquier fila creada**:
+  ![Portapapeles con visor imagenes / Menú Express](docs/screenshots/portapapeles_menu.png)
 
-![Selector y editor de temas](docs/screenshots/temas.png)
+- **Selecciona y edita temas a tu gusto**:
+  ![Selector y editor de temas](docs/screenshots/temas.png)
 
-![Ventana de Configuración — Opciones](docs/screenshots/opciones.png)
+- **Multiples opciones de configuración**:
+  ![Ventana de Configuración — Opciones](docs/screenshots/opciones.png)
 
-![Editor de Macros](docs/screenshots/macros.png)
+- **Crea y edita Macros facilmente**:
+  ![Editor de Macros](docs/screenshots/macros.png)
 
-![Gestor de Coordenadas](docs/screenshots/coordenadas.png)
+- **Gestiona coordenadas, guárdalas y previsualízalas**:
+  ![Gestor de Coordenadas](docs/screenshots/coordenadas.png)
 
 ## Requisitos
 
