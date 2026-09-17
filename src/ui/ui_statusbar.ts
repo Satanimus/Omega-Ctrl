@@ -17,6 +17,7 @@ import { obtenerAdvertenciasCompilacion } from "../core/core_advertencias_compil
 
 import {
   obtenerTextoEstadoNormal,
+  esperarTextoEstadoNormal,
   obtenerTextoNotificacion,
   obtenerTextoNotificacionAtajoReservado,
   obtenerTextoAdvertenciaCompilacion,
@@ -46,6 +47,18 @@ export function crearStatusbar(alCambiarModo?: () => void): HTMLElement {
   const texto = document.createElement("span");
   texto.className = "statusbar-texto";
   texto.textContent = obtenerTextoEstadoNormal();
+
+  // Al crear el statusbar la versión puede no estar resuelta todavía
+  // (respaldo sincrónico "Perfil activo." mientras tanto) — en cuanto
+  // esté lista se refresca, salvo que para entonces ya haya aparecido
+  // una notificación real (no se la pisa).
+  const textoAlCrear = texto.textContent;
+
+  void esperarTextoEstadoNormal().then((valor) => {
+    if (texto.textContent === textoAlCrear) {
+      texto.textContent = valor;
+    }
+  });
 
   const boxModo = document.createElement("span");
   boxModo.className = "statusbar-box-modo";

@@ -12,6 +12,8 @@
 
 import type { AppPerfil } from "./core_perfil";
 
+import { getVersion } from "@tauri-apps/api/app";
+
 // ======================================================
 // 📦 DATOS NOTIFICACIÓN
 // ======================================================
@@ -42,7 +44,8 @@ export interface DatosNotificacionAtajoReservado {
 // ======================================================
 
 const TEXTOS = {
-  estadoNormal: "Perfil activo.",
+  // Respaldo mientras se resuelve la versión (o si getVersion() falla).
+  estadoNormalRespaldo: "Perfil activo.",
 
   notificacion001: (datos: DatosNotificacion) =>
     `⚠ (Fila ${datos.filaA} y ${datos.filaB}) ` +
@@ -132,8 +135,33 @@ export function obtenerTextoAdvertenciaCompilacion(
 
 // ======================================================
 // ℹ️ ESTADO NORMAL
+// ------------------------------------------------------
+// Por defecto (sin conflictos/advertencias) la barra de estado
+// muestra la versión instalada ("v0.1.0") en vez de un texto que no
+// aporta información. Se resuelve una sola vez al cargar el módulo
+// (ver getVersion(), mismo mecanismo que la pestaña Acerca de en
+// vent_configuracion_main.ts) y se cachea.
 // ======================================================
 
+let textoEstadoNormalCache: string | null = null;
+
+const cargaVersionEstadoNormal = getVersion()
+  .then((version) => {
+    textoEstadoNormalCache = `v${version}`;
+  })
+  .catch(() => {
+    textoEstadoNormalCache = TEXTOS.estadoNormalRespaldo;
+  });
+
 export function obtenerTextoEstadoNormal(): string {
-  return TEXTOS.estadoNormal;
+  return textoEstadoNormalCache ?? TEXTOS.estadoNormalRespaldo;
+}
+
+// Para quien quiera esperar a que la versión ya esté resuelta (ver
+// ui_statusbar.ts::crearStatusbar) en vez de conformarse con el
+// respaldo sincrónico de arriba.
+export async function esperarTextoEstadoNormal(): Promise<string> {
+  await cargaVersionEstadoNormal;
+
+  return obtenerTextoEstadoNormal();
 }
