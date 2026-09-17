@@ -1,48 +1,55 @@
 # Omega Ctrl
 
-Omega Ctrl es una eficiente y completa aplicación de escritorio para Windows (Tauri + Rust) que permite remapear teclado y mouse, crear macros, menús flotantes y un portapapeles ampliado, todo organizado en **perfiles**, con **filas** que puedes activar/desactivar y personalizar por aplicación. Todo eso con un mínimo consumo de ram (entre 5MB y 8MB aprox).
+Omega Ctrl es una eficiente y completa aplicación de escritorio para Windows (Tauri + Rust) que permite mediante pocos clicks y en menos de un minuto:
+
+- Remapear teclado y mouse
+- Crear Macros
+- Crear tus propios Menús flotantes
+- Tener múltiples Portapapeles
+  todo organizado en **perfiles**, con **filas** que puedes activar/desactivar y personalizar por aplicación. Todo eso con un mínimo consumo de ram (entre 5MB y 8MB aprox).
 
 ![Captura general de la ventana principal](docs/screenshots/main.png)
 
 ## Características
 
-**Una fila puede disparar:**
+- **Una fila puede disparar:**
+  - 🔠**Remapeo de teclado y mouse** (reasigna cualquier tecla o botón a otra tecla o combinación, con condición Simple / Mantenido / Turbo).
+  - 🧩**Macro** (grabación y reproducción de secuencias de teclado/mouse).
+  - 📂**Abrir archivo o aplicación** (con modo de ventana, instancias, o argumento personalizado).
+  - 🎵**Multimedia** (control de reproducción, volumen, etc.), con alcance global o solo dentro de la app activa.
+  - ⚡**Menú Express**: un menú flotente radial o en cuadrícula con botones propios, cada uno ejecutando su propia acción.
+  - 📋**Portapapeles ampliado**: pool de elementos copiados (texto/imagen), fijables y con límite configurable.
 
-- 🔠**Remapeo de teclado y mouse** (reasigna cualquier tecla o botón a otra tecla o combinación, con condición Simple / Mantenido / Turbo).
-- 🧩**Macro** (grabación y reproducción de secuencias de teclado/mouse).
-- 📂**Abrir archivo o aplicación** (con modo de ventana, instancias, o argumento personalizado).
-- 🎵**Multimedia** (control de reproducción, volumen, etc.), con alcance global o solo dentro de la app activa.
-- ⚡**Menú Express**: un menú flotente radial o en cuadrícula con botones propios, cada uno ejecutando su propia acción.
-- 📋**Portapapeles ampliado**: pool de elementos copiados (texto/imagen), fijables y con límite configurable.
-
-- **Barra lateral de ayuda**: Al abrirla, luego al poner brevemente el mouse sobre un objeto, se mostrará en ella una descripción del elemento y sus opciones configurables.
-- **Gestor de Coordenadas**: Guarda conjunto de coordenadas en relación a la pantalla, la ventana o el mouse. Para usarlas luego en macros o automatizar clicks.
 - **Perfiles**: cada perfil es un conjunto independiente de remapeos. Se pueden crear, clonar, renombrar, eliminar y activar en cualquier momento desde el panel lateral o la bandeja del sistema.
 - **Restricción por aplicación**: cada fila puede limitarse a una app específica (por ejecutable) o aplicar de forma global.
-- **Apariencia personalizable**: colores, opacidades y tamaños configurables por variable, con soporte de temas guardables/editables.
-- **Bandeja del sistema**: minimizar a bandeja, mostrar/ocultar ventana, cambiar de perfil desde el menú contextual del ícono.
 - **Dos motores de captura de entrada**:
   - **Interception** (requiere instalar el driver [Interception](http://www.oblita.com/interception)): más bajo nivel.
   - **Simple** (hooks nativos de WinAPI): no requiere instalar nada aparte, pensado para uso portable.
 
 ## Capturas de pantalla
 
-- **Selecciona opciones en popups y obtén ayuda en la barra lateral**:
+- **Selecciona opciones en popups y obtén ayuda en la barra lateral**: Al poner brevemente el mouse sobre un objeto, se mostrará en ella una descripción del elemento y sus opciones configurables.
+
   ![Editor de fila / Barra lateral de ayuda](docs/screenshots/selector_ayuda.png)
 
 - **Portapapeles con previsualizador de imágenes y crea Menú Express con atajos a cualquier fila creada**:
+
   ![Portapapeles con visor imagenes / Menú Express](docs/screenshots/portapapeles_menu.png)
 
-- **Selecciona y edita temas a tu gusto**:
+- **Apariencia personalizable**: colores, opacidades y tamaños configurables por variable, con soporte de temas guardables/editables.
+
   ![Selector y editor de temas](docs/screenshots/temas.png)
 
-- **Multiples opciones de configuración**:
+- **Multiples opciones de configuración**: puedes minimizar a bandeja de sistema, mostrar/ocultar ventana, cambiar de perfil desde el menú contextual del ícono.
+
   ![Ventana de Configuración — Opciones](docs/screenshots/opciones.png)
 
 - **Crea y edita Macros facilmente**:
+
   ![Editor de Macros](docs/screenshots/macros.png)
 
-- **Gestiona coordenadas, guárdalas y previsualízalas**:
+- **Gestor de Coordenadas**: Guarda y previsualiza conjuntos de coordenadas en relación a la pantalla, la ventana o el mouse. Úsalas luego en macros o para automatizar clicks.
+
   ![Gestor de Coordenadas](docs/screenshots/coordenadas.png)
 
 ## Requisitos
