@@ -7,7 +7,7 @@ Omega Ctrl es una moderna, eficiente y completa aplicación de escritorio para W
 - Crear tus propios Menús flotantes
 - Tener múltiples Portapapeles
 
-Todo organizado en **perfiles**, con **filas** que puedes activar/desactivar y personalizar por aplicación. Todo eso con un mínimo consumo de ram (entre 5MB y 8MB aprox).
+Todo organizado en **perfiles**, con **filas** que puedes activar/desactivar y personalizar por aplicación. Todo eso con un mínimo consumo de RAM (entre 5MB y 8MB aprox).
 
 ![Captura general de la ventana principal](docs/screenshots/main.png)
 
@@ -45,7 +45,7 @@ Todo organizado en **perfiles**, con **filas** que puedes activar/desactivar y p
 
   ![Ventana de Configuración — Opciones](docs/screenshots/opciones.png)
 
-- **Crea y edita Macros facilmente**:
+- **Crea y edita Macros fácilmente**:
 
   ![Editor de Macros](docs/screenshots/macros.png)
 
@@ -90,7 +90,9 @@ npm run tauri build
 
 ## ⚠️ Limitaciones conocidas
 
-1- ⚠️ Esto ocurre al usar el Modo Simple (API Windows) sin ejecutar como administrador: Por limitación de Windows (no es un bug), el tener el Administrador de Tareas en primer plano hace que los clicks puedan dejar de responder en cualquier otra ventana. Esto se soluciona haciendo Alt+Tab. Para evitarlo se recomienda ejecutar Omega Ctrl como administrador.
+1. ⚠️ Esto ocurre al usar el Modo Simple (API Windows) sin ejecutar como administrador: por limitación de Windows (no es un bug), tener el Administrador de Tareas en primer plano hace que los clicks dejen de responder en cualquier otra ventana. Esto se soluciona haciendo Alt+Tab. Para evitarlo se recomienda ejecutar Omega Ctrl como administrador.
+
+2. ⚠️ Esto ocurre al ejecutar como administrador: por limitación de Windows (no es un bug), mientras Omega Ctrl está en primer plano no aparece la barra de captura de pantalla Windows al presionar Impr Pant, ya que Windows no permite mostrar ese overlay sobre una ventana elevada. En modo normal (sin administrador) esto no ocurre.
 
 ## Licencia
 
