@@ -1,5 +1,7 @@
 # Omega Ctrl
 
+<meta name="google-site-verification" content="onbETz8-O4PzqViADf7w-6hH9ik9mSrSl67ULQHSfPE" />
+
 Omega Ctrl es una moderna, eficiente y completa aplicación de escritorio para Windows (Tauri + Rust) que permite mediante pocos clicks y en menos de un minuto:
 
 - Remapear teclado y mouse
