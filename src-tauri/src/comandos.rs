@@ -1586,16 +1586,8 @@ pub fn guardar_iniciar_con_windows(activo: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn establecer_autostart(app: tauri::AppHandle, activo: bool) -> Result<(), String> {
-    use tauri_plugin_autostart::ManagerExt;
-
-    let autostart = app.autolaunch();
-
-    if activo {
-        autostart.enable().map_err(|error| error.to_string())
-    } else {
-        autostart.disable().map_err(|error| error.to_string())
-    }
+pub fn establecer_autostart(activo: bool) -> Result<(), String> {
+    crate::back_autostart::establecer(activo)
 }
 
 #[tauri::command]

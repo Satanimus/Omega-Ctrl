@@ -10,6 +10,7 @@ use tauri::Manager;
 
 mod ayuda;
 mod back_app;
+mod back_autostart;
 mod back_coordenada;
 mod back_interception;
 mod back_menu_express;
@@ -73,11 +74,6 @@ pub fn run() {
     back_app::iniciar_monitor();
     tauri::Builder::default()
         .device_event_filter(tauri::DeviceEventFilter::Always)
-        // Iniciar con Windows (Configuración → General).
-        .plugin(tauri_plugin_autostart::init(
-            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-            None,
-        ))
         // Abrir links externos (pestaña Acerca de) en el navegador
         // del sistema — dependencia y permiso ("opener:default") ya
         // estaban en Cargo.toml/capabilities/default.json, faltaba
@@ -188,6 +184,25 @@ pub fn run() {
                         }
                     }
                 });
+
+                // Iniciar minimizado: solo cuando Windows lanzó el
+                // programa al iniciar sesión (ARG_AUTOSTART), nunca desde
+                // un acceso directo o doble click. Minimizar dispara el
+                // handler de arriba, así que respeta "Minimizar a bandeja".
+                let arrancado_por_windows =
+                    std::env::args().any(|arg| arg == back_autostart::ARG_AUTOSTART);
+
+                let iniciar_con_windows = configuracion_usuario::leer_iniciar_con_windows()
+                    .unwrap_or(None)
+                    .unwrap_or(false);
+
+                let iniciar_minimizado = configuracion_usuario::leer_iniciar_minimizado()
+                    .unwrap_or(None)
+                    .unwrap_or(false);
+
+                if arrancado_por_windows && iniciar_con_windows && iniciar_minimizado {
+                    let _ = ventana_principal.minimize();
+                }
             }
 
             Ok(())
