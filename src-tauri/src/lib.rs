@@ -187,8 +187,8 @@ pub fn run() {
 
                 // Iniciar minimizado: solo cuando Windows lanzó el
                 // programa al iniciar sesión (ARG_AUTOSTART), nunca desde
-                // un acceso directo o doble click. Minimizar dispara el
-                // handler de arriba, así que respeta "Minimizar a bandeja".
+                // un acceso directo o doble click. Respeta "Mostrar en bandeja"
+                // y "Minimizar a bandeja".
                 let arrancado_por_windows =
                     std::env::args().any(|arg| arg == back_autostart::ARG_AUTOSTART);
 
@@ -201,7 +201,19 @@ pub fn run() {
                     .unwrap_or(false);
 
                 if arrancado_por_windows && iniciar_con_windows && iniciar_minimizado {
-                    let _ = ventana_principal.minimize();
+                    let minimizar_a_bandeja = configuracion_usuario::leer_minimizar_a_bandeja()
+                        .unwrap_or(None)
+                        .unwrap_or(false);
+
+                    // Con bandeja: solo el ícono de bandeja, sin botón en la
+                    // barra de tareas. Se aplica directo porque minimize()
+                    // en el setup no garantiza que llegue el evento Resized.
+                    if mostrar_en_bandeja && minimizar_a_bandeja {
+                        let _ = ventana_principal.set_skip_taskbar(true);
+                        let _ = ventana_principal.hide();
+                    } else {
+                        let _ = ventana_principal.minimize();
+                    }
                 }
             }
 

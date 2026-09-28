@@ -99,6 +99,12 @@ function iniciarEstadoModoMotor(): void {
   void listen<string>("motor_modo_cambio", (evento) => {
     aplicarModo(evento.payload);
   });
+
+  // Al volver de minimizado/bandeja se vuelve a consultar el modo, por
+  // si la consulta inicial se perdió mientras la ventana estaba oculta.
+  window.addEventListener("focus", () => {
+    void actualizarBoxModoMotor();
+  });
 }
 
 async function actualizarBoxModoMotor(): Promise<void> {
