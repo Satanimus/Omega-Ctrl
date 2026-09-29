@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Omega Ctrl",
   "mainBinaryName": "Omega Ctrl",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "com.sat.omegactrl",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -15,6 +15,7 @@
     "windows": [
       {
         "title": "Omega Ctrl",
+        "visible": false,
         "width": 800,
         "height": 600
       }

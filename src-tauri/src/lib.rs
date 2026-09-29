@@ -200,20 +200,22 @@ pub fn run() {
                     .unwrap_or(None)
                     .unwrap_or(false);
 
+                // La ventana nace oculta (tauri.conf.json, "visible": false)
+                // para no mostrar un cuadro en blanco mientras carga.
                 if arrancado_por_windows && iniciar_con_windows && iniciar_minimizado {
                     let minimizar_a_bandeja = configuracion_usuario::leer_minimizar_a_bandeja()
                         .unwrap_or(None)
                         .unwrap_or(false);
 
-                    // Con bandeja: solo el ícono de bandeja, sin botón en la
-                    // barra de tareas. Se aplica directo porque minimize()
-                    // en el setup no garantiza que llegue el evento Resized.
                     if mostrar_en_bandeja && minimizar_a_bandeja {
+                        // Solo ícono de bandeja, sin botón en la barra de tareas.
                         let _ = ventana_principal.set_skip_taskbar(true);
-                        let _ = ventana_principal.hide();
                     } else {
                         let _ = ventana_principal.minimize();
+                        let _ = ventana_principal.show();
                     }
+                } else {
+                    let _ = ventana_principal.show();
                 }
             }
 
